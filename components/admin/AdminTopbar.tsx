@@ -48,7 +48,7 @@ const navLinks = [
   { label: 'Réservations', path: '/admin/reservations', icon: 'reservations' },
   { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: 'utilisateurs' },
   { label: 'Évaluations', path: '/admin/evaluations', icon: 'evaluations' },
-  { label: 'Lieux', path: '/admin/lieux', icon: 'lieux' },
+
   { label: 'Paiements', path: '/admin/paiements', icon: 'paiements' },
 ];
 
@@ -85,12 +85,7 @@ const icons = {
       <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
-  lieux: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.8"/>
-      <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.8"/>
-    </svg>
-  ),
+
   paiements: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <rect x="2" y="6" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="1.8"/>
