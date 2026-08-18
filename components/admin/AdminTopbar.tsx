@@ -352,6 +352,21 @@ export default function AdminTopbar() {
 
                     <div style={{ height: '1px', background: '#2a2a2a', margin: '6px 0' }}/>
 
+                    <Link href="/admin/profil" style={{ textDecoration: 'none' }}>
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#2a2a2a'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span style={{ fontSize: '13px', color: '#fff', fontWeight: '500' }}>Mon profil</span>
+                      </div>
+                    </Link>
+
+                    <div style={{ height: '1px', background: '#2a2a2a', margin: '6px 0' }}/>
+
                     <div onClick={handleLogout}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#2a1a1a'}
@@ -427,6 +442,21 @@ export default function AdminTopbar() {
                 );
               })}
             </div>
+
+            <div style={{ height: '1px', background: '#2a2a2a', margin: '10px 0' }}/>
+
+            <Link href="/admin/profil" style={{ textDecoration: 'none' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '12px', cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#2a2a2a'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span style={{ fontSize: '15px', color: '#fff', fontWeight: '500' }}>Mon profil</span>
+              </div>
+            </Link>
 
             <div style={{ height: '1px', background: '#2a2a2a', margin: '10px 0' }}/>
 
