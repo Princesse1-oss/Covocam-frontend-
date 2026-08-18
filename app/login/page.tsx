@@ -426,7 +426,7 @@ export default function LoginPage() {
           <div 
             className="hero-image"
             style={{
-              backgroundImage: 'url(https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?w=1400&q=80)',
+              backgroundImage: 'url(/kribi-login.jpg)',
             }}
           />
           <div className="hero-overlay" />

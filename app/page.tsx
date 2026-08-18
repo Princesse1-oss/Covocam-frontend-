@@ -346,7 +346,7 @@ export default function HomePage() {
             >
               <Icons.Language />
               <span style={{ fontSize: '13px', fontWeight: '600' }}>{lang.toUpperCase()}</span>
-            </button>
+            </button> 
             {isLangOpen && (
               <div style={{
                 position: 'absolute',
@@ -432,7 +432,7 @@ export default function HomePage() {
           <div 
             className="hero-image-bg"
             style={{
-              backgroundImage: 'url(https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?w=1400&q=80)',
+              backgroundImage: 'url(/yaounde-accueil.jpg)',
             }}
           />
           <div className="hero-overlay-gradient" />
