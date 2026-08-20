@@ -258,7 +258,7 @@ export default function PassagerEvaluationsPage() {
                   <div style={{ position: 'relative', width: '48px', height: '48px', flexShrink: 0 }}>
                     {photo && (
                       <img
-                        src={photo.startsWith('http') ? photo : `${typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : ''}/uploads/profils/${photo}`}
+                        src={photo.startsWith('http') ? photo : `/uploads/profils/${photo}`}
                         alt="Photo conducteur"
                         onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                         style={{

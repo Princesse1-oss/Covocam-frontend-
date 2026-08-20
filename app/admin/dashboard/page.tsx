@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 // ─── SVG Icons inline ───
@@ -408,7 +406,7 @@ export default function AdminDashboard() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                                 {u.photo && (
-                                  <img src={u.photo.startsWith('http') ? u.photo : `${BACKEND_URL}/uploads/profils/${u.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                                  <img src={u.photo.startsWith('http') ? u.photo : `/uploads/profils/${u.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                                 )}
                                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#E8F7F3', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: '700', color: '#0D9E7E', position: 'relative', zIndex: 1 }}>
                                   {u.prenom?.charAt(0)}{u.nom?.charAt(0)}

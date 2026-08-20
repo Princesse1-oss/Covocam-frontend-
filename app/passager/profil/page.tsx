@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 // Couleurs
@@ -46,8 +44,8 @@ const getFullPhotoUrl = (photoPath: string | null | undefined) => {
   const cleanPath = photoPath.trim();
   
   if (cleanPath.startsWith('http')) return cleanPath;
-  if (cleanPath.startsWith('/uploads/')) return `${BACKEND_URL}${cleanPath}`;
-  return `${BACKEND_URL}/uploads/profils/${cleanPath}`;
+  if (cleanPath.startsWith('/uploads/')) return `${cleanPath}`;
+  return `/uploads/profils/${cleanPath}`;
 };
 
 export default function PassagerProfil() {

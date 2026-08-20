@@ -6,8 +6,6 @@ import dynamic from 'next/dynamic';
 import SvgIcon from '../../../../../components/SvgIcon';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 // La carte (Leaflet) est chargée uniquement côté client pour éviter l'erreur SSR "window is not defined"
 const CarteSuivi = dynamic(() => import('../../../../../components/CarteSuiviTrajet'), { ssr: false });
 
@@ -126,7 +124,7 @@ export default function SuiviTrajetPage() {
   const arrCoords = VILLES_COORDS[trajet.villeArrivee] || [4.0483, 9.7043];
 
   const conducteurPhoto = trajet.conducteur.photo
-    ? (trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `${BACKEND_URL}/uploads/profils/${trajet.conducteur.photo}`)
+    ? (trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `/uploads/profils/${trajet.conducteur.photo}`)
     : null;
 
   return (

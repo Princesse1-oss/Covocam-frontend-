@@ -19,11 +19,9 @@ const AMBER = '#F59E0B';
 const AMBER_LIGHT = '#FFF8E8';
 const RED = '#EF4444';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
   const photoUrl = user?.photo && user.photo !== 'null' && user.photo !== 'undefined'
-    ? (user.photo.startsWith('http') ? user.photo.trim() : user.photo.startsWith('/uploads/') ? user.photo.trim() : `${BACKEND_URL}/uploads/profils/${user.photo.trim()}`)
+    ? (user.photo.startsWith('http') ? user.photo.trim() : user.photo.startsWith('/uploads/') ? user.photo.trim() : `/uploads/profils/${user.photo.trim()}`)
     : null;
   const initials = (
     <div style={{

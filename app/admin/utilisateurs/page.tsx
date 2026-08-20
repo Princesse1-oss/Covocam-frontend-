@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 interface Utilisateur {
@@ -281,7 +279,7 @@ export default function AdminUtilisateurs() {
                           <div style={{ position: 'relative', width: '30px', height: '30px', flexShrink: 0 }}>
                             {u.photo && (
                               <img
-                                src={u.photo.startsWith('http') ? u.photo : `${BACKEND_URL}/uploads/profils/${u.photo}`}
+                                src={u.photo.startsWith('http') ? u.photo : `/uploads/profils/${u.photo}`}
                                 alt={`Photo de ${u.prenom}`}
                                 onError={(e) => (e.currentTarget.style.display = 'none')}
                                 style={{
@@ -375,7 +373,7 @@ export default function AdminUtilisateurs() {
                           <div style={{ position: 'relative', width: '30px', height: '30px', flexShrink: 0 }}>
                             {u.photo && (
                               <img
-                                src={u.photo.startsWith('http') ? u.photo : `${BACKEND_URL}/uploads/profils/${u.photo}`}
+                                src={u.photo.startsWith('http') ? u.photo : `/uploads/profils/${u.photo}`}
                                 alt={`Photo de ${u.prenom}`}
                                 onError={(e) => (e.currentTarget.style.display = 'none')}
                                 style={{

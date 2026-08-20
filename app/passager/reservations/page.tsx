@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
 const ED = '#0A7B62';
@@ -635,7 +633,7 @@ export default function MesReservations() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                         <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
                           {r.trajet?.conducteur?.photo && (
-                            <img src={r.trajet.conducteur.photo.startsWith('http') ? r.trajet.conducteur.photo : `${BACKEND_URL}/uploads/profils/${r.trajet.conducteur.photo}`} alt="" onError={(e) => (e.currentTarget.style.display = 'none')} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FFFFFF', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                            <img src={r.trajet.conducteur.photo.startsWith('http') ? r.trajet.conducteur.photo : `/uploads/profils/${r.trajet.conducteur.photo}`} alt="" onError={(e) => (e.currentTarget.style.display = 'none')} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FFFFFF', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                           )}
                           <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: `linear-gradient(135deg, ${BK}, #1a2e1a)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700', color: E, position: 'relative', zIndex: 1 }}>
                             {r.trajet?.conducteur?.prenom?.charAt(0)}{r.trajet?.conducteur?.nom?.charAt(0)}

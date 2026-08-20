@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 const E = '#0D9E7E';
@@ -325,7 +323,7 @@ export default function MesDemandesPage() {
                               <img 
                                 src={demande.conducteurAcceptant.photo.startsWith('http') 
                                   ? demande.conducteurAcceptant.photo 
-                                  : `${BACKEND_URL}/uploads/profils/${demande.conducteurAcceptant.photo}`} 
+                                  : `/uploads/profils/${demande.conducteurAcceptant.photo}`} 
                                 alt="Photo conducteur" 
                                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} 
                                 style={{ 

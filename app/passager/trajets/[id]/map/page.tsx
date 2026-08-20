@@ -7,8 +7,6 @@ import PassagerLayout from '../../../../../components/passager/PassagerLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
 import { estimatedDistanceKm, estimatedDurationMinutes, formatDistance, formatDuration } from '../../../../../components/distanceUtils';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 // La carte (Leaflet) est chargée uniquement côté client pour éviter l'erreur SSR "window is not defined"
 const CarteTrajetPassager = dynamic(() => import('../../../../../components/CarteTrajetPassager'), { ssr: false });
 
@@ -346,7 +344,7 @@ export default function PassagerMapPage() {
           }}>
             {trajet.conducteur.photo ? (
               <img
-                src={trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `${BACKEND_URL}/uploads/profils/${trajet.conducteur.photo}`}
+                src={trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `/uploads/profils/${trajet.conducteur.photo}`}
                 alt="Conducteur"
                 style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />

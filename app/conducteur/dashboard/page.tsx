@@ -6,8 +6,6 @@ import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Stats {
   totalTrajets: number;
   trajetsOuverts: number;
@@ -541,7 +539,7 @@ export default function ConducteurDashboard() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                   <div style={{ position: 'relative', width: '42px', height: '42px', flexShrink: 0 }}>
                     {r.passager?.photo && (
-                      <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `${BACKEND_URL}/uploads/profils/${r.passager.photo}`} alt="" 
+                      <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `/uploads/profils/${r.passager.photo}`} alt="" 
                         onError={e => e.currentTarget.style.display = 'none'}
                         style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10, border: '2px solid white' }}
                       />

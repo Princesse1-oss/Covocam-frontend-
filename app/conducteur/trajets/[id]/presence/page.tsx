@@ -5,8 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 const E = '#0D9E7E';
@@ -276,7 +274,7 @@ export default function PresenceValidationPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ position: 'relative', width: '42px', height: '42px', flexShrink: 0 }}>
                         {res.passager?.photo && (
-                          <img src={res.passager.photo.startsWith('http') ? res.passager.photo : `${BACKEND_URL}/uploads/profils/${res.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                          <img src={res.passager.photo.startsWith('http') ? res.passager.photo : `/uploads/profils/${res.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                         )}
                         <div style={{ 
                           width: '42px', height: '42px', borderRadius: '50%', 

@@ -577,6 +577,27 @@ export default function MesVehicules() {
           </p>
         </div>
       )}
+
+      {!showForm && vehicules.length === 0 && !loading && (
+        <div style={{ textAlign: 'center', padding: '60px 24px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: `1px dashed ${darkMode ? '#333' : '#d1d5db'}` }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '20px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Icon name="car" size={36} color={E} />
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#fff' : '#111827', margin: '0 0 8px' }}>
+            {t('addVehicle')}
+          </h3>
+          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', margin: '0 0 24px', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
+            {t('vehicleDescription')}
+          </p>
+          <button onClick={() => { setShowForm(true); setError(''); }} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '12px', border: 'none',
+            background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+            boxShadow: `0 4px 15px rgba(13,158,126,0.4)`,
+          }}>
+            <Icon name="plus" size={16} color="#fff" /> {t('addVehicle')}
+          </button>
+        </div>
+      )}
     </ConducteurLayout>
   );
 }

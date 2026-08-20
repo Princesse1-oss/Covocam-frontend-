@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Reservation {
   id: number;
   placesReservees?: number;
@@ -248,7 +246,7 @@ export default function AdminReservations() {
                             <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                               {r.passager?.photo && (
                                 <img
-                                  src={r.passager.photo.startsWith('http') ? r.passager.photo : `${BACKEND_URL}/uploads/profils/${r.passager.photo}`}
+                                  src={r.passager.photo.startsWith('http') ? r.passager.photo : `/uploads/profils/${r.passager.photo}`}
                                   alt="Photo passager"
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{
@@ -295,7 +293,7 @@ export default function AdminReservations() {
                             <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                               {conducteurPhoto && (
                                 <img
-                                  src={conducteurPhoto.startsWith('http') ? conducteurPhoto : `${BACKEND_URL}/uploads/profils/${conducteurPhoto}`}
+                                  src={conducteurPhoto.startsWith('http') ? conducteurPhoto : `/uploads/profils/${conducteurPhoto}`}
                                   alt="Photo"
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', position: 'absolute', top: 0, left: 0, zIndex: 10 }}

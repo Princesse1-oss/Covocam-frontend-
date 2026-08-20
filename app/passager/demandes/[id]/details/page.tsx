@@ -5,8 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
@@ -244,7 +242,7 @@ export default function DemandeConfirmationPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
                     {conducteur.photo && (
-                      <img src={conducteur.photo.startsWith('http') ? conducteur.photo : `${BACKEND_URL}/uploads/profils/${conducteur.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10, border: '2px solid #fff' }} />
+                      <img src={conducteur.photo.startsWith('http') ? conducteur.photo : `/uploads/profils/${conducteur.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10, border: '2px solid #fff' }} />
                     )}
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: `linear-gradient(135deg, ${E}, ${ED})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', color: '#FFF', position: 'relative', zIndex: 1 }}>
                       {conducteur.prenom?.charAt(0)}{conducteur.nom?.charAt(0)}

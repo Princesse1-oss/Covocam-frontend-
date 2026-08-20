@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@/app/lib/ThemeContext';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const API_URL = '/api';
 
 const E = '#0D9E7E';
@@ -350,7 +348,7 @@ export default function ConducteurDemandesPage() {
                             <img 
                               src={demande.passager.photo.startsWith('http') 
                                 ? demande.passager.photo 
-                                : `${BACKEND_URL}/uploads/profils/${demande.passager.photo}`} 
+                                : `/uploads/profils/${demande.passager.photo}`} 
                               alt="Photo passager" 
                               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} 
                               style={{ 

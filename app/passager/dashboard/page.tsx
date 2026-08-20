@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Trajet {
   id: number;
   villeDepart: string;
@@ -495,7 +493,7 @@ export default function PassagerDashboard() {
                     <div style={{ position: 'relative', width: 44, height: 44, flexShrink: 0 }}>
                       {trajet.conducteur?.photo && (
                         <img
-                          src={trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `${BACKEND_URL}/uploads/profils/${trajet.conducteur.photo}`}
+                          src={trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `/uploads/profils/${trajet.conducteur.photo}`}
                           alt={`Photo de ${trajet.conducteur.prenom}`}
                           onError={(e) => (e.currentTarget.style.display = 'none')}
                           style={{

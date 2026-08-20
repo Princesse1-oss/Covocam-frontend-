@@ -236,7 +236,7 @@ export default function AdminEvaluations() {
                           <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                             {e.auteur?.photo && (
                               <img
-                                src={e.auteur.photo.startsWith('http') ? e.auteur.photo : `${typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : ''}/uploads/profils/${e.auteur.photo}`}
+                                src={e.auteur.photo.startsWith('http') ? e.auteur.photo : `/uploads/profils/${e.auteur.photo}`}
                                 alt=""
                                 onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = 'none'; }}
                                 style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 2, border: '1px solid #e5e7eb' }}
@@ -258,7 +258,7 @@ export default function AdminEvaluations() {
                           <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                             {e.cible?.photo && (
                               <img
-                                src={e.cible.photo.startsWith('http') ? e.cible.photo : `${typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : ''}/uploads/profils/${e.cible.photo}`}
+                                src={e.cible.photo.startsWith('http') ? e.cible.photo : `/uploads/profils/${e.cible.photo}`}
                                 alt=""
                                 onError={(ev) => { (ev.currentTarget as HTMLImageElement).style.display = 'none'; }}
                                 style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 2, border: '1px solid #e5e7eb' }}

@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 // ✅ Utilisation du proxy Next.js pour éviter tout problème CORS
 const API_URL = '/api';
 
@@ -342,7 +340,7 @@ export default function PassagerNotifications() {
                   {showAvatar ? (
                     <div style={{ position: 'relative', width: '40px', height: '40px' }}>
                       {notif.passager?.photo && (
-                        <img src={notif.passager.photo.startsWith('http') ? notif.passager.photo : `${BACKEND_URL}/uploads/profils/${notif.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                        <img src={notif.passager.photo.startsWith('http') ? notif.passager.photo : `/uploads/profils/${notif.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                       )}
                       <div style={{
                         width: '40px', height: '40px', borderRadius: '50%',

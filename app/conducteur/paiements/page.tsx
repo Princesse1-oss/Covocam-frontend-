@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
 const ED = '#0A7B62';
@@ -256,7 +254,7 @@ export default function ConducteurPaiements() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ position: 'relative', width: '32px', height: '32px', borderRadius: '50%', background: `linear-gradient(135deg, ${E}, ${ED})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontWeight: '700', flexShrink: 0 }}>
                           {passagerPhoto && (
-                            <img src={passagerPhoto.startsWith('http') ? passagerPhoto : `${BACKEND_URL}/uploads/profils/${passagerPhoto}`} alt="Photo passager" onError={(e) => (e.currentTarget.style.display = 'none')} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                            <img src={passagerPhoto.startsWith('http') ? passagerPhoto : `/uploads/profils/${passagerPhoto}`} alt="Photo passager" onError={(e) => (e.currentTarget.style.display = 'none')} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                           )}
                           <span style={{ position: 'relative', zIndex: 1 }}>{initials}</span>
                         </div>

@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Paiement {
   id: number;
   montantTotal: number;
@@ -345,7 +343,7 @@ export default function AdminPaiements() {
                             <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                               {passagerPhoto && (
                                 <img
-                                  src={passagerPhoto.startsWith('http') ? passagerPhoto : `${BACKEND_URL}/uploads/profils/${passagerPhoto}`}
+                                  src={passagerPhoto.startsWith('http') ? passagerPhoto : `/uploads/profils/${passagerPhoto}`}
                                   alt="Photo passager"
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{
@@ -394,7 +392,7 @@ export default function AdminPaiements() {
                             <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                               {conducteurPhoto && (
                                 <img
-                                  src={conducteurPhoto.startsWith('http') ? conducteurPhoto : `${BACKEND_URL}/uploads/profils/${conducteurPhoto}`}
+                                  src={conducteurPhoto.startsWith('http') ? conducteurPhoto : `/uploads/profils/${conducteurPhoto}`}
                                   alt="Photo conducteur"
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{

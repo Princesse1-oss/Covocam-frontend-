@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000';
+    const backendUrl = process.env.BACKEND_URL || 'https://covocam-backend.onrender.com';
     return [
       {
         source: '/api/:path*',

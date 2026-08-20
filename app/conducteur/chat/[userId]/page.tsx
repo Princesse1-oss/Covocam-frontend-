@@ -5,8 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../../components/conducteur/ConducteurLayout';
 import Link from 'next/link';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
 const ED = '#0A7B62';
@@ -158,7 +156,7 @@ export default function ConducteurConversationPage() {
           <div style={{ position: 'relative', width: '40px', height: '40px', flexShrink: 0 }}>
             {contactPhoto && (
               <img
-                src={contactPhoto.startsWith('http') ? contactPhoto : `${BACKEND_URL}/uploads/profils/${contactPhoto}`}
+                src={contactPhoto.startsWith('http') ? contactPhoto : `/uploads/profils/${contactPhoto}`}
                 alt="Photo"
                 onError={(e) => (e.currentTarget.style.display = 'none')}
                 style={{

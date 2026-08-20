@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 // Palette de couleurs CovoCam
 const EMERALD = '#0D9E7E';
 const EMERALD_LIGHT = '#E8F7F3';
@@ -277,7 +275,7 @@ export default function ReservationDetailPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
               {reservation.trajet?.conducteur?.photo && (
-                <img src={reservation.trajet.conducteur.photo.startsWith('http') ? reservation.trajet.conducteur.photo : `${BACKEND_URL}/uploads/profils/${reservation.trajet.conducteur.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                <img src={reservation.trajet.conducteur.photo.startsWith('http') ? reservation.trajet.conducteur.photo : `/uploads/profils/${reservation.trajet.conducteur.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
               )}
               <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: EMERALD_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '700', color: EMERALD, position: 'relative', zIndex: 1 }}>
                 {reservation.trajet?.conducteur?.prenom?.charAt(0)}{reservation.trajet?.conducteur?.nom?.charAt(0)}

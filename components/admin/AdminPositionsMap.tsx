@@ -247,7 +247,7 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                   <div style={{ position: 'relative', width: '36px', height: '36px', flexShrink: 0 }}>
                     {p.photo ? (
-                      <img src={p.photo.startsWith('http') ? p.photo : `${typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : ''}/uploads/profils/${p.photo}`} alt="" onError={e => e.currentTarget.style.display='none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10, border: '2px solid #fff' }} />
+                      <img src={p.photo.startsWith('http') ? p.photo : `/uploads/profils/${p.photo}`} alt="" onError={e => e.currentTarget.style.display='none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10, border: '2px solid #fff' }} />
                     ) : null}
                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `linear-gradient(135deg, ${GREEN}, #0A7B62)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#FFF', position: 'relative', zIndex: 1 }}>
                       {p.prenom?.charAt(0)}{p.nom?.charAt(0)}

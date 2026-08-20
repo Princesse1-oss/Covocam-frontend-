@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Trajet {
   id: number;
   villeDepart: string;
@@ -291,7 +289,7 @@ export default function AdminTrajets() {
                           <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
                             {t.conducteur?.photo && (
                               <img
-                                src={t.conducteur.photo.startsWith('http') ? t.conducteur.photo : `${BACKEND_URL}/uploads/profils/${t.conducteur.photo}`}
+                                src={t.conducteur.photo.startsWith('http') ? t.conducteur.photo : `/uploads/profils/${t.conducteur.photo}`}
                                 alt="Photo"
                                 onError={(e) => (e.currentTarget.style.display = 'none')}
                                 style={{

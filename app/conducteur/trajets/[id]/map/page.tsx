@@ -6,8 +6,6 @@ import dynamic from 'next/dynamic';
 import ConducteurLayout from '../../../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 // La carte (Leaflet) est chargée uniquement côté client pour éviter l'erreur SSR "window is not defined"
 const CarteTrajetConducteur = dynamic(() => import('../../../../../components/CarteTrajetConducteur'), { ssr: false });
 
@@ -264,7 +262,7 @@ export default function ConducteurMapPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
                       {passager.photo && (
-                        <img src={passager.photo.startsWith('http') ? passager.photo : `${BACKEND_URL}/uploads/profils/${passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                        <img src={passager.photo.startsWith('http') ? passager.photo : `/uploads/profils/${passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                       )}
                       <div style={{
                         width: '44px',

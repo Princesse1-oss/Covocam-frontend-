@@ -5,8 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import PassagerLayout from '../../../../components/passager/PassagerLayout';
 import Link from 'next/link';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Conducteur {
   id: number;
   nom: string;
@@ -185,7 +183,7 @@ export default function ConducteurProfile() {
             <div style={{ position: 'relative', width: isMobile ? '80px' : '100px', height: isMobile ? '80px' : '100px', margin: '0 auto 16px' }}>
               {conducteur.photo && (
                 <img
-                  src={conducteur.photo.startsWith('http') ? conducteur.photo : `${BACKEND_URL}/uploads/profils/${conducteur.photo}`}
+                  src={conducteur.photo.startsWith('http') ? conducteur.photo : `/uploads/profils/${conducteur.photo}`}
                   alt={`Photo de ${conducteur.prenom}`}
                   onError={(e) => (e.currentTarget.style.display = 'none')}
                   style={{

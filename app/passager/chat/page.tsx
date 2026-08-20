@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 interface Contact {
   id: number;
   nom: string;
@@ -232,7 +230,7 @@ export default function ChatList() {
                 <div style={{ position: 'relative', width: isMobile ? '48px' : '52px', height: isMobile ? '48px' : '52px', flexShrink: 0 }}>
                   {contact.photo && (
                     <img
-                      src={contact.photo.startsWith('http') ? contact.photo : `${BACKEND_URL}/uploads/profils/${contact.photo}`}
+                      src={contact.photo.startsWith('http') ? contact.photo : `/uploads/profils/${contact.photo}`}
                       alt={`Photo de ${contact.prenom}`}
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                       style={{

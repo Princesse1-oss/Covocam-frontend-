@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
 const ED = '#0A7B62';
@@ -472,7 +470,7 @@ export default function ConducteurNotifications() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ position: 'relative', width: '36px', height: '36px', flexShrink: 0 }}>
                             {r.passager?.photo && (
-                               <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `${BACKEND_URL}/uploads/profils/${r.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                               <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `/uploads/profils/${r.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                             )}
                             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #ea580c, #f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#000', flexShrink: 0, position: 'relative', zIndex: 1 }}>
                               {r.passager?.prenom?.charAt(0)}{r.passager?.nom?.charAt(0)}
@@ -546,7 +544,7 @@ export default function ConducteurNotifications() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <div style={{ position: 'relative', width: '36px', height: '36px', flexShrink: 0 }}>
                             {r.passager?.photo && (
-                               <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `${BACKEND_URL}/uploads/profils/${r.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                               <img src={r.passager.photo.startsWith('http') ? r.passager.photo : `/uploads/profils/${r.passager.photo}`} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
                             )}
                             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', color: '#dc2626', flexShrink: 0, position: 'relative', zIndex: 1 }}>
                               {r.passager?.prenom?.charAt(0)}{r.passager?.nom?.charAt(0)}

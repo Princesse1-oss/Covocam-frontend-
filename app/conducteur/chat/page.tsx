@@ -6,8 +6,6 @@ import Link from 'next/link';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
 
-const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '';
-
 const E = '#0D9E7E';
 const EL = '#E8F7F3';
 const ED = '#0A7B62';
@@ -194,7 +192,7 @@ export default function ConducteurChatList() {
                 <div style={{ position: 'relative', width: '50px', height: '50px', flexShrink: 0 }}>
                   {contact.photo && (
                     <img
-                      src={contact.photo.startsWith('http') ? contact.photo : `${BACKEND_URL}/uploads/profils/${contact.photo}`}
+                      src={contact.photo.startsWith('http') ? contact.photo : `/uploads/profils/${contact.photo}`}
                       alt={`Photo de ${contact.prenom}`}
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                       style={{
