@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
@@ -107,12 +107,18 @@ export default function PassagerTopbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const notifPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchNotifCount = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
     fetch('/api/notifications/non-lues/count', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(d => setNotifCount(d.count || 0)).catch(() => {});
+      .then(r => {
+        if (r.status === 401) { if (notifPollRef.current) { clearInterval(notifPollRef.current); notifPollRef.current = null; } return; }
+        return r.json();
+      })
+      .then(d => { if (d) setNotifCount(d.count || 0); })
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -137,7 +143,7 @@ export default function PassagerTopbar() {
     updateUser();
 
     fetchNotifCount();
-    const pollInterval = setInterval(fetchNotifCount, 30000);
+    notifPollRef.current = setInterval(fetchNotifCount, 30000);
 
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll);
@@ -145,7 +151,7 @@ export default function PassagerTopbar() {
     window.addEventListener('notifications-updated', fetchNotifCount);
     
     return () => {
-      clearInterval(pollInterval);
+      if (notifPollRef.current) clearInterval(notifPollRef.current);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('user-updated', updateUser);
       window.removeEventListener('resize', checkMobile);
