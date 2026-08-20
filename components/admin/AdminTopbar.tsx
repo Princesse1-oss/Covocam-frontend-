@@ -27,10 +27,12 @@ const getFullPhotoUrl = (p?: string | null) => {
 };
 
 // Move Avatar component outside to avoid creating during render
-const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => (
-  user?.photo ? (
-    <img src={user.photo} alt="Profil"
-      onError={e => e.currentTarget.style.display = 'none'}
+const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
+  const [imgError, setImgError] = useState(false);
+  const photoUrl = user?.photo && !imgError ? user.photo : null;
+  return photoUrl ? (
+    <img src={photoUrl} alt="Profil"
+      onError={() => setImgError(true)}
       style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}/>
   ) : (
     <div style={{
@@ -41,8 +43,8 @@ const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => (
     }}>
       {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
     </div>
-  )
-);
+  );
+};
 
 const navLinks = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
@@ -223,48 +225,6 @@ export default function AdminTopbar() {
 
           {/* ACTIONS DROITE */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-
-            {/* Nom de l'admin */}
-            {!isMobile && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                background: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-              }}>
-                <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
-                  {user?.photo && (
-                    <img src={user.photo} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
-                  )}
-                  <div style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: GREEN,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    color: 'white',
-                    position: 'relative',
-                    zIndex: 1,
-                  }}>
-                    {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
-                  </div>
-                </div>
-                <span style={{
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#fff',
-                }}>
-                  {user?.prenom} {user?.nom}
-                </span>
-              </div>
-            )}
 
             {/* Séparateur */}
             <div style={{ width: '1px', height: '24px', background: BORDER, margin: '0 4px' }}/>

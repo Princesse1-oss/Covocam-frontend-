@@ -84,6 +84,12 @@ export default function PassagerEvaluationsPage() {
   const [noteMoyenne, setNoteMoyenne] = useState(0);
   const [total, setTotal] = useState(0);
   const [filtreNote, setFiltreNote] = useState<number | null>(null);
+  const [hasPlateformeEval, setHasPlateformeEval] = useState(false);
+  const [plateformeNote, setPlateformeNote] = useState(0);
+  const [plateformeComment, setPlateformeComment] = useState('');
+  const [plateformeHover, setPlateformeHover] = useState(0);
+  const [submittingPlateforme, setSubmittingPlateforme] = useState(false);
+  const [showPlateformeForm, setShowPlateformeForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -97,6 +103,8 @@ export default function PassagerEvaluationsPage() {
       .then(data => {
         if (Array.isArray(data)) {
           setEvaluations(data);
+          const hasPlateforme = data.some((e: Evaluation) => e.type === 'PLATEFORME');
+          setHasPlateformeEval(hasPlateforme);
           if (data.length > 0) {
             const sum = data.reduce((acc: number, e: Evaluation) => acc + e.note, 0);
             setNoteMoyenne(Math.round((sum / data.length) * 10) / 10);
@@ -177,6 +185,124 @@ export default function PassagerEvaluationsPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Évaluation plateforme */}
+      {hasPlateformeEval ? (
+        <div style={{
+          background: bg, borderRadius: '16px', padding: '20px 24px',
+          marginBottom: '20px', border: `1px solid ${bd}`,
+          display: 'flex', alignItems: 'center', gap: '12px'
+        }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="star" size={20} color={E} />
+          </div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: tc }}>Merci pour votre avis sur la plateforme !</div>
+            <div style={{ fontSize: '12px', color: ts }}>Vous avez déjà donné votre avis sur CovoCam.</div>
+          </div>
+        </div>
+      ) : showPlateformeForm ? (
+        <div style={{
+          background: bg, borderRadius: '16px', padding: '24px',
+          marginBottom: '20px', border: `2px solid ${E}`,
+          boxShadow: `0 0 0 4px ${EL}`
+        }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '700', color: tc, margin: '0 0 4px' }}>
+            Évaluer la plateforme CovoCam
+          </h3>
+          <p style={{ fontSize: '13px', color: ts, margin: '0 0 16px' }}>
+            Votre avis nous aide à améliorer le service.
+          </p>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
+            {[1, 2, 3, 4, 5].map(star => (
+              <button
+                key={star}
+                onClick={() => setPlateformeNote(star)}
+                onMouseEnter={() => setPlateformeHover(star)}
+                onMouseLeave={() => setPlateformeHover(0)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+              >
+                <Icon name="star" size={28} color={(plateformeHover || plateformeNote) >= star ? '#F59E0B' : '#D1D5DB'} />
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={plateformeComment}
+            onChange={e => setPlateformeComment(e.target.value)}
+            placeholder="Commentaire (optionnel, max 500 car.)"
+            maxLength={500}
+            rows={3}
+            style={{
+              width: '100%', padding: '12px 14px', borderRadius: '10px',
+              border: `1px solid ${bd}`, background: darkMode ? '#2A2A2A' : '#F9FAFB',
+              color: tc, fontSize: '13px', resize: 'vertical', fontFamily: 'inherit', marginBottom: '14px'
+            }}
+          />
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={async () => {
+                if (plateformeNote < 1) return;
+                setSubmittingPlateforme(true);
+                const token = localStorage.getItem('token')?.replace(/"/g, '').trim();
+                try {
+                  const res = await fetch('/api/evaluations/plateforme', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ note: plateformeNote, commentaire: plateformeComment || null })
+                  });
+                  if (res.ok) {
+                    setHasPlateformeEval(true);
+                    setShowPlateformeForm(false);
+                  }
+                } finally { setSubmittingPlateforme(false); }
+              }}
+              disabled={plateformeNote < 1 || submittingPlateforme}
+              style={{
+                padding: '10px 24px', borderRadius: '10px', border: 'none',
+                background: plateformeNote >= 1 ? `linear-gradient(135deg, ${E}, ${ED})` : BD,
+                color: plateformeNote >= 1 ? '#fff' : GR,
+                fontSize: '13px', fontWeight: '700', cursor: plateformeNote >= 1 ? 'pointer' : 'not-allowed',
+                boxShadow: plateformeNote >= 1 ? `0 4px 12px rgba(13,158,126,0.3)` : 'none'
+              }}
+            >
+              {submittingPlateforme ? 'Envoi...' : 'Envoyer mon avis'}
+            </button>
+            <button
+              onClick={() => { setShowPlateformeForm(false); setPlateformeNote(0); setPlateformeComment(''); }}
+              style={{
+                padding: '10px 20px', borderRadius: '10px', border: `1px solid ${bd}`,
+                background: 'transparent', color: ts, fontSize: '13px', fontWeight: '600', cursor: 'pointer'
+              }}
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowPlateformeForm(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '16px 20px', borderRadius: '16px',
+            background: bg, border: `1px dashed ${E}`,
+            cursor: 'pointer', width: '100%', marginBottom: '20px',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = E; e.currentTarget.style.background = EL; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = E; e.currentTarget.style.background = bg; }}
+        >
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name="star" size={20} color={E} />
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: tc }}>Évaluer la plateforme CovoCam</div>
+            <div style={{ fontSize: '12px', color: ts }}>Donnez votre avis sur votre expérience globale</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={E} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0 }}>
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
       )}
 
       {/* Filter */}
@@ -290,7 +416,7 @@ export default function PassagerEvaluationsPage() {
                           padding: '2px 8px', borderRadius: '6px',
                           background: EL, fontSize: '11px', fontWeight: '600', color: ED
                         }}>
-                          <Icon name="car" size={11} color={E} /> Conducteur
+                          <Icon name="car" size={11} color={E} /> {ev.type === 'PLATEFORME' ? 'Plateforme' : 'Conducteur'}
                         </span>
                       </div>
                       <span style={{ fontSize: '12px', color: ts, whiteSpace: 'nowrap' }}>
