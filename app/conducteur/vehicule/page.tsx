@@ -325,18 +325,20 @@ export default function MesVehicules() {
             {t('vehicleDescription')}
           </p>
         </div>
-        <button onClick={() => { 
-          setShowForm(!showForm); 
-          setError(''); 
-        }} style={{
-          display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
-          background: showForm ? (darkMode ? '#2D2D2D' : '#f3f4f6') : `linear-gradient(135deg, ${E}, ${ED})`,
-          color: showForm ? (darkMode ? '#9CA3AF' : '#6b7280') : '#fff',
-          fontSize: '14px', fontWeight: '700', cursor: 'pointer',
-          boxShadow: showForm ? 'none' : `0 4px 15px rgba(13,158,126,0.4)`,
-        }}>
-          {showForm ? <><Icon name="x" size={14} /> {t('cancel')}</> : (vehicules.length > 0 ? <><Icon name="edit" size={14} /> {t('editVehicle')}</> : <><Icon name="plus" size={14} /> {t('addVehicle')}</>)}
-        </button>
+        {vehicules.length > 0 && (
+          <button onClick={() => { 
+            setShowForm(!showForm); 
+            setError(''); 
+          }} style={{
+            display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
+            background: showForm ? (darkMode ? '#2D2D2D' : '#f3f4f6') : `linear-gradient(135deg, ${E}, ${ED})`,
+            color: showForm ? (darkMode ? '#9CA3AF' : '#6b7280') : '#fff',
+            fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+            boxShadow: showForm ? 'none' : `0 4px 15px rgba(13,158,126,0.4)`,
+          }}>
+            {showForm ? <><Icon name="x" size={14} /> {t('cancel')}</> : <><Icon name="edit" size={14} /> {t('editVehicle')}</>}
+          </button>
+        )}
       </div>
 
       {success && (
@@ -488,21 +490,17 @@ export default function MesVehicules() {
         </div>
       )}
 
-      {vehicules.length === 0 ? (
+      {!showForm && vehicules.length === 0 && (
         <div style={{ textAlign: 'center', padding: '80px 40px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}><Icon name="car" size={64} /></div>
           <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>{t('noVehicle')}</h3>
-          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', marginBottom: '24px', lineHeight: '1.6' }}>
+          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', lineHeight: '1.6' }}>
             {t('noData')}
           </p>
-          <button onClick={() => setShowForm(true)} style={{
-            padding: '12px 28px', background: `linear-gradient(135deg, ${E}, ${ED})`, border: 'none', borderRadius: '10px',
-            fontSize: '14px', fontWeight: '700', color: '#fff', cursor: 'pointer', boxShadow: `0 4px 15px rgba(13,158,126,0.4)`,
-          }}>
-            + {t('addVehicle')}
-          </button>
         </div>
-      ) : (
+      )}
+
+      {!showForm && vehicules.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: '16px' }}>
           {vehicules.map(v => (
             <div key={v.id} style={{
@@ -571,7 +569,7 @@ export default function MesVehicules() {
         </div>
       )}
 
-      {vehicules.length > 0 && (
+      {!showForm && vehicules.length > 0 && (
         <div style={{ marginTop: '24px', padding: '16px 20px', background: EL, borderRadius: '12px', border: `1px solid rgba(13,158,126,0.2)`, display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '20px' }}><Icon name="lightbulb" size={20} color={E} /></span>
           <p style={{ fontSize: '13px', color: E, margin: 0, lineHeight: '1.5' }}>

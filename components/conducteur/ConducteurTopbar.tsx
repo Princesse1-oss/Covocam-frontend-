@@ -23,7 +23,7 @@ const BACKEND_URL = typeof window !== 'undefined' ? `${window.location.protocol}
 
 const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
   const photoUrl = user?.photo && user.photo !== 'null' && user.photo !== 'undefined'
-    ? (user.photo.startsWith('http') ? user.photo.trim() : `${BACKEND_URL}/uploads/profils/${user.photo.trim()}`)
+    ? (user.photo.startsWith('http') ? user.photo.trim() : user.photo.startsWith('/uploads/') ? user.photo.trim() : `${BACKEND_URL}/uploads/profils/${user.photo.trim()}`)
     : null;
   const initials = (
     <div style={{
@@ -291,16 +291,7 @@ export default function ConducteurTopbar() {
               <span style={{ fontSize: '11px', fontWeight: '700', marginLeft: '2px', color: styles.textSecondary }}>{lang.toUpperCase()}</span>
             </div>
 
-            {!isMobile && (
-              <Link href="/conducteur/trajets/creer" style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`, color: 'white', padding: '9px 18px', borderRadius: '50px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', boxShadow: `0 4px 14px rgba(13,158,126,0.3)`, transition: 'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 6px 20px rgba(13,158,126,0.4)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 14px rgba(13,158,126,0.3)`; }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/><path d="M12 8V16M8 12H16" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
-                  {t('publish')}
-                </div>
-              </Link>
-            )}
+            {!isMobile && <div style={{ width: '1px', height: '28px', background: styles.border, margin: '0 4px' }}/>}
 
             <Link href="/conducteur/notifications" style={{ textDecoration: 'none', position: 'relative' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: pathname.startsWith('/conducteur/notifications') ? EMERALD_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -348,15 +339,6 @@ export default function ConducteurTopbar() {
                           </div>
                         </div>
                       </div>
-
-                      <Link href="/conducteur/trajets/creer" onClick={() => setProfileOpen(false)} style={{ textDecoration: 'none' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: EMERALD_LIGHT, cursor: 'pointer', marginBottom: '8px', transition: 'all 0.15s' }}
-                          onMouseEnter={e => e.currentTarget.style.background = '#D0F0E8'}
-                          onMouseLeave={e => e.currentTarget.style.background = EMERALD_LIGHT}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke={EMERALD} strokeWidth="2"/><path d="M12 8V16M8 12H16" stroke={EMERALD} strokeWidth="2" strokeLinecap="round"/></svg>
-                          <span style={{ fontSize: '14px', color: EMERALD, fontWeight: '600' }}>{t('publish')}</span>
-                        </div>
-                      </Link>
 
                       {[
                         { labelKey: 'myProfile' as const, path: '/conducteur/profil' },
@@ -410,13 +392,6 @@ export default function ConducteurTopbar() {
                 </div>
               </div>
             </div>
-
-            <Link href="/conducteur/trajets/creer" style={{ textDecoration: 'none', display: 'block', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`, color: 'white', padding: '13px', borderRadius: '12px', fontSize: '14px', fontWeight: '600', boxShadow: `0 4px 14px rgba(13,158,126,0.3)` }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="2"/><path d="M12 8V16M8 12H16" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
-                {t('publish')}
-              </div>
-            </Link>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '8px' }}>
               {navLinks.map(link => {

@@ -21,7 +21,9 @@ const RED = '#EF4444';
 
 const getFullPhotoUrl = (p?: string | null) => {
   if (!p || p === 'null' || p === 'undefined') return null;
-  return p.startsWith('http') ? p.trim() : `/uploads/profils/${p.trim()}`;
+  if (p.startsWith('http')) return p.trim();
+  if (p.startsWith('/uploads/')) return p.trim();
+  return `/uploads/profils/${p.trim()}`;
 };
 
 // Move Avatar component outside to avoid creating during render
@@ -233,19 +235,26 @@ export default function AdminTopbar() {
                 background: 'rgba(34, 197, 94, 0.1)',
                 border: '1px solid rgba(34, 197, 94, 0.2)',
               }}>
-                <div style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: GREEN,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  color: 'white',
-                }}>
-                  {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
+                <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
+                  {user?.photo && (
+                    <img src={user.photo} alt="" onError={e => e.currentTarget.style.display = 'none'} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }} />
+                  )}
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: GREEN,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: 'white',
+                    position: 'relative',
+                    zIndex: 1,
+                  }}>
+                    {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
+                  </div>
                 </div>
                 <span style={{
                   fontSize: '13px',

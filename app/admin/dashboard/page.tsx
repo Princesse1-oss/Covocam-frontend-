@@ -36,6 +36,21 @@ const Icon = ({ name, size = 24, color = '#0D9E7E' }: { name: string; size?: num
         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
       </svg>
     ),
+    clock: (
+      <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+    ),
+    check: (
+      <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    ),
+    refund: (
+      <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+      </svg>
+    ),
   };
   return <span style={{ lineHeight: 0, display: 'inline-flex' }}>{icons[name] || null}</span>;
 };
@@ -174,7 +189,9 @@ export default function AdminDashboard() {
     { label: 'Conducteurs',   value: totalConducteurs,  color: '#374151', bg: '#f3f4f6', icon: <Icon name="car" color="#374151" /> },
     { label: 'Trajets',       value: totalTrajets,      color: '#10b981', bg: '#d1fae5', icon: <Icon name="route" color="#15803d" /> },
     { label: 'Réservations',  value: totalReservations, color: '#84cc16', bg: '#ecfccb', icon: <Icon name="clipboard" color="#65a30d" /> },
-    { label: 'Paiements',     value: totalPaiements,    color: '#14b8a6', bg: '#ccfbf1', icon: <Icon name="creditCard" color="#0d9488" /> },
+    { label: 'En attente',    value: statsPaiements?.en_attente ?? 0,  color: '#f59e0b', bg: '#fef3c7', icon: <Icon name="clock" color="#d97706" /> },
+    { label: 'Confirmés',     value: statsPaiements?.confirmes ?? 0,   color: '#22c55e', bg: '#dcfce7', icon: <Icon name="check" color="#15803d" /> },
+    { label: 'Remboursés',    value: statsPaiements?.rembourses ?? 0,  color: '#ef4444', bg: '#fee2e2', icon: <Icon name="refund" color="#dc2626" /> },
   ];
 
   const hasData = totalUsers > 0 || totalTrajets > 0 || totalReservations > 0;
