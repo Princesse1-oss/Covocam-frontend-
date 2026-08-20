@@ -194,7 +194,7 @@ export default function CreerTrajetPage() {
 
     const controller = new AbortController();
     // ✅ CORRECTION : Augmenté à 10 secondes pour éviter les timeouts trop rapides
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     Promise.all([
       fetch(`${API_URL}/villes-quartiers`, {

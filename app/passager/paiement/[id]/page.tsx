@@ -60,7 +60,7 @@ export default function PaiementPage() {
 
     const fetchData = async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         let res = await fetch(`${API_URL}/demandes/mes-demandes`, { 

@@ -159,10 +159,9 @@ export default function MesVehicules() {
     fetchVehicules(cleanToken);
   }, [router]);
 
-  const fetchVehicules = async (token: string) => {
+  const fetchVehicules = async (token: string, retryCount = 0) => {
     const controller = new AbortController();
-    // ✅ CORRECTION : Augmenté à 10 secondes pour éviter les timeouts trop rapides
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       const res = await fetch(`${API_URL}/conducteur/vehicule`, {
@@ -179,6 +178,12 @@ export default function MesVehicules() {
         return;
       }
 
+      if (!res.ok && retryCount < 2) {
+        console.warn(`Retry ${retryCount + 1}/2 pour /api/conducteur/vehicule (status: ${res.status})`);
+        setTimeout(() => fetchVehicules(token, retryCount + 1), 3000);
+        return;
+      }
+
       const data = await res.json();
       if (data.hasVehicule && data.vehicule) {
         setVehicules([{ ...data.vehicule, estDefaut: true }]);
@@ -186,11 +191,21 @@ export default function MesVehicules() {
         setVehicules([]);
       }
     } catch (err: any) {
-      // ✅ CORRECTION : Ignorer poliment si c'est juste une annulation due au délai (timeout)
       if (err.name === 'AbortError') {
-        console.warn("⏱️ Le chargement des véhicules a pris plus de 10 secondes. Ce n'est pas une erreur critique.");
+        if (retryCount < 2) {
+          console.warn(`⏱️ Timeout, retry ${retryCount + 1}/2...`);
+          fetchVehicules(token, retryCount + 1);
+        } else {
+          console.warn("⏱️ Timeout définitif après 3 tentatives.");
+          setVehicules([]);
+        }
       } else {
         console.error("Erreur réseau lors du chargement des véhicules:", err);
+        if (retryCount < 2) {
+          setTimeout(() => fetchVehicules(token, retryCount + 1), 3000);
+        } else {
+          setVehicules([]);
+        }
       }
       setVehicules([]);
     } finally {

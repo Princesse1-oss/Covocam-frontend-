@@ -58,7 +58,7 @@ export default function DemandeConfirmationPage() {
 
     const fetchDemande = async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         const res = await fetch(`${API_URL}/demandes/mes-demandes`, {

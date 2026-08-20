@@ -184,7 +184,7 @@ export default function ConducteurNotifications() {
     const fetchData = async () => {
       const controller = new AbortController();
       // ✅ CORRECTION 1 : Délai augmenté à 10 secondes
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         const [notifRes, reservationsRes] = await Promise.all([

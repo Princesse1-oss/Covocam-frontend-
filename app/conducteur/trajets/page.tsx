@@ -119,7 +119,7 @@ export default function MesTrajetsPage() {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     // ✅ CORRECTION PRINCIPALE : Ajout de '/trajets' à la fin de l'URL
     fetch(`${API_URL}/conducteur/trajets`, {

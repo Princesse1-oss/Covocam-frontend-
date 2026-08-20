@@ -102,7 +102,7 @@ export default function ConducteurDashboard() {
     if (ud) { try { setUser(JSON.parse(ud)); } catch {} }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     const API = '/api';
 
     const fetchData = async () => {
