@@ -117,12 +117,18 @@ export default function AdminUtilisateurs() {
     if (!userId) return;
 
     try {
-      await fetch(`${API_URL}/admin/utilisateurs/${userId}/${action}`, {
+      const res = await fetch(`${API_URL}/admin/utilisateurs/${userId}/${action}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = await res.json();
       setUtilisateurs(prev => prev.map(u => u.id === userId ? { ...u, estActif: action === 'activer' } : u));
       setConfirmModal({ open: false, userId: null, userName: '', action: 'suspendre' });
+      if (data.emailEnvoye === false) {
+        setTimeout(() => alert(`Utilisateur ${action === 'suspendre' ? 'suspendu' : 'réactivé'}.\n\nNote : L'email de notification n'a pas pu être envoyé (SMTP non configuré).`), 300);
+      } else if (data.emailEnvoye === true) {
+        setTimeout(() => alert(`Utilisateur ${action === 'suspendre' ? 'suspendu' : 'réactivé'}.\n\nUn email de notification a été envoyé.`), 300);
+      }
     } catch {
       alert('Erreur lors de la mise à jour');
     }
