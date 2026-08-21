@@ -100,6 +100,7 @@ export default function AdminDashboard() {
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
   const [reservationsParMois, setReservationsParMois] = useState<ReservationParMois[]>([]);
   const [statsPaiements, setStatsPaiements] = useState<StatsPaiements | null>(null);
+  const [paiementPeriod, setPaiementPeriod] = useState<number>(30);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -159,14 +160,19 @@ export default function AdminDashboard() {
       .then(r => r.json())
       .then(data => setReservationsParMois(Array.isArray(data) ? data : []))
       .catch(() => setReservationsParMois([]));
+  }, []);
 
-    fetch(`${API_URL}/admin/stats-paiements`, {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const q = paiementPeriod > 0 ? `?days=${paiementPeriod}` : '';
+    fetch(`${API_URL}/admin/stats-paiements${q}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
       .then(data => setStatsPaiements(data))
       .catch(() => setStatsPaiements(null));
-  }, []);
+  }, [paiementPeriod]);
 
   const totalUsers = stats?.utilisateurs?.total ?? 0;
   const totalConducteurs = stats?.utilisateurs?.conducteurs ?? 0;
@@ -217,19 +223,6 @@ export default function AdminDashboard() {
     if (s === 'En attente')                   return { bg: '#fef3c7', color: '#d97706' };
     return { bg: '#fee2e2', color: '#dc2626' };
   };
-
-  const getPaiementPercentages = () => {
-    if (!statsPaiements || statsPaiements.total === 0)
-      return { confirmes: 0, en_attente: 0, rembourses: 0 };
-    const t = statsPaiements.total;
-    return {
-      confirmes:   Math.round((statsPaiements.confirmes   / t) * 100),
-      en_attente:  Math.round((statsPaiements.en_attente  / t) * 100),
-      rembourses:  Math.round((statsPaiements.rembourses  / t) * 100),
-    };
-  };
-
-  const paiementPercentages = getPaiementPercentages();
 
   if (loading) {
     return (
@@ -320,50 +313,89 @@ export default function AdminDashboard() {
             </div>
 
             {/* Donut chart */}
-            <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb' }}>
-              <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827', marginBottom:'16px' }}>Paiements</div>
-              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'14px' }}>
-                <svg viewBox="0 0 120 120" width="120" height="120">
-                  {(() => {
-                    const slices = [
-                      { v: paiementPercentages.confirmes  / 100, c: '#22c55e' },
-                      { v: paiementPercentages.en_attente / 100, c: '#fbbf24' },
-                      { v: paiementPercentages.rembourses / 100, c: '#f87171' },
-                    ];
-                    let angle = -Math.PI / 2;
-                    return slices.map((s, i) => {
-                      if (s.v === 0) return null;
-                      const end = angle + s.v * 2 * Math.PI;
-                      const x1 = 60 + 54 * Math.cos(angle), y1 = 60 + 54 * Math.sin(angle);
-                      const x2 = 60 + 54 * Math.cos(end),   y2 = 60 + 54 * Math.sin(end);
-                      const large = s.v > 0.5 ? 1 : 0;
-                      const d = `M60,60 L${x1},${y1} A54,54,0,${large},1,${x2},${y2}Z`;
-                      const result = <path key={i} d={d} fill={s.c}/>;
-                      angle = end;
-                      return result;
-                    });
-                  })()}
-                  <circle cx="60" cy="60" r="32" fill="#fff"/>
-                  <text x="60" y="56" textAnchor="middle" fontSize="14" fontWeight="700" fill="#111827">
-                    {paiementPercentages.confirmes}%
-                  </text>
-                  <text x="60" y="70" textAnchor="middle" fontSize="9" fill="#6b7280">confirmés</text>
-                </svg>
-                <div style={{ width:'100%' }}>
+            <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb', display:'flex', flexDirection:'column' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
+                <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>Transactions</div>
+                <div style={{ display:'flex', gap:'4px' }}>
                   {[
-                    { label:'Confirmés',  pct:`${paiementPercentages.confirmes}%`,  color:'#22c55e' },
-                    { label:'En attente', pct:`${paiementPercentages.en_attente}%`, color:'#fbbf24' },
-                    { label:'Remboursés', pct:`${paiementPercentages.rembourses}%`, color:'#f87171' },
-                  ].map((item, i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'5px 0', borderBottom:'1px solid #f3f4f6', fontSize:'11px' }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'6px', color:'#374151' }}>
-                        <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:item.color }}/>
-                        {item.label}
-                      </div>
-                      <span style={{ fontWeight:'600', color:'#111827' }}>{item.pct}</span>
-                    </div>
+                    { label: '1 mois', days: 30 },
+                    { label: '3 mois', days: 90 },
+                    { label: '6 mois', days: 180 },
+                    { label: 'Tout', days: 0 },
+                  ].map(p => (
+                    <button
+                      key={p.days}
+                      onClick={() => setPaiementPeriod(p.days)}
+                      style={{
+                        fontSize:'10px', padding:'3px 8px', borderRadius:'4px',
+                        border:'1px solid', cursor:'pointer',
+                        borderColor: paiementPeriod === p.days ? '#0D9E7E' : '#e5e7eb',
+                        background: paiementPeriod === p.days ? '#0D9E7E' : '#fff',
+                        color: paiementPeriod === p.days ? '#fff' : '#6b7280',
+                        fontWeight: paiementPeriod === p.days ? 600 : 400,
+                      }}
+                    >{p.label}</button>
                   ))}
                 </div>
+              </div>
+              <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'14px' }}>
+                {(() => {
+                  const total = statsPaiements?.total ?? 0;
+                  const conf = statsPaiements?.confirmes ?? 0;
+                  const att = statsPaiements?.en_attente ?? 0;
+                  const rem = statsPaiements?.rembourses ?? 0;
+                  const pc = total > 0 ? (conf / total) * 100 : 0;
+                  const pa = total > 0 ? (att / total) * 100 : 0;
+                  const pr = total > 0 ? (rem / total) * 100 : 0;
+                  const slices = [
+                    { v: pc / 100, c: '#22c55e', label: 'Confirmés', n: conf },
+                    { v: pa / 100, c: '#fbbf24', label: 'En attente', n: att },
+                    { v: pr / 100, c: '#f87171', label: 'Remboursés', n: rem },
+                  ].filter(s => s.v > 0);
+                  const R = 70, r = 42, cx = 80, cy = 80;
+                  let angle = -Math.PI / 2;
+                  const paths = slices.map((s, i) => {
+                    if (s.v === 0) return null;
+                    const end = angle + s.v * 2 * Math.PI;
+                    const x1o = cx + R * Math.cos(angle), y1o = cy + R * Math.sin(angle);
+                    const x2o = cx + R * Math.cos(end),   y2o = cy + R * Math.sin(end);
+                    const x1i = cx + r * Math.cos(end),   y1i = cy + r * Math.sin(end);
+                    const x2i = cx + r * Math.cos(angle), y2i = cy + r * Math.sin(angle);
+                    const large = s.v > 0.5 ? 1 : 0;
+                    const d = `M${x1o},${y1o} A${R},${R},0,${large},1,${x2o},${y2o} L${x1i},${y1i} A${r},${r},0,${large},0,${x2i},${y2i}Z`;
+                    const result = <path key={i} d={d} fill={s.c} style={{ transition:'all 0.6s ease' }}/>;
+                    angle = end;
+                    return result;
+                  });
+                  return (
+                    <>
+                      <svg viewBox="0 0 160 160" width="160" height="160" style={{ filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.06))' }}>
+                        {paths}
+                        <circle cx={cx} cy={cy} r={r - 2} fill="#fff"/>
+                        <text x={cx} y={cy - 6} textAnchor="middle" fontSize="18" fontWeight="700" fill="#111827">
+                          {total}
+                        </text>
+                        <text x={cx} y={cy + 10} textAnchor="middle" fontSize="9" fill="#6b7280">
+                          transactions
+                        </text>
+                      </svg>
+                      <div style={{ width:'100%' }}>
+                        {slices.map((s, i) => (
+                          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', borderBottom:'1px solid #f3f4f6', fontSize:'12px' }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'#374151' }}>
+                              <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:s.c, flexShrink:0 }}/>
+                              <span>{s.label}</span>
+                            </div>
+                            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                              <span style={{ color:'#6b7280', fontSize:'11px' }}>{s.n}</span>
+                              <span style={{ fontWeight:'700', color:'#111827', fontSize:'12px' }}>{Math.round(s.v * 100)}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
