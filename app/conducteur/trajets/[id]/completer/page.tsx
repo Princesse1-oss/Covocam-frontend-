@@ -56,14 +56,8 @@ interface Vehicule {
   photoAvant?: string;
 }
 
-const VILLE_QUARTIERS: Record<string, string[]> = {
-  'Yaoundé': ['Bastos', 'Mvan', 'Mfoundi', 'Nlongkak', 'Essos', 'Odza', 'Messa', 'Elig-Essono', 'Carrefour Warda'],
-  'Douala': ['Akwa', 'Bonanjo', 'Bonapriso', 'Deido', 'Logbaba', 'Makepe', 'Bonaberi', 'Ndogbong', 'New Bell'],
-  'Bafoussam': ['Centre-ville', 'Djeleng', 'Tamdja', 'Famla'],
-  'Bamenda': ['Commercial Avenue', 'Nkwen', 'Mile 4', 'Up Station', 'Ntarikon'],
-  'Garoua': ['Plateau', 'Doualaré', 'Béka', 'Roumdé Adjia'],
-  'Maroua': ['Domayo', 'Pitoaré', 'Doualaré', 'Ziling'],
-};
+interface Quartier { id: number; nom: string; }
+interface Ville { id: number; nom: string; region: string; quartiers: Quartier[]; }
 
 export default function CompleterTrajetPage() {
   const params = useParams();
@@ -81,19 +75,19 @@ export default function CompleterTrajetPage() {
   const [vehiculeId, setVehiculeId] = useState('');
   const [heureDepart, setHeureDepart] = useState('');
   const [pointDepart, setPointDepart] = useState('');
-  const [quartierDepart, setQuartierDepart] = useState('');
   const [pointArrivee, setPointArrivee] = useState('');
-  const [quartierArrivee, setQuartierArrivee] = useState('');
   const [description, setDescription] = useState('');
   const [bagagesAutorises, setBagagesAutorises] = useState(true);
   const [heureArriveeEstimee, setHeureArriveeEstimee] = useState('');
   const [gpsEnabled, setGpsEnabled] = useState(false);
+  const [villesQuartiers, setVillesQuartiers] = useState<Ville[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { router.push('/login'); return; }
     fetchTrajet(token);
     fetchVehicules(token);
+    fetchVillesQuartiers();
   }, [router, trajetId]);
 
   const fetchTrajet = async (token: string) => {
@@ -130,6 +124,19 @@ export default function CompleterTrajetPage() {
     } catch {}
   };
 
+  const fetchVillesQuartiers = async () => {
+    try {
+      const res = await fetch(`${API_URL}/villes-quartiers`);
+      const data = await res.json();
+      if (data.villes) setVillesQuartiers(data.villes);
+    } catch {}
+  };
+
+  const getQuartiersForVille = (villeNom: string): Quartier[] => {
+    const ville = villesQuartiers.find(v => v.nom.toLowerCase() === villeNom?.toLowerCase());
+    return ville?.quartiers || [];
+  };
+
   const handleSubmit = async () => {
     if (!vehiculeId) { setError('Veuillez sélectionner un véhicule'); return; }
     if (!pointDepart) { setError('Veuillez indiquer le point de départ'); return; }
@@ -147,8 +154,8 @@ export default function CompleterTrajetPage() {
         body: JSON.stringify({
           vehiculeId: parseInt(vehiculeId),
           heureDepart: heureDepart || undefined,
-          pointDepart: quartierDepart ? `${pointDepart}, ${quartierDepart}` : pointDepart,
-          pointArrivee: quartierArrivee ? `${pointArrivee}, ${quartierArrivee}` : pointArrivee,
+          pointDepart: pointDepart,
+          pointArrivee: pointArrivee,
           description: description || undefined,
           statut: 'OUVERT',
         })
@@ -285,40 +292,40 @@ export default function CompleterTrajetPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={labelStyle}><Icon name="mapPin" size={12} color={E} /> Point de départ *</label>
-              <input
-                type="text"
+              <select
                 value={pointDepart}
                 onChange={e => setPointDepart(e.target.value)}
-                placeholder="Ex: Carrefour Warda"
                 required
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = E}
-                onBlur={e => e.currentTarget.style.borderColor = borderColor}
-              />
-              {trajet?.villeDepart && VILLE_QUARTIERS[trajet.villeDepart] && (
-                <select value={quartierDepart} onChange={e => { setQuartierDepart(e.target.value); if (e.target.value) setPointDepart(e.target.value); }} style={{ ...inputStyle, marginTop: '8px' }}>
-                  <option value="">Choisir un quartier (optionnel)</option>
-                  {VILLE_QUARTIERS[trajet.villeDepart].map(q => <option key={q} value={q}>{q}</option>)}
-                </select>
+                style={{ ...inputStyle, cursor: 'pointer' }}
+              >
+                <option value="">Sélectionner un quartier</option>
+                {getQuartiersForVille(trajet?.villeDepart || '').map(q => (
+                  <option key={q.id} value={q.nom}>{q.nom}</option>
+                ))}
+              </select>
+              {trajet?.villeDepart && (
+                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>
+                  Quartiers de {trajet.villeDepart}
+                </div>
               )}
             </div>
             <div>
               <label style={labelStyle}><Icon name="mapPin" size={12} color={RD} /> Point d'arrivée *</label>
-              <input
-                type="text"
+              <select
                 value={pointArrivee}
                 onChange={e => setPointArrivee(e.target.value)}
-                placeholder="Ex: Gare routière"
                 required
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = E}
-                onBlur={e => e.currentTarget.style.borderColor = borderColor}
-              />
-              {trajet?.villeArrivee && VILLE_QUARTIERS[trajet.villeArrivee] && (
-                <select value={quartierArrivee} onChange={e => { setQuartierArrivee(e.target.value); if (e.target.value) setPointArrivee(e.target.value); }} style={{ ...inputStyle, marginTop: '8px' }}>
-                  <option value="">Choisir un quartier (optionnel)</option>
-                  {VILLE_QUARTIERS[trajet.villeArrivee].map(q => <option key={q} value={q}>{q}</option>)}
-                </select>
+                style={{ ...inputStyle, cursor: 'pointer' }}
+              >
+                <option value="">Sélectionner un quartier</option>
+                {getQuartiersForVille(trajet?.villeArrivee || '').map(q => (
+                  <option key={q.id} value={q.nom}>{q.nom}</option>
+                ))}
+              </select>
+              {trajet?.villeArrivee && (
+                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>
+                  Quartiers de {trajet.villeArrivee}
+                </div>
               )}
             </div>
           </div>
