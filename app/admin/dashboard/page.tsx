@@ -101,6 +101,8 @@ export default function AdminDashboard() {
   const [reservationsParMois, setReservationsParMois] = useState<ReservationParMois[]>([]);
   const [statsPaiements, setStatsPaiements] = useState<StatsPaiements | null>(null);
   const [paiementPeriod, setPaiementPeriod] = useState<number>(30);
+  const [scatterData, setScatterData] = useState<{ date: string; montant: number; commission: number; statut: string }[]>([]);
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -172,6 +174,12 @@ export default function AdminDashboard() {
       .then(r => r.json())
       .then(data => setStatsPaiements(data))
       .catch(() => setStatsPaiements(null));
+    fetch(`${API_URL}/admin/paiements/all${q}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => setScatterData(Array.isArray(data) ? data : []))
+      .catch(() => setScatterData([]));
   }, [paiementPeriod]);
 
   const totalUsers = stats?.utilisateurs?.total ?? 0;
@@ -338,58 +346,104 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               </div>
-              <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'14px' }}>
-                {(() => {
-                  const total = statsPaiements?.total ?? 0;
-                  const conf = statsPaiements?.confirmes ?? 0;
-                  const att = statsPaiements?.en_attente ?? 0;
-                  const rem = statsPaiements?.rembourses ?? 0;
-                  const pc = total > 0 ? (conf / total) * 100 : 0;
-                  const pa = total > 0 ? (att / total) * 100 : 0;
-                  const pr = total > 0 ? (rem / total) * 100 : 0;
-                  const slices = [
-                    { v: pc / 100, c: '#22c55e', label: 'Confirmés', n: conf },
-                    { v: pa / 100, c: '#fbbf24', label: 'En attente', n: att },
-                    { v: pr / 100, c: '#f87171', label: 'Remboursés', n: rem },
-                  ].filter(s => s.v > 0);
-                  const R = 70, r = 42, cx = 80, cy = 80;
-                  let angle = -Math.PI / 2;
-                  const paths = slices.map((s, i) => {
-                    if (s.v === 0) return null;
-                    const end = angle + s.v * 2 * Math.PI;
-                    const x1o = cx + R * Math.cos(angle), y1o = cy + R * Math.sin(angle);
-                    const x2o = cx + R * Math.cos(end),   y2o = cy + R * Math.sin(end);
-                    const x1i = cx + r * Math.cos(end),   y1i = cy + r * Math.sin(end);
-                    const x2i = cx + r * Math.cos(angle), y2i = cy + r * Math.sin(angle);
-                    const large = s.v > 0.5 ? 1 : 0;
-                    const d = `M${x1o},${y1o} A${R},${R},0,${large},1,${x2o},${y2o} L${x1i},${y1i} A${r},${r},0,${large},0,${x2i},${y2i}Z`;
-                    const result = <path key={i} d={d} fill={s.c} style={{ transition:'all 0.6s ease' }}/>;
-                    angle = end;
-                    return result;
-                  });
+              <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
+                {scatterData.length === 0 ? (
+                  <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <p style={{ fontSize:'12px', color:'#9ca3af' }}>Aucune transaction sur cette période</p>
+                  </div>
+                ) : (() => {
+                  const parseDate = (d: string) => new Date(`${d}T00:00:00`).getTime();
+                  const points = [...scatterData].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+                  const tMin = parseDate(points[0].date);
+                  const tMax = parseDate(points[points.length - 1].date);
+                  const span = tMax - tMin || 86400000;
+                  const maxVal = Math.max(...points.map(p => p.montant)) * 1.1 || 1;
+                  const padL = 46, padR = 10, padT = 12, padB = 32;
+                  const plotW = 400 - padL - padR, plotH = 200 - padT - padB;
+                  const xOf = (d: string) => padL + ((parseDate(d) - tMin) / span) * plotW;
+                  const yOf = (m: number) => padT + plotH - (m / maxVal) * plotH;
+                  const dotColor = (st: string) =>
+                    st === 'REUSSI'     ? '#22c55e' :
+                    st === 'EN_ATTENTE' ? '#fbbf24' :
+                    st === 'REMBOURSE'  ? '#f87171' : '#ef4444';
+                  const statutLabel = (st: string) =>
+                    st === 'REUSSI'     ? 'Réussi' :
+                    st === 'EN_ATTENTE' ? 'En attente' :
+                    st === 'REMBOURSE'  ? 'Remboursé' :
+                    st === 'ECHEC'      ? 'Échec' : st;
+                  const fmtK = (v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`;
                   return (
                     <>
-                      <svg viewBox="0 0 160 160" width="160" height="160" style={{ filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.06))' }}>
-                        {paths}
-                        <circle cx={cx} cy={cy} r={r - 2} fill="#fff"/>
-                        <text x={cx} y={cy - 6} textAnchor="middle" fontSize="18" fontWeight="700" fill="#111827">
-                          {total}
-                        </text>
-                        <text x={cx} y={cy + 10} textAnchor="middle" fontSize="9" fill="#6b7280">
-                          transactions
-                        </text>
-                      </svg>
-                      <div style={{ width:'100%' }}>
-                        {slices.map((s, i) => (
-                          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 0', borderBottom:'1px solid #f3f4f6', fontSize:'12px' }}>
-                            <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'#374151' }}>
-                              <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:s.c, flexShrink:0 }}/>
-                              <span>{s.label}</span>
+                      <div style={{ position:'relative', width:'100%' }}>
+                        <svg viewBox="0 0 400 200" width="100%" style={{ display:'block' }} preserveAspectRatio="xMidYMid meet">
+                          {[0, 1, 2, 3, 4].map(i => {
+                            const val = maxVal * (i / 4);
+                            const y = yOf(val);
+                            return (
+                              <g key={`g${i}`}>
+                                <line x1={padL} y1={y} x2={400 - padR} y2={y} stroke="#e5e7eb" strokeWidth="1"/>
+                                <text x={padL - 6} y={y + 3} textAnchor="end" fontSize="8" fill="#9ca3af">{fmtK(val)}</text>
+                              </g>
+                            );
+                          })}
+                          <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#d1d5db" strokeWidth="1"/>
+                          <line x1={padL} y1={padT + plotH} x2={400 - padR} y2={padT + plotH} stroke="#d1d5db" strokeWidth="1"/>
+                          {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+                            const d = new Date(tMin + t * span);
+                            const lbl = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                            return (
+                              <text key={`x${i}`} x={padL + t * plotW} y={200 - 12} textAnchor="middle" fontSize="8" fill="#9ca3af">{lbl}</text>
+                            );
+                          })}
+                          {points.map((p, i) => (
+                            <circle
+                              key={`p${i}`}
+                              cx={xOf(p.date)}
+                              cy={yOf(p.montant)}
+                              r={hoveredPoint === i ? 5 : 3}
+                              fill={dotColor(p.statut)}
+                              fillOpacity={hoveredPoint === null || hoveredPoint === i ? 0.85 : 0.35}
+                              stroke={hoveredPoint === i ? '#111827' : 'none'}
+                              strokeWidth="1"
+                              style={{ cursor:'pointer', transition:'r 0.15s ease, fill-opacity 0.15s ease' }}
+                              onMouseEnter={() => setHoveredPoint(i)}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                          ))}
+                        </svg>
+                        {hoveredPoint !== null && points[hoveredPoint] && (() => {
+                          const p = points[hoveredPoint];
+                          const leftPct = (xOf(p.date) / 400) * 100;
+                          const topPct = (yOf(p.montant) / 200) * 100;
+                          const below = topPct < 25;
+                          return (
+                            <div style={{
+                              position:'absolute',
+                              left:`${leftPct}%`,
+                              top:`${topPct}%`,
+                              transform: below ? 'translate(-50%, 14px)' : 'translate(-50%, calc(-100% - 12px))',
+                              background:'#111827', color:'#fff', borderRadius:'6px',
+                              padding:'6px 10px', fontSize:'11px', lineHeight:'16px',
+                              pointerEvents:'none', whiteSpace:'nowrap', zIndex:20,
+                              boxShadow:'0 2px 8px rgba(0,0,0,0.25)',
+                            }}>
+                              <div style={{ fontWeight:600 }}>{p.date.split('-').reverse().join('/')}</div>
+                              <div>{p.montant.toLocaleString('fr-FR')} XAF</div>
+                              <div style={{ color: dotColor(p.statut), fontWeight:600 }}>{statutLabel(p.statut)}</div>
                             </div>
-                            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                              <span style={{ color:'#6b7280', fontSize:'11px' }}>{s.n}</span>
-                              <span style={{ fontWeight:'700', color:'#111827', fontSize:'12px' }}>{Math.round(s.v * 100)}%</span>
-                            </div>
+                          );
+                        })()}
+                      </div>
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center', marginTop:'10px' }}>
+                        {[
+                          { s:'REUSSI',     c:'#22c55e', l:'Réussi' },
+                          { s:'EN_ATTENTE', c:'#fbbf24', l:'En attente' },
+                          { s:'REMBOURSE',  c:'#f87171', l:'Remboursé' },
+                          { s:'ECHEC',      c:'#ef4444', l:'Échec' },
+                        ].map(item => (
+                          <div key={item.s} style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'10px', color:'#6b7280' }}>
+                            <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:item.c, flexShrink:0 }}/>
+                            {item.l}
                           </div>
                         ))}
                       </div>
