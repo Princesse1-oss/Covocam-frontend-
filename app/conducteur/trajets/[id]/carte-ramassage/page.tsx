@@ -31,6 +31,66 @@ const VILLES_COORDS: Record<string, [number, number]> = {
   'Bertoua': [4.5833, 13.6833],
   'Ebolowa': [2.9000, 11.1500],
   'Kribi': [2.9400, 9.9100],
+  'Mfou': [3.9500, 11.8000],
+  'Mbalmayo': [3.5167, 11.5000],
+  'Akono': [3.4900, 11.3100],
+  'Eseka': [3.6500, 10.7667],
+  'Edéa': [3.8000, 10.1333],
+  'Limbe': [4.0200, 9.2100],
+  'Buea': [4.1500, 9.2400],
+  'Tiko': [4.0800, 9.3600],
+  'Mamfe': [5.7750, 9.3000],
+  'Kumba': [4.6400, 9.4400],
+  'Nkongsamba': [4.9500, 9.9333],
+  'Dschang': [5.4500, 10.0500],
+  'Fundong': [6.2500, 10.2667],
+  'Jakiri': [6.1000, 10.1667],
+  'Wum': [6.4167, 10.0667],
+  'Njinikom': [6.2333, 10.2167],
+  'Batibo': [5.8333, 9.8500],
+  'Mankon': [5.9833, 10.1000],
+  'Kumbo': [6.2000, 10.6667],
+  'Nkambe': [6.5000, 10.6833],
+  'Ndu': [6.3833, 10.7333],
+  'Tchamba': [7.4500, 12.3500],
+  'Tibati': [6.4667, 12.6333],
+  'Meiganga': [6.5167, 14.3000],
+  'Ngaoundal': [6.5000, 13.2667],
+  'Doumere': [7.5833, 13.1500],
+  'Yoko': [5.5333, 12.3167],
+  'Batouri': [4.4333, 14.3667],
+  'Kentzou': [4.1667, 14.8500],
+  'Lomie': [3.1500, 13.4667],
+  'Ambam': [2.3833, 11.2667],
+  'Minta': [3.6000, 11.5167],
+  'Akonolinga': [3.7667, 12.2500],
+  'Ayos': [3.9000, 12.5333],
+  'Nanga-Eboko': [4.6833, 12.3667],
+  'Mbandjock': [4.4500, 12.7333],
+  'Essaki': [4.1167, 12.9500],
+  'Bonaberi': [4.0700, 9.6600],
+  'Dakar': [3.9500, 11.4500],
+  'Simbock': [3.8167, 11.4833],
+  'Mvan': [3.8167, 11.5167],
+  'Bastos': [3.8833, 11.4833],
+  'Mendong': [3.8333, 11.4500],
+  'Nkolfoulou': [3.8167, 11.6500],
+  'Soa': [3.8667, 11.6333],
+  'Biyem-Assi': [3.8333, 11.4667],
+  'Mokolo': [10.7417, 13.8000],
+  'Yagoua': [10.3417, 14.9417],
+  'Waza': [11.0500, 14.3750],
+  'Kousseri': [12.0833, 14.5333],
+  'Logone-Birni': [11.4500, 14.2500],
+  'Poli': [8.3500, 13.1833],
+  'Rey-Bouba': [8.6667, 13.9833],
+  'Touboro': [7.8500, 14.4167],
+  'Blangoua': [12.3500, 14.2500],
+  'Gouna': [9.6500, 13.5833],
+  'Mayo-Baléo': [7.8000, 13.5333],
+  'Bouba': [6.6667, 12.4500],
+  'Mindif': [6.8667, 14.1167],
+  'Dargala': [11.2167, 13.8333],
 };
 
 // ─── SVG Icons inline ───
@@ -122,6 +182,7 @@ export default function CarteRamassagePage() {
   const [loading, setLoading] = useState(true);
   const [trajet, setTrajet] = useState<any>(null);
   const [passagers, setPassagers] = useState<Passager[]>([]);
+  const [driverPos, setDriverPos] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -139,6 +200,10 @@ export default function CarteRamassagePage() {
       .then(res => res.json())
       .then(data => {
         setTrajet(data);
+        // Use trajet GPS coordinates if available
+        if (data.positionActuelleLat && data.positionActuelleLng) {
+          setDriverPos([data.positionActuelleLat, data.positionActuelleLng]);
+        }
       })
       .catch(err => console.error('Erreur trajet:', err));
 
@@ -166,6 +231,22 @@ export default function CarteRamassagePage() {
         console.error('Erreur passagers:', err);
         setLoading(false);
       });
+
+    // 3. Poll driver position every 10s for live tracking
+    const pollPosition = setInterval(() => {
+      fetch(`${API_URL}/trajets/${id}/position-conducteur`, {
+        headers: { Authorization: `Bearer ${cleanToken}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.position?.lat && data.position?.lng) {
+            setDriverPos([data.position.lat, data.position.lng]);
+          }
+        })
+        .catch(() => {});
+    }, 10000);
+
+    return () => clearInterval(pollPosition);
   }, [id, router]);
 
   if (loading) {
@@ -230,9 +311,13 @@ export default function CarteRamassagePage() {
     );
   }
 
-  const depCoords = VILLES_COORDS[trajet.villeDepart] || [3.8480, 11.5021];
-  const arrCoords = VILLES_COORDS[trajet.villeArrivee] || [4.0483, 9.7043];
-  const center: [number, number] = [(depCoords[0] + arrCoords[0]) / 2, (depCoords[1] + arrCoords[1]) / 2];
+  const depCoords: [number, number] = (trajet.pointDepartLat && trajet.pointDepartLng) 
+    ? [trajet.pointDepartLat, trajet.pointDepartLng]
+    : VILLES_COORDS[trajet.villeDepart] || [3.8480, 11.5021];
+  const arrCoords: [number, number] = (trajet.pointArriveeLat && trajet.pointArriveeLng) 
+    ? [trajet.pointArriveeLat, trajet.pointArriveeLng]
+    : VILLES_COORDS[trajet.villeArrivee] || [4.0483, 9.7043];
+  const center: [number, number] = driverPos || [(depCoords[0] + arrCoords[0]) / 2, (depCoords[1] + arrCoords[1]) / 2];
   const distance = Math.sqrt(Math.pow(arrCoords[0] - depCoords[0], 2) + Math.pow(arrCoords[1] - depCoords[1], 2));
   const zoom = distance < 1 ? 11 : distance < 3 ? 9 : 8;
 
@@ -331,6 +416,8 @@ export default function CarteRamassagePage() {
             departureLabel={`${trajet.villeDepart}${trajet.quartierDepart ? ` (${trajet.quartierDepart})` : ''}`}
             arrivalLabel={`${trajet.villeArrivee}${trajet.quartierArrivee ? ` (${trajet.quartierArrivee})` : ''}`}
             color={E}
+            driverPosition={driverPos}
+            driverLabel={`Position conducteur`}
           />
         </div>
 

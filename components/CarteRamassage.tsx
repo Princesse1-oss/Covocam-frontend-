@@ -64,6 +64,8 @@ interface CarteRamassageProps {
   departureLabel: string;
   arrivalLabel: string;
   color?: string;
+  driverPosition?: [number, number] | null;
+  driverLabel?: string;
 }
 
 export default function CarteRamassage({
@@ -74,7 +76,23 @@ export default function CarteRamassage({
   departureLabel,
   arrivalLabel,
   color = '#0D9E7E',
+  driverPosition = null,
+  driverLabel = 'Position actuelle',
 }: CarteRamassageProps) {
+  const driverIcon = new L.DivIcon({
+    className: 'custom-marker',
+    html: `<div style="background: #3B82F6; width: 36px; height: 36px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5); display: flex; align-items: center; justify-content: center; animation: pulse 2s infinite;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+        <path d="M5 11L6.5 6.5C6.8 5.6 7.6 5 8.6 5H15.4C16.4 5 17.2 5.6 17.5 6.5L19 11"/>
+        <rect x="2" y="11" width="20" height="7" rx="2" fill="white" stroke="white"/>
+        <circle cx="7" cy="18" r="2" fill="white"/>
+        <circle cx="17" cy="18" r="2" fill="white"/>
+      </svg>
+    </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+  });
+
   return (
     <MapContainer
       center={center}
@@ -107,6 +125,19 @@ export default function CarteRamassage({
           <div style={{ fontSize: '13px', color: '#6B7280' }}>{arrivalLabel}</div>
         </Popup>
       </Marker>
+
+      {driverPosition && (
+        <Marker position={driverPosition} icon={driverIcon}>
+          <Popup>
+            <div style={{ fontWeight: '600', fontSize: '14px', color: '#3B82F6' }}>
+              🚗 {driverLabel}
+            </div>
+            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+              {driverPosition[0].toFixed(5)}, {driverPosition[1].toFixed(5)}
+            </div>
+          </Popup>
+        </Marker>
+      )}
 
       <Polyline
         positions={[departure, arrival]}
