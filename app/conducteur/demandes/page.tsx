@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 
@@ -109,11 +110,14 @@ export default function ConducteurDemandesPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
   const [prixPropose, setPrixPropose] = useState('');
+  const [acceptationSuccess, setAcceptationSuccess] = useState<Demande | null>(null);
+  const [prixAccepte, setPrixAccepte] = useState(0);
   
   const [filtreVilleDepart, setFiltreVilleDepart] = useState('');
   const [filtreVilleArrivee, setFiltreVilleArrivee] = useState('');
   const [filtreBudgetMin, setFiltreBudgetMin] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -143,8 +147,8 @@ export default function ConducteurDemandesPage() {
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("🚨 VRAIE ERREUR DU BACKEND 🚨:\n", errorText);
-        alert("Erreur serveur :\n" + errorText);
+        console.error("ERREUR DU BACKEND:\n", errorText);
+        setError('Erreur serveur: ' + errorText);
         setDemandes([]);
         setLoading(false);
         return;
@@ -169,9 +173,10 @@ export default function ConducteurDemandesPage() {
 
   const handleAccepter = async () => {
     if (!selectedDemande || !prixPropose || parseFloat(prixPropose) <= 0) {
-      alert('Veuillez entrer un prix valide');
+      setError('Veuillez entrer un prix valide');
       return;
     }
+    setError('');
 
     const token = localStorage.getItem('token');
     setAcceptingId(selectedDemande.id);
@@ -192,22 +197,23 @@ export default function ConducteurDemandesPage() {
       try {
         data = JSON.parse(responseText);
       } catch (e) {
-        console.error("🚨 VRAIE ERREUR DU BACKEND 🚨:\n", responseText);
-        alert("Erreur Serveur :\n\n" + responseText);
+        console.error("ERREUR DU BACKEND:\n", responseText);
+        setError("Erreur Serveur: " + responseText);
         setAcceptingId(null);
         return;
       }
 
       if (res.ok) {
-        alert(`Demande acceptee ! Prix propose : ${parseFloat(prixPropose).toLocaleString()} FCFA/place\n\nLe trajet a ete cree en brouillon. Vous avez 24h pour le completer.`);
+        setAcceptationSuccess(selectedDemande);
+        setPrixAccepte(parseFloat(prixPropose));
         setShowModal(false);
         fetchDemandes();
       } else {
-        alert(data.error || 'Erreur lors de l\'acceptation');
+        setError(data.error || 'Erreur lors de l\'acceptation');
       }
     } catch (err) {
       console.error('Erreur réseau:', err);
-      alert('Erreur de connexion au serveur');
+      setError('Erreur de connexion au serveur');
     } finally {
       setAcceptingId(null);
     }
@@ -235,6 +241,39 @@ export default function ConducteurDemandesPage() {
     );
   }
 
+  if (acceptationSuccess) {
+    return (
+      <ConducteurLayout>
+        <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '600px', margin: '0 auto' }}>
+          <div style={{ background: bgCard, borderRadius: '20px', padding: '48px 32px', textAlign: 'center', border: `1px solid ${borderColor}`, boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Icon name="check" size={40} color={E} />
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: textColor, margin: '0 0 12px' }}>Demande acceptée !</h2>
+            <p style={{ fontSize: '15px', color: textSecondary, marginBottom: '24px', lineHeight: '1.6' }}>
+              Vous avez accepté la demande de <strong>{acceptationSuccess.passager.prenom} {acceptationSuccess.passager.nom}</strong> pour le trajet <strong>{acceptationSuccess.villeDepart} → {acceptationSuccess.villeArrivee}</strong>.
+            </p>
+            <div style={{ background: darkMode ? '#2A2A2A' : EL, borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+              <div style={{ fontSize: '13px', color: textSecondary, marginBottom: '4px' }}>Prix proposé</div>
+              <div style={{ fontSize: '24px', fontWeight: '800', color: E }}>{prixAccepte.toLocaleString()} FCFA/place</div>
+            </div>
+            <div style={{ padding: '14px', background: AL, borderRadius: '10px', marginBottom: '24px', fontSize: '13px', color: AM, textAlign: 'left' }}>
+              <strong>Prochaine étape :</strong> Un trajet brouillon a été créé. Vous avez 24h pour le compléter (véhicule, heure précise, point de RDV).
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Link href="/conducteur/trajets/brouillons" style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#FFF', fontSize: '14px', fontWeight: '700', cursor: 'pointer', textDecoration: 'none', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Icon name="check" size={16} color="#FFF" /> Compléter le trajet
+              </Link>
+              <button onClick={() => setAcceptationSuccess(null)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: `1.5px solid ${borderColor}`, background: 'transparent', color: textColor, fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                Retour aux demandes
+              </button>
+            </div>
+          </div>
+        </div>
+      </ConducteurLayout>
+    );
+  }
+
   return (
     <ConducteurLayout>
       <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -248,6 +287,13 @@ export default function ConducteurDemandesPage() {
             Trouvez des passagers et acceptez les demandes qui vous intéressent
           </p>
         </div>
+
+        {error && (
+          <div style={{ background: RL, border: `1px solid #FECACA`, borderRadius: '12px', padding: '14px 18px', marginBottom: '20px', color: RD, fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <span>{error}</span>
+            <button onClick={() => setError('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: RD, fontSize: '18px', fontWeight: '700', padding: '0 4px' }}>&times;</button>
+          </div>
+        )}
 
         {/* Filtres */}
         <div style={{

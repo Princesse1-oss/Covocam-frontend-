@@ -86,6 +86,7 @@ export default function PassagerNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -163,7 +164,8 @@ export default function PassagerNotifications() {
   };
 
   const supprimer = async (id: number) => {
-    if (!confirm('Supprimer cette notification ?')) return;
+    if (confirmDeleteId !== id) { setConfirmDeleteId(id); return; }
+    setConfirmDeleteId(null);
     const token = localStorage.getItem('token');
     try {
       await fetch(`${API_URL}/notifications/${id}`, {
@@ -206,6 +208,15 @@ export default function PassagerNotifications() {
 
   return (
     <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '800px', margin: '0 auto' }}>
+      {confirmDeleteId !== null && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Supprimer cette notification ?</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
+            <button onClick={() => supprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div style={{ 
         display: 'flex', 

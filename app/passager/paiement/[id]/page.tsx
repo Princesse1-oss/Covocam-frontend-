@@ -144,7 +144,7 @@ export default function PaiementPage() {
         setTimeout(() => router.push('/passager/reservations'), 3000);
       }
     } catch (err: any) {
-      alert(err.message || (lang === 'fr' ? 'Erreur lors du paiement.' : 'Payment error.'));
+      setError(err.message || (lang === 'fr' ? 'Erreur lors du paiement.' : 'Payment error.')); setTimeout(() => setError(''), 4000);
     } finally {
       setProcessing(false);
     }

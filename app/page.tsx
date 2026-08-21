@@ -233,10 +233,15 @@ export default function HomePage() {
         }
         .hero-image-bg {
           position: absolute;
-          inset: -30px;
+          inset: 0;
           background-size: cover;
           background-position: center 35%;
-          transform: scale(1.05);
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          will-change: transform;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          transform: translateZ(0);
         }
         .hero-overlay-gradient {
           position: absolute;
@@ -255,7 +260,7 @@ export default function HomePage() {
             display:block !important;
           }
           .hero-image-bg {
-            inset: -20px !important;
+            inset: 0 !important;
           }
           .hero-content { width:100% !important;padding:48px 24px !important; }
           .features-grid { grid-template-columns:1fr !important; }
@@ -299,14 +304,8 @@ export default function HomePage() {
       }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '40px', height: '40px', borderRadius: '12px',
-            background: `linear-gradient(135deg,${E},${ED})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 4px 12px rgba(13,158,126,0.35)`,
-          }}>
-            <Icons.Logo color="white" />
-          </div>
+          <img src="/covocam_logo.png" alt="CovoCam"
+            style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', display: 'block' }} />
           <div>
             <span style={{
               fontSize: '20px', fontWeight: '800',
@@ -731,29 +730,21 @@ export default function HomePage() {
         textAlign: 'center'
       }}>
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '10px',
-          marginBottom: '12px'
-        }}>
-          <div style={{
-            width: '32px', height: '32px',
-            borderRadius: '8px',
-            background: E,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            gap: '10px',
+            marginBottom: '12px'
           }}>
-            <Icons.Logo color="white" />
+            <img src="/covocam_logo.png" alt="CovoCam"
+              style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'contain' }} />
+            <span style={{
+              fontSize: '18px', fontWeight: '800',
+              color: 'white'
+            }}>
+              {t.brand}<span style={{ color: E }}>Cam</span>
+            </span>
           </div>
-          <span style={{
-            fontSize: '18px', fontWeight: '800',
-            color: 'white'
-          }}>
-            {t.brand}<span style={{ color: E }}>Cam</span>
-          </span>
-        </div>
         <p style={{
           fontSize: '13px',
           color: '#6B7280',

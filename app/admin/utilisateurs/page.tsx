@@ -42,6 +42,8 @@ export default function AdminUtilisateurs() {
     action: 'suspendre'
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [adminError, setAdminError] = useState('');
+  const [adminSuccess, setAdminSuccess] = useState('');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -125,12 +127,15 @@ export default function AdminUtilisateurs() {
       setUtilisateurs(prev => prev.map(u => u.id === userId ? { ...u, estActif: action === 'activer' } : u));
       setConfirmModal({ open: false, userId: null, userName: '', action: 'suspendre' });
       if (data.emailEnvoye === false) {
-        setTimeout(() => alert(`Utilisateur ${action === 'suspendre' ? 'suspendu' : 'réactivé'}.\n\nNote : L'email de notification n'a pas pu être envoyé (SMTP non configuré).`), 300);
+        setAdminSuccess('Utilisateur ' + (action === 'suspendre' ? 'suspendu' : 'réactivé') + '. Email non envoyé (SMTP non configuré).');
+        setTimeout(() => setAdminSuccess(''), 4000);
       } else if (data.emailEnvoye === true) {
-        setTimeout(() => alert(`Utilisateur ${action === 'suspendre' ? 'suspendu' : 'réactivé'}.\n\nUn email de notification a été envoyé.`), 300);
+        setAdminSuccess('Utilisateur ' + (action === 'suspendre' ? 'suspendu' : 'réactivé') + '. Email envoyé.');
+        setTimeout(() => setAdminSuccess(''), 4000);
       }
     } catch {
-      alert('Erreur lors de la mise à jour');
+      setAdminError('Erreur lors de la mise à jour');
+      setTimeout(() => setAdminError(''), 4000);
     }
   };
 
@@ -191,6 +196,18 @@ export default function AdminUtilisateurs() {
   return (
     <AdminLayout>
       <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
+        {adminError && (
+          <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {adminError}
+          </div>
+        )}
+        {adminSuccess && (
+          <div style={{ padding: '12px 16px', background: '#DCFCE7', border: '1px solid #BBF7D0', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#15803D', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            {adminSuccess}
+          </div>
+        )}
         <header style={{ background: '#fff', padding: isMobile ? '12px 16px' : '0 24px', height: isMobile ? 'auto' : '56px', display: 'flex', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexShrink: 0, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '10px' : '0' }}>
           <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>Gestion des utilisateurs</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>

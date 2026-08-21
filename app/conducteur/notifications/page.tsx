@@ -166,6 +166,9 @@ export default function ConducteurNotifications() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'reservations' | 'annulations'>('reservations');
   const [markingAll, setMarkingAll] = useState(false);
+  const [error, setError] = useState('');
+  const [confirmRefuseId, setConfirmRefuseId] = useState<number | null>(null);
+  const [confirmSupprimerLues, setConfirmSupprimerLues] = useState(false);
 
   const notifierChangementNotifications = () => {
     window.dispatchEvent(new Event('notifications-updated'));
@@ -284,12 +287,13 @@ export default function ConducteurNotifications() {
         setReservations(prev => prev.map(r => r.id === id ? { ...r, statut: 'A_PAYER' } : r));
       }
     } catch {
-      alert('Erreur lors de l\'acceptation');
+      setError('Erreur lors de l\'acceptation'); setTimeout(() => setError(''), 4000);
     }
   };
 
   const handleRefuser = async (id: number) => {
-    if (!window.confirm('Voulez-vous refuser cette réservation ?')) return;
+    if (confirmRefuseId !== id) { setConfirmRefuseId(id); return; }
+    setConfirmRefuseId(null);
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
@@ -301,7 +305,7 @@ export default function ConducteurNotifications() {
         setReservations(prev => prev.map(r => r.id === id ? { ...r, statut: 'REFUSEE' } : r));
       }
     } catch {
-      alert('Erreur lors du refus');
+      setError('Erreur lors du refus'); setTimeout(() => setError(''), 4000);
     }
   };
 
@@ -323,7 +327,7 @@ export default function ConducteurNotifications() {
   };
 
   const handleSupprimerLues = async () => {
-    if (!window.confirm('Supprimer toutes les notifications lues ?')) return;
+    setConfirmSupprimerLues(false);
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
@@ -357,6 +361,30 @@ export default function ConducteurNotifications() {
 
   return (
     <ConducteurLayout>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+      {confirmRefuseId !== null && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous refuser cette réservation ?</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmRefuseId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
+            <button onClick={() => handleRefuser(confirmRefuseId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, refuser</button>
+          </div>
+        </div>
+      )}
+      {confirmSupprimerLues && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Supprimer toutes les notifications lues ?</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmSupprimerLues(false)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
+            <button onClick={handleSupprimerLues} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, supprimer</button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#111827', margin: '0 0 4px' }}>Notifications <Icon name="bell" size={24} /></h1>

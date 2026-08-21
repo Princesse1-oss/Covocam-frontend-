@@ -79,6 +79,8 @@ export default function ValidationPresences() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [heureArrivee, setHeureArrivee] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -154,13 +156,16 @@ export default function ValidationPresences() {
       });
 
       if (res.ok) {
-        alert(lang === 'fr' ? 'Présences validées avec succès !' : 'Presences validated successfully!');
+        setSuccess('Présences validées avec succès !');
+        setTimeout(() => setSuccess(''), 4000);
         router.push(`/conducteur/trajets/${trajetId}`);
       } else {
-        alert(t('presenceValidationError'));
+        setError(t('presenceValidationError') || 'Erreur de validation');
+        setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      alert(t('serverError'));
+      setError(t('serverError') || 'Erreur serveur');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setSubmitting(false);
     }
@@ -199,6 +204,18 @@ export default function ValidationPresences() {
       marginBottom: '24px', 
       boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.04)'
     }}>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+      {success && (
+        <div style={{ padding: '12px 16px', background: '#D1FAE5', border: '1px solid #A7F3D0', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          {success}
+        </div>
+      )}
       <h2 style={{ 
         fontSize: isMobile ? '16px' : '18px', 
         fontWeight: '800', 

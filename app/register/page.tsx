@@ -265,10 +265,15 @@ export default function RegisterPage() {
 
         .hero-image {
           position: absolute;
-          inset: -30px;
+          inset: 0;
           background-size: cover;
           background-position: center 35%;
-          transform: scale(1.05);
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          will-change: transform;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          transform: translateZ(0);
         }
 
         .hero-overlay {
@@ -436,7 +441,7 @@ export default function RegisterPage() {
             flex-shrink: 0;
           }
           .hero-image {
-            inset: -40px !important;
+            inset: 0 !important;
           }
           .form-section {
             width: 50%;
@@ -530,20 +535,12 @@ export default function RegisterPage() {
             zIndex: 10,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '14px',
-                background: 'rgba(255,255,255,0.2)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              }}>
-                <Car size={22} color="#FFF" strokeWidth={1.8} />
-              </div>
+              <img src="/covocam_logo.png" alt="CovoCam"
+                style={{
+                  width: '44px', height: '44px', borderRadius: '14px',
+                  objectFit: 'contain', display: 'block',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                }} />
               <div>
                 <span className="logo-text" style={{
                   fontSize: '20px',

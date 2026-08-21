@@ -69,12 +69,14 @@ export default function PresenceValidationPage() {
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [trajet, setTrajet] = useState<any>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   
   // État pour suivre les présences : { reservationId: number, present: boolean }
   const [presences, setPresences] = useState<{ reservationId: number; present: boolean }[]>([]);
+  const [confirmValider, setConfirmValider] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -129,9 +131,8 @@ export default function PresenceValidationPage() {
   };
 
   const handleSubmit = async () => {
-    if (!confirm('Êtes-vous sûr de vouloir valider ces présences et terminer le trajet ? Cette action est irréversible.')) {
-      return;
-    }
+    if (!confirmValider) { setConfirmValider(true); return; }
+    setConfirmValider(false);
 
     setSubmitting(true);
     const token = localStorage.getItem('token');
@@ -154,11 +155,13 @@ export default function PresenceValidationPage() {
           router.push('/conducteur/trajets');
         }, 2500);
       } else {
-        alert(data.error || 'Erreur lors de la validation');
+        setError(data.error || 'Erreur lors de la validation');
+        setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
       console.error('Erreur réseau:', err);
-      alert('Erreur de connexion au serveur');
+      setError('Erreur de connexion au serveur');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setSubmitting(false);
     }
@@ -199,6 +202,21 @@ export default function PresenceValidationPage() {
   return (
     <ConducteurLayout>
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px 16px 40px' }}>
+        {error && (
+          <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {error}
+          </div>
+        )}
+        {confirmValider && (
+          <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Valider ces présences et terminer le trajet ? Cette action est irréversible.</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmValider(false)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={handleSubmit} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Confirmer</button>
+            </div>
+          </div>
+        )}
         
         {/* Header */}
         <button 

@@ -168,6 +168,8 @@ export default function MesReservations() {
   const [loading, setLoading] = useState(true);
   const [filterStatut, setFilterStatut] = useState('tous');
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [error, setError] = useState('');
+  const [confirmAnnul, setConfirmAnnul] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   // ✅ ÉTATS POUR LA MODALE D'ÉVALUATION
@@ -254,7 +256,10 @@ export default function MesReservations() {
   }, [router]);
 
   const handleAnnuler = async (id: number) => {
-    if (!window.confirm(t('confirmCancelTrip') || 'Voulez-vous vraiment annuler cette réservation ?')) return;
+    if (confirmAnnul === null) {
+      setConfirmAnnul(id);
+      return;
+    }
     const token = localStorage.getItem('token');
     setProcessingId(id);
     try {
@@ -269,10 +274,12 @@ export default function MesReservations() {
       if (res.ok) {
         setReservations(prev => prev.filter(r => r.id !== id));
       } else {
-        alert(t('cancelError') || 'Impossible d\'annuler cette réservation.');
+        setError('Impossible d\'annuler cette réservation.');
+        setTimeout(() => setError(''), 4000);
       }
     } catch {
-      alert(t('serverError') || 'Erreur réseau');
+      setError('Erreur réseau.');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setProcessingId(null);
     }
@@ -281,7 +288,8 @@ export default function MesReservations() {
   // ✅ FONCTION POUR SOUMETTRE L'ÉVALUATION
   const handleSubmitEvaluation = async () => {
     if (note === 0) {
-      alert('Veuillez sélectionner une note (1 à 5 étoiles)');
+      setError('Veuillez sélectionner une note (1 à 5 étoiles)');
+      setTimeout(() => setError(''), 4000);
       return;
     }
 
@@ -313,11 +321,13 @@ export default function MesReservations() {
           setEvaluationSuccess(false);
         }, 2500);
       } else {
-        alert(data.error || 'Erreur lors de l\'envoi de l\'évaluation');
+        setError(data.error || 'Erreur lors de l\'envoi');
+        setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
       console.error('Erreur réseau:', err);
-      alert('Erreur de connexion au serveur');
+      setError('Erreur de connexion au serveur');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setSubmittingEvaluation(false);
     }
@@ -514,6 +524,13 @@ export default function MesReservations() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
+      {error && (
+        <div style={{ maxWidth: '900px', margin: '0 auto 16px', padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+
       <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ marginBottom: isMobile ? '20px' : '24px' }}>
           <h1 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: textColor, margin: '0 0 8px' }}>
@@ -540,6 +557,16 @@ export default function MesReservations() {
             </div>
           ))}
         </div>
+
+        {confirmAnnul !== null && (
+          <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment annuler cette réservation ?</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmAnnul(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
+              <button onClick={() => { const id = confirmAnnul; setConfirmAnnul(null); handleAnnuler(id!); }} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, annuler</button>
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '8px', marginBottom: isMobile ? '16px' : '20px', flexWrap: 'wrap' }}>
           {[

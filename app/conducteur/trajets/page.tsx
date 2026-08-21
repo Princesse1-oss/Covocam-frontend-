@@ -113,6 +113,8 @@ export default function MesTrajetsPage() {
   // ✅ AJOUT : 'brouillon' dans les types de filtre
   const [filter, setFilter] = useState<'tous' | 'ouvert' | 'complet' | 'annule' | 'brouillon' | 'en_cours' | 'termine'>('tous');
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [error, setError] = useState('');
+  const [confirmAnnulId, setConfirmAnnulId] = useState<number | null>(null);
 
   useEffect(() => {
     const rawToken = localStorage.getItem('token');
@@ -163,7 +165,8 @@ export default function MesTrajetsPage() {
   }, [router]);
 
   const handleAnnuler = async (id: number) => {
-    if (!window.confirm(t('confirmCancelTrip') || 'Voulez-vous vraiment annuler ce trajet ?')) return;
+    if (confirmAnnulId !== id) { setConfirmAnnulId(id); return; }
+    setConfirmAnnulId(null);
     
     const token = localStorage.getItem('token');
     setCancellingId(id);
@@ -179,10 +182,10 @@ export default function MesTrajetsPage() {
           prev.map((t) => (t.id === id ? { ...t, statut: 'ANNULE' } : t))
         );
       } else {
-        alert(t('cancelError') || 'Erreur lors de l\'annulation');
+        setError('Erreur lors de l\'annulation'); setTimeout(() => setError(''), 4000);
       }
     } catch {
-      alert(t('serverError') || 'Erreur serveur');
+      setError('Erreur serveur'); setTimeout(() => setError(''), 4000);
     } finally {
       setCancellingId(null);
     }
@@ -271,6 +274,21 @@ export default function MesTrajetsPage() {
 
   return (
     <ConducteurLayout>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+      {confirmAnnulId !== null && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment annuler ce trajet ?</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmAnnulId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
+            <button onClick={() => handleAnnuler(confirmAnnulId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, annuler</button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: darkMode ? '#FFFFFF' : '#111827', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>

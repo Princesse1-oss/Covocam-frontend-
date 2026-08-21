@@ -123,6 +123,9 @@ export default function TrajetsBrouillonsPage() {
   const [selectedTrajet, setSelectedTrajet] = useState<TrajetBrouillon | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const [vehiculeId, setVehiculeId] = useState('');
   const [heureDepart, setHeureDepart] = useState('');
@@ -199,14 +202,13 @@ export default function TrajetsBrouillonsPage() {
 
   const handleSubmit = async () => {
     if (!selectedTrajet || !vehiculeId) {
-      alert('Veuillez sélectionner un véhicule');
+      setError('Veuillez sélectionner un véhicule'); setTimeout(() => setError(''), 4000);
       return;
     }
 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Session expirée. Veuillez vous reconnecter.');
-      router.push('/login');
+      setError('Session expirée. Veuillez vous reconnecter.'); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
       return;
     }
 
@@ -232,26 +234,24 @@ export default function TrajetsBrouillonsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert('Trajet publie avec succes ! Il est maintenant visible par les passagers.');
-        setShowModal(false);
-        fetchBrouillons(token);
+        setSuccess('Trajet publié avec succès !'); setTimeout(() => { setSuccess(''); setShowModal(false); fetchBrouillons(token); }, 2000);
       } else {
-        alert(data.error || 'Erreur lors de la publication');
+        setError(data.error || 'Erreur lors de la publication'); setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      alert('Erreur de connexion');
+      setError('Erreur de connexion'); setTimeout(() => setError(''), 4000);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleSupprimer = async (id: number) => {
-    if (!window.confirm('Voulez-vous vraiment supprimer ce brouillon ? Le passager sera notifié.')) return;
+    if (confirmDeleteId !== id) { setConfirmDeleteId(id); return; }
+    setConfirmDeleteId(null);
 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Session expirée. Veuillez vous reconnecter.');
-      router.push('/login');
+      setError('Session expirée. Veuillez vous reconnecter.'); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
       return;
     }
 
@@ -263,13 +263,13 @@ export default function TrajetsBrouillonsPage() {
 
       if (res.ok) {
         setBrouillons(prev => prev.filter(t => t.id !== id));
-        alert('Brouillon supprimé');
+        setSuccess('Brouillon supprimé'); setTimeout(() => setSuccess(''), 3000);
       } else {
         const data = await res.json();
-        alert(data.error || 'Erreur lors de la suppression');
+        setError(data.error || 'Erreur lors de la suppression'); setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      alert('Erreur de connexion');
+      setError('Erreur de connexion'); setTimeout(() => setError(''), 4000);
     }
   };
 
@@ -303,6 +303,28 @@ export default function TrajetsBrouillonsPage() {
   return (
     <ConducteurLayout>
       <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '1000px', margin: '0 auto' }}>
+        
+        {error && (
+          <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{ padding: '12px 16px', background: '#DCFCE7', border: '1px solid #BBF7D0', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#15803D', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            {success}
+          </div>
+        )}
+        {confirmDeleteId !== null && (
+          <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment supprimer ce brouillon ? Le passager sera notifié.</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => handleSupprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+            </div>
+          </div>
+        )}
         
         {/* Header */}
         <div style={{ marginBottom: '24px' }}>

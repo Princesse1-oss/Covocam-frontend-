@@ -38,6 +38,7 @@ export default function AdminTrajets() {
   const [showConfirmDelete, setShowConfirmDelete] = useState<number | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [adminError, setAdminError] = useState('');
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
@@ -82,7 +83,8 @@ export default function AdminTrajets() {
       setTrajets(prev => prev.filter(t => t.id !== id));
       setShowConfirmDelete(null);
     } catch {
-      alert('Erreur lors de la suppression');
+      setAdminError('Erreur lors de la suppression');
+      setTimeout(() => setAdminError(''), 4000);
     }
   };
 
@@ -169,6 +171,12 @@ export default function AdminTrajets() {
   return (
     <AdminLayout>
       <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
+        {adminError && (
+          <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {adminError}
+          </div>
+        )}
         <header style={{ background: '#fff', padding: isMobile ? '12px 16px' : '0 24px', height: isMobile ? 'auto' : '56px', display: 'flex', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexShrink: 0, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '10px' : '0' }}>
           <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>Gestion des trajets</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>

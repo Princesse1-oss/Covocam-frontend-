@@ -20,8 +20,6 @@ interface Vehicule {
   description?: string;
   photoAvant?: string;
   photoArriere?: string;
-  photoInterieur?: string;
-  photoCoffre?: string;
   estDefaut?: boolean;
 }
 
@@ -134,6 +132,7 @@ export default function MesVehicules() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     marque: '', modele: '', annee: new Date().getFullYear(), couleur: '',
@@ -143,13 +142,9 @@ export default function MesVehicules() {
 
   const [photoAvant, setPhotoAvant] = useState<File | null>(null);
   const [photoArriere, setPhotoArriere] = useState<File | null>(null);
-  const [photoInterieur, setPhotoInterieur] = useState<File | null>(null);
-  const [photoCoffre, setPhotoCoffre] = useState<File | null>(null);
 
   const [previewAvant, setPreviewAvant] = useState('');
   const [previewArriere, setPreviewArriere] = useState('');
-  const [previewInterieur, setPreviewInterieur] = useState('');
-  const [previewCoffre, setPreviewCoffre] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -256,8 +251,6 @@ export default function MesVehicules() {
     
     if (photoAvant) payload.append('photoAvant', photoAvant);
     if (photoArriere) payload.append('photoArriere', photoArriere);
-    if (photoInterieur) payload.append('photoInterieur', photoInterieur);
-    if (photoCoffre) payload.append('photoCoffre', photoCoffre);
 
     try {
       const method = vehicules.length > 0 ? 'PUT' : 'POST';
@@ -272,8 +265,8 @@ export default function MesVehicules() {
         setSuccess(vehicules.length > 0 ? t('vehicleUpdated') : t('vehicleAdded'));
         setShowForm(false);
         setFormData({ marque: '', modele: '', annee: new Date().getFullYear(), couleur: '', immatriculation: '', nbPlaces: 4, carburant: 'Essence', boiteVitesse: 'Manuelle', climatisation: true, gps: false, description: '' });
-        setPhotoAvant(null); setPhotoArriere(null); setPhotoInterieur(null); setPhotoCoffre(null);
-        setPreviewAvant(''); setPreviewArriere(''); setPreviewInterieur(''); setPreviewCoffre('');
+        setPhotoAvant(null); setPhotoArriere(null);
+        setPreviewAvant(''); setPreviewArriere('');
         fetchVehicules(token!);
         setTimeout(() => setSuccess(''), 4000);
       } else {
@@ -287,7 +280,8 @@ export default function MesVehicules() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t('confirmDelete'))) return;
+    if (confirmDeleteId !== id) { setConfirmDeleteId(id); return; }
+    setConfirmDeleteId(null);
     const token = localStorage.getItem('token');
     setDeletingId(id);
     try {
@@ -296,8 +290,11 @@ export default function MesVehicules() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicules([]);
+      setSuccess(t('success') || 'Véhicule supprimé');
+      setTimeout(() => setSuccess(''), 3000);
     } catch {
-      alert(t('error'));
+      setError(t('error') || 'Une erreur est survenue');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setDeletingId(null);
     }
@@ -331,6 +328,27 @@ export default function MesVehicules() {
 
   return (
     <ConducteurLayout>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+      {success && (
+        <div style={{ padding: '12px 16px', background: '#DCFCE7', border: '1px solid #BBF7D0', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#15803D', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          {success}
+        </div>
+      )}
+      {confirmDeleteId !== null && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('confirmDelete')}</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+            <button onClick={() => handleDelete(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: darkMode ? '#FFFFFF' : '#111827', margin: '0 0 4px' }}>
@@ -464,27 +482,28 @@ export default function MesVehicules() {
 
             <div style={{ marginBottom: '24px' }}>
               <label style={{ ...labelStyle, marginBottom: '12px' }}><Icon name="camera" size={14} /> {t('vehiclePhotos')}</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {[
                   { label: t('front') + ' *', file: photoAvant, setFile: setPhotoAvant, preview: previewAvant, setPreview: setPreviewAvant },
                   { label: t('rear') + ' *', file: photoArriere, setFile: setPhotoArriere, preview: previewArriere, setPreview: setPreviewArriere },
-                  { label: t('interior'), file: photoInterieur, setFile: setPhotoInterieur, preview: previewInterieur, setPreview: setPreviewInterieur },
-                  { label: t('trunk'), file: photoCoffre, setFile: setPhotoCoffre, preview: previewCoffre, setPreview: setPreviewCoffre },
                 ].map((photo, idx) => (
                   <div key={idx}>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: darkMode ? '#9CA3AF' : '#6b7280', marginBottom: '4px', display: 'block' }}>{photo.label}</label>
+                    <label style={{ fontSize: '12px', fontWeight: '700', color: darkMode ? '#9CA3AF' : '#374151', marginBottom: '6px', display: 'block' }}>{photo.label}</label>
                     <label style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      height: '120px', border: `2px dashed ${photo.preview ? E : '#d1d5db'}`,
-                      borderRadius: '10px', cursor: 'pointer', background: photo.preview ? EL : (darkMode ? '#2D2D2D' : '#f9fafb'),
-                      overflow: 'hidden', position: 'relative'
-                    }}>
+                      height: '180px', border: `2px dashed ${photo.preview ? E : '#d1d5db'}`,
+                      borderRadius: '12px', cursor: 'pointer', background: photo.preview ? EL : (darkMode ? '#2D2D2D' : '#f9fafb'),
+                      overflow: 'hidden', position: 'relative', transition: 'all 0.2s'
+                    }}
+                      onMouseEnter={e => { if (!photo.preview) e.currentTarget.style.borderColor = E; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                      onMouseLeave={e => { if (!photo.preview) e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    >
                       {photo.preview ? (
-                        <img src={photo.preview} alt={photo.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={photo.preview} alt={photo.label} style={{ width: '100%', height: '100%', objectFit: 'cover', imageRendering: 'auto' }} />
                       ) : (
                         <>
-                          <span style={{ fontSize: '24px', marginBottom: '4px' }}><Icon name="camera" size={24} /></span>
-                          <span style={{ fontSize: '11px', color: darkMode ? '#6B7280' : '#9ca3af' }}>{t('addPhoto')}</span>
+                          <span style={{ marginBottom: '8px' }}><Icon name="camera" size={32} color={GR} /></span>
+                          <span style={{ fontSize: '12px', fontWeight: '600', color: darkMode ? '#6B7280' : '#9ca3af' }}>{t('addPhoto')}</span>
                         </>
                       )}
                       <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e.target.files?.[0] || null, photo.setFile, photo.setPreview)} />
@@ -497,7 +516,7 @@ export default function MesVehicules() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '16px', borderTop: '1px solid #f3f4f6' }}>
               <button type="button" onClick={() => {
                 setShowForm(false);
-                setPreviewAvant(''); setPreviewArriere(''); setPreviewInterieur(''); setPreviewCoffre('');
+                setPreviewAvant(''); setPreviewArriere('');
               }} style={{ padding: '10px 20px', background: darkMode ? '#2D2D2D' : '#f3f4f6', border: 'none', borderRadius: '10px', fontSize: '14px', cursor: 'pointer', fontWeight: '600', color: darkMode ? '#9CA3AF' : '#374151' }}>
                 {t('cancel')}
               </button>
@@ -532,34 +551,28 @@ export default function MesVehicules() {
                 <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '3px 8px', borderRadius: '20px' }}><Icon name="check" size={10} color="white" /> {t('default')}</span>
               </div>
 
-              {(v.photoAvant || v.photoArriere || v.photoInterieur || v.photoCoffre) && (
-                <div style={{ padding: '12px 20px 0' }}>
+              {(v.photoAvant || v.photoArriere) && (
+                <div style={{ padding: '0' }}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: v.photoAvant ? '2fr 1fr 1fr' : '1fr 1fr',
-                    gridTemplateRows: v.photoAvant ? '77px 77px' : 'auto',
-                    gap: '6px',
-                    borderRadius: '10px',
+                    gridTemplateColumns: v.photoAvant && v.photoArriere ? '1fr 1fr' : '1fr',
+                    gap: '3px',
+                    borderRadius: '0',
                     overflow: 'hidden',
+                    height: '240px',
                   }}>
                     {v.photoAvant && (
-                      <div style={{ gridRow: '1 / 3', overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
-                        <img src={v.photoAvant} alt={t('front')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ overflow: 'hidden', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoAvant} alt={t('front')} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s', imageRendering: 'auto', backfaceVisibility: 'hidden' }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                       </div>
                     )}
                     {v.photoArriere && (
-                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
-                        <img src={v.photoArriere} alt={t('rear')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                    )}
-                    {v.photoInterieur && (
-                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
-                        <img src={v.photoInterieur} alt={t('interior')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                    )}
-                    {v.photoCoffre && (
-                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
-                        <img src={v.photoCoffre} alt={t('trunk')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ overflow: 'hidden', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoArriere} alt={t('rear')} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s', imageRendering: 'auto', backfaceVisibility: 'hidden' }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                       </div>
                     )}
                   </div>
@@ -596,8 +609,6 @@ export default function MesVehicules() {
                     }); 
                     setPreviewAvant(v.photoAvant ? `${v.photoAvant}` : '');
                     setPreviewArriere(v.photoArriere ? `${v.photoArriere}` : '');
-                    setPreviewInterieur(v.photoInterieur ? `${v.photoInterieur}` : '');
-                    setPreviewCoffre(v.photoCoffre ? `${v.photoCoffre}` : '');
                     setShowForm(true); 
                   }} style={{
                     flex: 1, padding: '10px', borderRadius: '8px', border: `1px solid rgba(13,158,126,0.3)`, background: 'rgba(13,158,126,0.05)', color: E, fontSize: '13px', fontWeight: '600', cursor: 'pointer',

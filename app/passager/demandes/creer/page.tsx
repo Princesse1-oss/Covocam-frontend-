@@ -126,6 +126,8 @@ export default function CreerDemandePage() {
   const [description, setDescription] = useState('');
   const [estPrivee, setEstPrivee] = useState(false);
   const [destinatairePriveEmail, setDestinatairePriveEmail] = useState('');
+  const [conducteurs, setConducteurs] = useState<{ id: number; nom: string; prenom: string; email: string; photo?: string | null; noteMoyenne?: number }[]>([]);
+  const [loadingConducteurs, setLoadingConducteurs] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -148,6 +150,22 @@ export default function CreerDemandePage() {
       router.push('/login');
     }
   }, [router]);
+
+  useEffect(() => {
+    if (estPrivee && conducteurs.length === 0) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        setLoadingConducteurs(true);
+        fetch('/api/utilisateurs/conducteurs/actifs', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(r => r.json())
+          .then(data => { if (Array.isArray(data)) setConducteurs(data); })
+          .catch(() => {})
+          .finally(() => setLoadingConducteurs(false));
+      }
+    }
+  }, [estPrivee]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -317,17 +335,31 @@ export default function CreerDemandePage() {
             
             {estPrivee && (
               <div style={{ marginTop: '12px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textColor, marginBottom: '6px' }}><Icon name="mail" size={12} color={E} /> Email du conducteur *</label>
-                <input
-                  type="email"
-                  value={destinatairePriveEmail}
-                  onChange={(e) => setDestinatairePriveEmail(e.target.value)}
-                  placeholder="Ex: conducteur@covocam.cm"
-                  required={estPrivee}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none', transition: 'border-color 0.2s' }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = E}
-                  onBlur={(e) => e.currentTarget.style.borderColor = borderColor}
-                />
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textColor, marginBottom: '6px' }}><Icon name="mail" size={12} color={E} /> Sélectionner un conducteur *</label>
+                {loadingConducteurs ? (
+                  <div style={{ padding: '12px', textAlign: 'center', color: textSecondary, fontSize: '13px', background: inputBg, borderRadius: '8px', border: `1px solid ${borderColor}` }}>
+                    Chargement des conducteurs...
+                  </div>
+                ) : (
+                  <select
+                    value={destinatairePriveEmail}
+                    onChange={(e) => setDestinatairePriveEmail(e.target.value)}
+                    required={estPrivee}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none', transition: 'border-color 0.2s' }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = E}
+                    onBlur={(e) => e.currentTarget.style.borderColor = borderColor}
+                  >
+                    <option value="">Choisir un conducteur...</option>
+                    {conducteurs.map(c => (
+                      <option key={c.id} value={c.email}>
+                        {c.prenom} {c.nom} {c.noteMoyenne ? `(${Number(c.noteMoyenne).toFixed(1)}★)` : ''} - {c.email}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {conducteurs.length === 0 && !loadingConducteurs && (
+                  <p style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>Aucun conducteur disponible pour le moment.</p>
+                )}
               </div>
             )}
           </div>

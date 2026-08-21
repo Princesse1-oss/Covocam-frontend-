@@ -246,14 +246,8 @@ export default function ConducteurTopbar() {
       }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: '68px', gap: '24px' }}>
           <Link href="/conducteur/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 16px rgba(13,158,126,0.35)` }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M5 11L6.5 6.5C6.8 5.6 7.6 5 8.6 5H15.4C16.4 5 17.2 5.6 17.5 6.5L19 11" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                <rect x="2" y="11" width="20" height="7" rx="2" stroke="white" strokeWidth="1.8" fill="rgba(255,255,255,0.15)"/>
-                <circle cx="7" cy="18" r="2" stroke="white" strokeWidth="1.8" fill="rgba(255,255,255,0.3)"/>
-                <circle cx="17" cy="18" r="2" stroke="white" strokeWidth="1.8" fill="rgba(255,255,255,0.3)"/>
-              </svg>
-            </div>
+            <img src="/covocam_logo.png" alt="CovoCam"
+              style={{ width: '44px', height: '44px', borderRadius: '14px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 16px rgba(13,158,126,0.35)' }} />
             <div>
               <span style={{ fontSize: '22px', fontWeight: '800', color: styles.text, letterSpacing: '-0.5px', display: 'block', lineHeight: '1.1' }}>Covo<span style={{ color: EMERALD }}>Cam</span></span>
               <span style={{ fontSize: '10px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{t('activeDriver')}</span>

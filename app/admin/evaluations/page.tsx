@@ -19,6 +19,8 @@ export default function AdminEvaluations() {
   const [user, setUser] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [filterNote, setFilterNote] = useState('toutes');
+  const [adminError, setAdminError] = useState('');
+  const [confirmDeleteEvalId, setConfirmDeleteEvalId] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -39,15 +41,19 @@ export default function AdminEvaluations() {
   }, []);
 
   const handleDelete = async (id: number) => {
+    if (confirmDeleteEvalId !== id) { setConfirmDeleteEvalId(id); return; }
+    setConfirmDeleteEvalId(null);
     const token = localStorage.getItem('token');
-    if (!confirm('Supprimer cette évaluation ?')) return;
     try {
       await fetch(`/api/evaluations/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       setEvaluations(evaluations.filter(e => e.id !== id));
-    } catch { alert('Erreur lors de la suppression'); }
+    } catch {
+      setAdminError('Erreur lors de la suppression');
+      setTimeout(() => setAdminError(''), 4000);
+    }
   };
 
   const handleLogout = () => {
@@ -90,6 +96,21 @@ export default function AdminEvaluations() {
   return (
     <AdminLayout>
       <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
+        {adminError && (
+          <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {adminError}
+          </div>
+        )}
+        {confirmDeleteEvalId !== null && (
+          <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Supprimer cette évaluation ?</span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setConfirmDeleteEvalId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => handleDelete(confirmDeleteEvalId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+            </div>
+          </div>
+        )}
         <header style={{ background: '#fff', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <div style={{ fontSize: '15px', fontWeight: '700', color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '18px' }}>

@@ -73,10 +73,12 @@ export default function DemarrerTrajetPage() {
   const [loading, setLoading] = useState(true);
   const [trajet, setTrajet] = useState<any>(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
   
   // ✅ C'est cette variable qui active/désactive le hook GPS
   const [isTrajetActive, setIsTrajetActive] = useState(false);
+  const [confirmEndTrip, setConfirmEndTrip] = useState(false);
 
   // Le hook gère automatiquement le démarrage et l'arrêt du GPS selon isTrajetActive
   const { isTracking, error: gpsError } = useGpsTracking(trajetId, isTrajetActive);
@@ -153,9 +155,8 @@ export default function DemarrerTrajetPage() {
   };
 
   const handleTerminer = async () => {
-    if (!confirm(t('confirmEndTrip'))) {
-      return;
-    }
+    if (!confirmEndTrip) { setConfirmEndTrip(true); return; }
+    setConfirmEndTrip(false);
 
     setSubmitting(true);
     
@@ -177,13 +178,16 @@ export default function DemarrerTrajetPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(t('tripEndedSuccess'));
+        setSuccess('Trajet terminé avec succès !');
+        setTimeout(() => setSuccess(''), 4000);
         router.push('/conducteur/trajets');
       } else {
-        alert(t('tripEndError') + (data.error || ''));
+        setError(t('tripEndError') || 'Erreur : ' + (data.error || ''));
+        setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      alert(t('serverError'));
+      setError(t('serverError') || 'Erreur serveur');
+      setTimeout(() => setError(''), 4000);
     } finally {
       setSubmitting(false);
     }
@@ -216,6 +220,27 @@ export default function DemarrerTrajetPage() {
 
   return (
     <ConducteurLayout>
+      {error && (
+        <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          {error}
+        </div>
+      )}
+      {success && (
+        <div style={{ padding: '12px 16px', background: '#D1FAE5', border: '1px solid #A7F3D0', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontSize: '13px', fontWeight: '600' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          {success}
+        </div>
+      )}
+      {confirmEndTrip && (
+        <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('confirmEndTrip')}</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setConfirmEndTrip(false)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+            <button onClick={handleTerminer} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Confirmer</button>
+          </div>
+        </div>
+      )}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '800', color: darkMode ? '#FFFFFF' : BK, margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Icon name="map" size={24} /> {t('trackingTitle')}

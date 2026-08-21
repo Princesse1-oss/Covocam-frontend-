@@ -11,6 +11,7 @@ interface Message {
   dateEnvoi: string;
   estLu: boolean;
   estMoi: boolean;
+  estSignale?: boolean;
   expediteur: { id: number; nom: string; prenom: string; photo?: string | null };
   destinataire?: { id: number; nom: string; prenom: string; photo?: string | null };
 }
@@ -61,6 +62,10 @@ export default function ConversationPage() {
   const [contactName, setContactName] = useState('Discussion');
   const [contactPhoto, setContactPhoto] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [showSignaler, setShowSignaler] = useState<number | null>(null);
+  const [raisonSignalement, setRaisonSignalement] = useState('');
+  const [error, setError] = useState('');
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -80,6 +85,8 @@ export default function ConversationPage() {
   useEffect(() => {
     if (!token) { router.push('/login'); return; }
     fetchConversation();
+    pollRef.current = setInterval(fetchConversation, 5000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [userId, token]);
 
   useEffect(() => {
@@ -148,7 +155,7 @@ export default function ConversationPage() {
       
       if (!res.ok) {
         setMessages(prev => prev.filter(m => m.id !== tempId));
-        alert('Échec de l\'envoi du message.');
+        setError('Échec de l\'envoi du message.'); setTimeout(() => setError(''), 4000);
       } else {
         fetchConversation(); 
       }
@@ -158,6 +165,21 @@ export default function ConversationPage() {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSignaler = async (messageId: number) => {
+    try {
+      const res = await fetch(`/api/messages/${messageId}/signaler`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raison: raisonSignalement || null })
+      });
+      if (res.ok) {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, estSignale: true } : m));
+        setShowSignaler(null);
+        setRaisonSignalement('');
+      }
+    } catch (err) { console.error('Erreur signalement:', err); }
   };
 
   const formatTime = (dateStr: string) => {
@@ -192,6 +214,12 @@ export default function ConversationPage() {
         overflow: 'hidden',
         boxShadow: theme === 'dark' ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.04)'
       }}>
+        {error && (
+          <div style={{ padding: '10px 16px', background: '#FEE2E2', borderBottom: '1px solid #FECACA', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            {error}
+          </div>
+        )}
         
         {/* Header */}
         <div style={{ 
@@ -290,24 +318,52 @@ export default function ConversationPage() {
               }}>
                 <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.4' }}>{msg.contenu}</p>
               </div>
-              <span style={{
-                fontSize: '11px',
-                color: '#8E8E8E',
-                marginTop: '4px',
-                marginRight: msg.estMoi ? '4px' : '0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontWeight: '500'
-              }}>
-                {formatTime(msg.dateEnvoi)}
-                {msg.estMoi && (
-                  <span style={{ color: msg.estLu ? '#34B7F1' : '#8E8E8E', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '1px' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    {msg.estLu && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'-6px'}}><polyline points="20 6 9 17 4 12"/></svg>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                <span style={{
+                  fontSize: '11px',
+                  color: '#8E8E8E',
+                  marginRight: msg.estMoi ? '4px' : '0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontWeight: '500'
+                }}>
+                  {formatTime(msg.dateEnvoi)}
+                  {msg.estMoi && (
+                    <span style={{ color: msg.estLu ? '#34B7F1' : '#8E8E8E', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '1px' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      {msg.estLu && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'-6px'}}><polyline points="20 6 9 17 4 12"/></svg>}
+                    </span>
+                  )}
+                </span>
+                {!msg.estMoi && !msg.estSignale && showSignaler !== msg.id && (
+                  <button onClick={() => setShowSignaler(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#8E8E8E', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '3px' }} title="Signaler">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    Signaler
+                  </button>
+                )}
+                {msg.estSignale && (
+                  <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    Signalé
                   </span>
                 )}
-              </span>
+              </div>
+              {showSignaler === msg.id && (
+                <div style={{ marginTop: '8px', padding: '10px', background: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '200px' }}>
+                  <input
+                    type="text"
+                    value={raisonSignalement}
+                    onChange={e => setRaisonSignalement(e.target.value)}
+                    placeholder="Raison (optionnel)"
+                    style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #FECACA', fontSize: '12px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
+                  />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => handleSignaler(msg.id)} style={{ flex: 1, padding: '6px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Confirmer</button>
+                    <button onClick={() => { setShowSignaler(null); setRaisonSignalement(''); }} style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#374151', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
