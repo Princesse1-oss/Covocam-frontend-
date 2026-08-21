@@ -340,21 +340,29 @@ export default function MesVehicules() {
             {t('vehicleDescription')}
           </p>
         </div>
-        {vehicules.length > 0 && (
-          <button onClick={() => { 
-            setShowForm(!showForm); 
-            setError(''); 
-          }} style={{
-            display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
-            background: showForm ? (darkMode ? '#2D2D2D' : '#f3f4f6') : `linear-gradient(135deg, ${E}, ${ED})`,
-            color: showForm ? (darkMode ? '#9CA3AF' : '#6b7280') : '#fff',
-            fontSize: '14px', fontWeight: '700', cursor: 'pointer',
-            boxShadow: showForm ? 'none' : `0 4px 15px rgba(13,158,126,0.4)`,
-          }}>
-            {showForm ? <><Icon name="x" size={14} /> {t('cancel')}</> : <><Icon name="edit" size={14} /> {t('editVehicle')}</>}
-          </button>
-        )}
+
       </div>
+
+      {!showForm && vehicules.length === 0 && !loading && (
+        <div style={{ textAlign: 'center', padding: '60px 24px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: `1px dashed ${darkMode ? '#333' : '#d1d5db'}` }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '20px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Icon name="car" size={36} color={E} />
+          </div>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#fff' : '#111827', margin: '0 0 8px' }}>
+            {t('addVehicle')}
+          </h3>
+          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', margin: '0 0 24px', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
+            {t('vehicleDescription')}
+          </p>
+          <button onClick={() => { setShowForm(true); setError(''); }} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '12px', border: 'none',
+            background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+            boxShadow: `0 4px 15px rgba(13,158,126,0.4)`,
+          }}>
+            <Icon name="plus" size={16} color="#fff" /> {t('addVehicle')}
+          </button>
+        </div>
+      )}
 
       {success && (
         <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '14px 18px', marginBottom: '20px', color: '#15803d', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -505,16 +513,6 @@ export default function MesVehicules() {
         </div>
       )}
 
-      {!showForm && vehicules.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '80px 40px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px' }}><Icon name="car" size={64} /></div>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>{t('noVehicle')}</h3>
-          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', lineHeight: '1.6' }}>
-            {t('noData')}
-          </p>
-        </div>
-      )}
-
       {!showForm && vehicules.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: '16px' }}>
           {vehicules.map(v => (
@@ -593,26 +591,6 @@ export default function MesVehicules() {
         </div>
       )}
 
-      {!showForm && vehicules.length === 0 && !loading && (
-        <div style={{ textAlign: 'center', padding: '60px 24px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: `1px dashed ${darkMode ? '#333' : '#d1d5db'}` }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '20px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <Icon name="car" size={36} color={E} />
-          </div>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#fff' : '#111827', margin: '0 0 8px' }}>
-            {t('addVehicle')}
-          </h3>
-          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', margin: '0 0 24px', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5' }}>
-            {t('vehicleDescription')}
-          </p>
-          <button onClick={() => { setShowForm(true); setError(''); }} style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '12px', border: 'none',
-            background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
-            boxShadow: `0 4px 15px rgba(13,158,126,0.4)`,
-          }}>
-            <Icon name="plus" size={16} color="#fff" /> {t('addVehicle')}
-          </button>
-        </div>
-      )}
     </ConducteurLayout>
   );
 }

@@ -225,7 +225,6 @@ export default function MesTrajetsPage() {
     const isBrouillon = u === 'BROUILLON' || u === 'DRAFT';
 
     if (filter === 'tous') {
-      if (isBrouillon) return false;
       return true;
     }
 
@@ -311,14 +310,6 @@ export default function MesTrajetsPage() {
           <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', marginBottom: '24px' }}>
             {filter === 'tous' ? (t('noTripsPublished') || 'Vous n\'avez encore publié aucun trajet.') : (t('noTripsFilter') || 'Aucun trajet dans la catégorie') + ' "' + getFilterLabel(filter) + '"'}
           </p>
-          {filter === 'tous' && (
-            <Link href="/conducteur/trajets/creer" style={{
-              padding: '12px 28px', background: 'linear-gradient(135deg, #0A7B62, #0D9E7E)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700',
-              color: '#fff', cursor: 'pointer', textDecoration: 'none', boxShadow: '0 4px 15px rgba(13,158,126,0.4)',
-            }}>
-              + {t('publishFirstTrip') || 'Publier mon premier trajet'}
-            </Link>
-          )}
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: '16px' }}>
