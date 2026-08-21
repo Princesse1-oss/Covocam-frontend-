@@ -189,7 +189,6 @@ export default function CreerTrajetPage() {
     const cleanToken = token.replace(/"/g, '').trim();
 
     const controller = new AbortController();
-    // ✅ CORRECTION : Augmenté à 10 secondes pour éviter les timeouts trop rapides
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     Promise.all([
@@ -225,8 +224,21 @@ export default function CreerTrajetPage() {
         }
         return JSON.parse(text);
       }),
+
+      fetch(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${cleanToken}` },
+        signal: controller.signal,
+      }).then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      }),
     ])
-      .then(([villesData, vehiculesData]) => {
+      .then(([villesData, vehiculesData, meData]) => {
+        if (meData && !meData.error) {
+          setUser(meData);
+          localStorage.setItem('user', JSON.stringify(meData));
+        }
+
         if (villesData.villes && Array.isArray(villesData.villes)) {
           setVilles(villesData.villes);
         } else if (Array.isArray(villesData)) {
@@ -512,32 +524,90 @@ export default function CreerTrajetPage() {
     );
   }
 
-  if (!loading && user && !user.photo) {
-    return (
-      <ConducteurLayout>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '40px 20px' }}>
-          <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: darkMode ? '#2D2D2D' : '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', border: '2px solid #F59E0B' }}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+  if (!loading && user) {
+    const missingItems: { label: string; action: string; icon: React.ReactNode }[] = [];
+
+    if (!user.photo) {
+      missingItems.push({
+        label: 'Photo de profil',
+        action: '/conducteur/profil',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        ),
+      });
+    }
+    if (!user.nom || !user.prenom) {
+      missingItems.push({
+        label: 'Nom et prénom',
+        action: '/conducteur/profil',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        ),
+      });
+    }
+    if (!user.telephone) {
+      missingItems.push({
+        label: 'Numéro de téléphone',
+        action: '/conducteur/profil',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        ),
+      });
+    }
+
+    if (missingItems.length > 0) {
+      return (
+        <ConducteurLayout>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: darkMode ? '#2D2D2D' : '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', border: '2px solid #F59E0B' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <h2 style={{ fontSize: '20px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>
+              Informations incomplètes
+            </h2>
+            <p style={{ fontSize: '14px', color: darkMode ? '#9CA3AF' : '#6b7280', maxWidth: '440px', marginBottom: '24px', lineHeight: '1.6' }}>
+              Vous devez compléter votre profil avant de pouvoir publier un trajet. C&apos;est une mesure de sécurité pour la confiance des passagers.
+            </p>
+
+            <div style={{ width: '100%', maxWidth: '440px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', padding: '20px', marginBottom: '24px', textAlign: 'left' }}>
+              {missingItems.map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: idx < missingItems.length - 1 ? `1px solid ${darkMode ? '#2A2A2A' : '#f3f4f6'}` : 'none' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {item.icon}
+                  </div>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: darkMode ? '#FFFFFF' : '#111827', flex: 1 }}>{item.label}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => router.push('/conducteur/profil')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 15px rgba(13,158,126,0.4)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Compléter mon profil
+            </button>
           </div>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>
-            Photo de profil requise
-          </h2>
-          <p style={{ fontSize: '14px', color: darkMode ? '#9CA3AF' : '#6b7280', maxWidth: '400px', marginBottom: '24px', lineHeight: '1.6' }}>
-            Vous devez ajouter une photo de profil avant de pouvoir publier un trajet. C&apos;est une mesure de securite pour la confiance des passagers.
-          </p>
-          <button onClick={() => router.push('/conducteur/profil')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 15px rgba(13,158,126,0.4)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            Ajouter ma photo
-          </button>
-        </div>
-      </ConducteurLayout>
-    );
+        </ConducteurLayout>
+      );
+    }
   }
 
   return (
