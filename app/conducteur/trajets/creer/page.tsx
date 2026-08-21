@@ -183,10 +183,6 @@ export default function CreerTrajetPage() {
       try {
         const parsed = JSON.parse(rawUser);
         setUser(parsed);
-        if (!parsed.photo) {
-          setLoading(false);
-          return;
-        }
       } catch {}
     }
 

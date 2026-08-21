@@ -532,6 +532,40 @@ export default function MesVehicules() {
                 <span style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '3px 8px', borderRadius: '20px' }}><Icon name="check" size={10} color="white" /> {t('default')}</span>
               </div>
 
+              {(v.photoAvant || v.photoArriere || v.photoInterieur || v.photoCoffre) && (
+                <div style={{ padding: '12px 20px 0' }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: v.photoAvant ? '2fr 1fr 1fr' : '1fr 1fr',
+                    gridTemplateRows: v.photoAvant ? '77px 77px' : 'auto',
+                    gap: '6px',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                  }}>
+                    {v.photoAvant && (
+                      <div style={{ gridRow: '1 / 3', overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoAvant} alt={t('front')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                    {v.photoArriere && (
+                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoArriere} alt={t('rear')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                    {v.photoInterieur && (
+                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoInterieur} alt={t('interior')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                    {v.photoCoffre && (
+                      <div style={{ overflow: 'hidden', borderRadius: '8px', background: darkMode ? '#2D2D2D' : '#f3f4f6' }}>
+                        <img src={v.photoCoffre} alt={t('trunk')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div style={{ padding: '16px 20px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
                   {[
