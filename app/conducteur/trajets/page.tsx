@@ -396,9 +396,11 @@ export default function MesTrajetsPage() {
                         <Link href={`/conducteur/trajets/${trajet.id}/carte-ramassage`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                           <Icon name="map" size={12} color="#fff" /> Carte ramassage
                         </Link>
-                        <Link href={`/conducteur/trajets/${trajet.id}`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid rgba(13,158,126,0.3)', background: 'rgba(13,158,126,0.05)', color: '#0D9E7E', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="users" size={12} color="#0D9E7E" /> Valider presences
-                        </Link>
+                        {trajet.statut.toUpperCase() === 'EN_ATTENTE_VALIDATION' && (
+                          <Link href={`/conducteur/trajets/${trajet.id}`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid rgba(13,158,126,0.3)', background: 'rgba(13,158,126,0.05)', color: '#0D9E7E', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                            <Icon name="users" size={12} color="#0D9E7E" /> Valider présences
+                          </Link>
+                        )}
                       </>
                     ) : trajet.statut.toUpperCase() === 'TERMINE' ? (
                       <>

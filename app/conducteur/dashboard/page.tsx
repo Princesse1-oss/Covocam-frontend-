@@ -396,18 +396,20 @@ export default function ConducteurDashboard() {
               >
                 <Icon name="map" size={16} /> Carte ramassage
               </Link>
-              <Link href={`/conducteur/trajets/${activeTrajet.id}`} style={{
-                padding: '12px 20px', borderRadius: '12px', border: 'none',
-                background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff',
-                fontSize: '13px', fontWeight: '700', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: '8px',
-                boxShadow: '0 4px 15px rgba(13,158,126,0.3)', transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(13,158,126,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.3)'; }}
-              >
-                <Icon name="users" size={16} color="#fff" /> Valider presences
-              </Link>
+              {activeTrajet.statut?.toUpperCase() === 'EN_ATTENTE_VALIDATION' && (
+                <Link href={`/conducteur/trajets/${activeTrajet.id}`} style={{
+                  padding: '12px 20px', borderRadius: '12px', border: 'none',
+                  background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff',
+                  fontSize: '13px', fontWeight: '700', textDecoration: 'none',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  boxShadow: '0 4px 15px rgba(13,158,126,0.3)', transition: 'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(13,158,126,0.4)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.3)'; }}
+                >
+                  <Icon name="users" size={16} color="#fff" /> Valider présences
+                </Link>
+              )}
             </div>
           </div>
         )}
