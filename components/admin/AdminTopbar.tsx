@@ -29,20 +29,34 @@ const getFullPhotoUrl = (p?: string | null) => {
 // Move Avatar component outside to avoid creating during render
 const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
   const [imgError, setImgError] = useState(false);
-  const photoUrl = user?.photo && !imgError ? user.photo : null;
-  return photoUrl ? (
-    <img src={photoUrl} alt="Profil"
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.photo) {
+      setImgSrc(user.photo);
+      setImgError(false);
+    } else {
+      setImgSrc(null);
+    }
+  }, [user?.photo]);
+
+  if (!imgSrc || imgError) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: '50%', flexShrink: 0,
+        background: GREEN,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: size * 0.375, fontWeight: '700', color: 'white',
+      }}>
+        {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
+      </div>
+    );
+  }
+
+  return (
+    <img src={imgSrc} alt="Profil"
       onError={() => setImgError(true)}
-      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}/>
-  ) : (
-    <div style={{
-      width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      background: GREEN,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.375, fontWeight: '700', color: 'white',
-    }}>
-      {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
-    </div>
+      style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', background: GREEN }}/>
   );
 };
 

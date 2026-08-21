@@ -152,9 +152,10 @@ const Icon = ({ name, size = 20, color = E }: { name: string; size?: number; col
 const estDansFenetreRamassage = (dateDepart: string, heureDepart: string) => {
   if (!dateDepart || !heureDepart) return false;
   const maintenant = new Date();
-  const dateHeureDepart = new Date(`${dateDepart}T${heureDepart}`);
+  const dateOnly = dateDepart.split(' ')[0];
+  const dateHeureDepart = new Date(`${dateOnly}T${heureDepart}`);
+  if (isNaN(dateHeureDepart.getTime())) return false;
   const diffMinutes = (maintenant.getTime() - dateHeureDepart.getTime()) / (1000 * 60);
-  // De 10 minutes avant le départ jusqu'à 2 heures après
   return diffMinutes >= -10 && diffMinutes <= 120;
 };
 
@@ -277,7 +278,8 @@ export default function CarteRamassagePage() {
   // ✅ Si on n'est pas encore dans la fenêtre de ramassage (sauf si EN_ATTENTE_DEPART ou EN_COURS)
   if (!estDansFenetreRamassage(trajet.dateDepart, trajet.heureDepart) && trajet.statut !== 'EN_ATTENTE_DEPART' && trajet.statut !== 'EN_COURS') {
     const maintenant = new Date();
-    const depart = new Date(`${trajet.dateDepart}T${trajet.heureDepart}`);
+    const dateOnly = trajet.dateDepart.split(' ')[0];
+    const depart = new Date(`${dateOnly}T${trajet.heureDepart}`);
     const diffMinutes = Math.round((depart.getTime() - maintenant.getTime()) / (1000 * 60));
     const heures = Math.floor(diffMinutes / 60);
     const minutes = diffMinutes % 60;
@@ -421,7 +423,7 @@ export default function CarteRamassagePage() {
           />
         </div>
 
-        {/* Liste des passagers */}
+        {/* Liste des passagers - Tableau compact */}
         <div>
           <h3 style={{ 
             fontSize: '14px', fontWeight: '700', color: darkMode ? '#9CA3AF' : GR, 
@@ -447,67 +449,75 @@ export default function CarteRamassagePage() {
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ 
+              background: darkMode ? '#1A1A1A' : '#FFFFFF', borderRadius: '12px', 
+              border: `1px solid ${darkMode ? '#2A2A2A' : BD}`, overflow: 'hidden' 
+            }}>
+              {/* Table header */}
+              <div style={{ 
+                display: 'grid', gridTemplateColumns: '40px 1fr 80px 100px',
+                padding: '10px 16px', background: darkMode ? '#2D2D2D' : '#F9FAFB',
+                borderBottom: `1px solid ${darkMode ? '#333' : BD}`,
+                fontSize: '11px', fontWeight: '700', color: GR, textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                <span>#</span>
+                <span>Nom</span>
+                <span style={{ textAlign: 'center' }}>Places</span>
+                <span style={{ textAlign: 'right' }}>Actions</span>
+              </div>
               {passagers.map((passager, i) => (
                 <div 
                   key={passager.reservationId}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '16px', borderRadius: '12px',
-                    background: darkMode ? '#1A1A1A' : '#FFFFFF',
-                    border: `1px solid ${darkMode ? '#2A2A2A' : BD}`,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                    display: 'grid', gridTemplateColumns: '40px 1fr 80px 100px',
+                    alignItems: 'center', padding: '10px 16px',
+                    borderBottom: i < passagers.length - 1 ? `1px solid ${darkMode ? '#222' : '#F3F4F6'}` : 'none',
+                    background: i % 2 === 0 ? 'transparent' : (darkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)')
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                    <div style={{ 
-                      width: '48px', height: '48px', borderRadius: '50%', 
-                      background: `linear-gradient(135deg, ${E}, ${ED})`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '16px', fontWeight: '800', color: '#FFF', flexShrink: 0,
-                      position: 'relative'
-                    }}>
-                      {passager.photo ? (
-                        <img 
-                          src={passager.photo.startsWith('http') ? passager.photo : `/uploads/profils/${passager.photo}`}
-                          alt=""
-                          onError={(e) => (e.currentTarget.style.display = 'none')}
-                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
-                        />
-                      ) : (
-                        <>
-                          {passager.prenom.charAt(0)}
-                          {passager.nom.charAt(0)}
-                        </>
-                      )}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ 
-                        fontSize: '15px', fontWeight: '700', color: darkMode ? '#FFFFFF' : BK,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                      }}>
-                        {passager.prenom} {passager.nom}
-                      </div>
-                      <div style={{ fontSize: '12px', color: GR, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <Icon name="users" size={14} color={GR} /> {passager.placesReservees} {passager.placesReservees > 1 ? 'places' : 'place'}
-                      </div>
+                  <div style={{ 
+                    width: '28px', height: '28px', borderRadius: '50%', 
+                    background: `linear-gradient(135deg, ${E}, ${ED})`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '11px', fontWeight: '800', color: '#FFF'
+                  }}>
+                    {passager.photo ? (
+                      <img src={passager.photo.startsWith('http') ? passager.photo : `/uploads/profils/${passager.photo}`}
+                        alt="" onError={(e) => (e.currentTarget.style.display = 'none')}
+                        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <>{passager.prenom.charAt(0)}{passager.nom.charAt(0)}</>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0, marginLeft: '8px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: darkMode ? '#FFF' : BK, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {passager.prenom} {passager.nom}
                     </div>
                   </div>
-
-                  {passager.telephone && (
-                    <a 
-                      href={`tel:${passager.telephone}`}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        width: '44px', height: '44px', borderRadius: '50%',
-                        background: EL, color: E, flexShrink: 0, marginLeft: '8px',
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: E, textAlign: 'center' }}>
+                    {passager.placesReservees}
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                    {passager.telephone && (
+                      <a href={`tel:${passager.telephone}`} style={{
+                        width: '32px', height: '32px', borderRadius: '8px',
+                        background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center',
                         textDecoration: 'none', transition: 'all 0.2s'
-                      }}
-                      title={`Appeler ${passager.prenom}`}
-                    >
-                      <Icon name="phone" size={18} color={E} />
+                      }} title={`Appeler ${passager.prenom}`}>
+                        <Icon name="phone" size={14} color={E} />
+                      </a>
+                    )}
+                    <a href={`https://www.google.com/maps/dir/?api=1&origin=${depCoords[0]},${depCoords[1]}&destination=${arrCoords[0]},${arrCoords[1]}&travelmode=driving`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{
+                        width: '32px', height: '32px', borderRadius: '8px',
+                        background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        textDecoration: 'none', transition: 'all 0.2s'
+                      }} title={`Naviguer vers ${passager.prenom}`}>
+                      <Icon name="navigation" size={14} color="#3B82F6" />
                     </a>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>

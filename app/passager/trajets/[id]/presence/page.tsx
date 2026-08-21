@@ -93,7 +93,11 @@ export default function PassagerPresencePage() {
         }
       },
       (err) => {
-        setError('Veuillez autoriser l\'accès à votre position pour confirmer votre présence.');
+        let msg = 'Impossible d\'accéder à votre position GPS.';
+        if (err.code === 1) msg = 'La géolocalisation est refusée. Autorisez-la dans les paramètres de votre navigateur.';
+        else if (err.code === 2) msg = 'Position indisponible. Vérifiez que le GPS est activé.';
+        else if (err.code === 3) msg = 'Délai d\'attente dépassé. Réessayez dans un lieu dégagé.';
+        setError(msg);
         setSubmitting(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
