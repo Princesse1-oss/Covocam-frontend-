@@ -56,9 +56,6 @@ interface Vehicule {
   photoAvant?: string;
 }
 
-interface Quartier { id: number; nom: string; }
-interface Ville { id: number; nom: string; region: string; quartiers: Quartier[]; }
-
 export default function CompleterTrajetPage() {
   const params = useParams();
   const router = useRouter();
@@ -73,21 +70,16 @@ export default function CompleterTrajetPage() {
   const [success, setSuccess] = useState(false);
 
   const [vehiculeId, setVehiculeId] = useState('');
-  const [heureDepart, setHeureDepart] = useState('');
-  const [pointDepart, setPointDepart] = useState('');
-  const [pointArrivee, setPointArrivee] = useState('');
-  const [description, setDescription] = useState('');
-  const [bagagesAutorises, setBagagesAutorises] = useState(true);
   const [heureArriveeEstimee, setHeureArriveeEstimee] = useState('');
+  const [bagagesAutorises, setBagagesAutorises] = useState(true);
   const [gpsEnabled, setGpsEnabled] = useState(false);
-  const [villesQuartiers, setVillesQuartiers] = useState<Ville[]>([]);
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) { router.push('/login'); return; }
     fetchTrajet(token);
     fetchVehicules(token);
-    fetchVillesQuartiers();
   }, [router, trajetId]);
 
   const fetchTrajet = async (token: string) => {
@@ -99,8 +91,6 @@ export default function CompleterTrajetPage() {
       const data = await res.json();
       const t = data.trajet || data;
       setTrajet(t);
-      setPointDepart(t.quartierDepart || '');
-      setPointArrivee(t.quartierArrivee || '');
       setDescription(t.description || '');
     } catch {
       setError('Erreur de chargement');
@@ -124,23 +114,8 @@ export default function CompleterTrajetPage() {
     } catch {}
   };
 
-  const fetchVillesQuartiers = async () => {
-    try {
-      const res = await fetch(`${API_URL}/villes-quartiers`);
-      const data = await res.json();
-      if (data.villes) setVillesQuartiers(data.villes);
-    } catch {}
-  };
-
-  const getQuartiersForVille = (villeNom: string): Quartier[] => {
-    const ville = villesQuartiers.find(v => v.nom.toLowerCase() === villeNom?.toLowerCase());
-    return ville?.quartiers || [];
-  };
-
   const handleSubmit = async () => {
     if (!vehiculeId) { setError('Veuillez sélectionner un véhicule'); return; }
-    if (!pointDepart) { setError('Veuillez indiquer le point de départ'); return; }
-    if (!pointArrivee) { setError('Veuillez indiquer le point d\'arrivée'); return; }
     setError('');
 
     const token = localStorage.getItem('token');
@@ -153,9 +128,11 @@ export default function CompleterTrajetPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           vehiculeId: parseInt(vehiculeId),
-          heureDepart: heureDepart || undefined,
-          pointDepart: pointDepart,
-          pointArrivee: pointArrivee,
+          pointDepart: trajet?.quartierDepart || '',
+          pointArrivee: trajet?.quartierArrivee || '',
+          heureArriveeEstimee: heureArriveeEstimee || undefined,
+          bagagesAutorises,
+          gpsEnabled,
           description: description || undefined,
           statut: 'OUVERT',
         })
@@ -281,87 +258,70 @@ export default function CompleterTrajetPage() {
           )}
         </div>
 
-        {/* Points de rendez-vous */}
+        {/* Itinéraire (lecture seule - défini par le passager) */}
         <div style={{ background: bgCard, borderRadius: '16px', border: `1px solid ${borderColor}`, padding: '24px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="mapPin" size={18} />
             </div>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Points de rendez-vous *</h3>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
-              <label style={labelStyle}><Icon name="mapPin" size={12} color={E} /> Point de départ *</label>
-              <select
-                value={pointDepart}
-                onChange={e => setPointDepart(e.target.value)}
-                required
-                style={{ ...inputStyle, cursor: 'pointer' }}
-              >
-                <option value="">Sélectionner un quartier</option>
-                {getQuartiersForVille(trajet?.villeDepart || '').map(q => (
-                  <option key={q.id} value={q.nom}>{q.nom}</option>
-                ))}
-              </select>
-              {trajet?.villeDepart && (
-                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>
-                  Quartiers de {trajet.villeDepart}
-                </div>
-              )}
-            </div>
-            <div>
-              <label style={labelStyle}><Icon name="mapPin" size={12} color={RD} /> Point d'arrivée *</label>
-              <select
-                value={pointArrivee}
-                onChange={e => setPointArrivee(e.target.value)}
-                required
-                style={{ ...inputStyle, cursor: 'pointer' }}
-              >
-                <option value="">Sélectionner un quartier</option>
-                {getQuartiersForVille(trajet?.villeArrivee || '').map(q => (
-                  <option key={q.id} value={q.nom}>{q.nom}</option>
-                ))}
-              </select>
-              {trajet?.villeArrivee && (
-                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>
-                  Quartiers de {trajet.villeArrivee}
-                </div>
-              )}
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Itinéraire</h3>
+              <p style={{ fontSize: '12px', color: textSecondary, margin: '2px 0 0' }}>Défini par le passager</p>
             </div>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: darkMode ? '#2A2A2A' : '#F9FAFB', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: E, flexShrink: 0 }} />
+              <div style={{ width: '2px', height: '24px', background: borderColor }} />
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: RD, flexShrink: 0 }} />
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: textSecondary, marginBottom: '2px' }}>Départ</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: textColor }}>{trajet?.quartierDepart || '—'}</div>
+                <div style={{ fontSize: '12px', color: textSecondary }}>{trajet?.villeDepart}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: textSecondary, marginBottom: '2px' }}>Arrivée</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: textColor }}>{trajet?.quartierArrivee || '—'}</div>
+                <div style={{ fontSize: '12px', color: textSecondary }}>{trajet?.villeArrivee}</div>
+              </div>
+            </div>
+          </div>
+          {trajet?.dateDepart && (
+            <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '12px', color: textSecondary }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Icon name="clock" size={14} color={GR} />
+                {new Date(trajet.dateDepart).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </span>
+              {trajet.heureDepart && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Icon name="clock" size={14} color={GR} />
+                  {trajet.heureDepart}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Heure & Bagages */}
+        {/* Options conducteur */}
         <div style={{ background: bgCard, borderRadius: '16px', border: `1px solid ${borderColor}`, padding: '24px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="clock" size={18} />
             </div>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Horaire & Options</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Options</h3>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div>
-              <label style={labelStyle}><Icon name="clock" size={12} color={E} /> Heure de départ</label>
-              <input
-                type="time"
-                value={heureDepart}
-                onChange={e => setHeureDepart(e.target.value)}
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = E}
-                onBlur={e => e.currentTarget.style.borderColor = borderColor}
-              />
-            </div>
-            <div>
-              <label style={labelStyle}><Icon name="clock" size={12} color={E} /> Heure d'arrivée estimée</label>
-              <input
-                type="time"
-                value={heureArriveeEstimee}
-                onChange={e => setHeureArriveeEstimee(e.target.value)}
-                style={inputStyle}
-                onFocus={e => e.currentTarget.style.borderColor = E}
-                onBlur={e => e.currentTarget.style.borderColor = borderColor}
-              />
-            </div>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={labelStyle}><Icon name="clock" size={12} color={E} /> Heure d'arrivée estimée</label>
+            <input
+              type="time"
+              value={heureArriveeEstimee}
+              onChange={e => setHeureArriveeEstimee(e.target.value)}
+              style={inputStyle}
+              onFocus={e => e.currentTarget.style.borderColor = E}
+              onBlur={e => e.currentTarget.style.borderColor = borderColor}
+            />
           </div>
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: textColor }}>
