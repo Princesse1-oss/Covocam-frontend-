@@ -21,7 +21,7 @@ const RED = '#EF4444';
 
 const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
   const photoUrl = user?.photo && user.photo !== 'null' && user.photo !== 'undefined'
-    ? (user.photo.startsWith('http') ? user.photo.trim() : `/uploads/profils/${user.photo.trim()}`)
+    ? (user.photo.startsWith('http') ? user.photo.trim() : user.photo.startsWith('/uploads/') ? user.photo.trim() : `/uploads/profils/${user.photo.trim()}`)
     : null;
   const initials = (
     <div style={{

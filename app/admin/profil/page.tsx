@@ -79,11 +79,10 @@ export default function AdminProfilPage() {
         return res.json();
       })
       .then(data => {
-        const fullPhotoUrl = getFullPhotoUrl(data.photo);
-        const userWithFullPhoto = { ...data, photo: fullPhotoUrl };
-        setUser(userWithFullPhoto);
-        if (fullPhotoUrl) setPreviewUrl(fullPhotoUrl);
-        localStorage.setItem('user', JSON.stringify(userWithFullPhoto));
+        const userWithBarePhoto = { ...data, photo: data.photo || null };
+        setUser(userWithBarePhoto);
+        if (data.photo) setPreviewUrl(getFullPhotoUrl(data.photo));
+        localStorage.setItem('user', JSON.stringify(userWithBarePhoto));
         setLoading(false);
       })
       .catch(() => {
@@ -131,10 +130,10 @@ export default function AdminProfilPage() {
       const data = JSON.parse(responseText.substring(jsonStart, jsonEnd));
 
       if (res.ok) {
-        const fullPhotoUrl = getFullPhotoUrl(data.filename.trim());
-        const updatedUser = { ...user, photo: fullPhotoUrl };
+        const bareFilename = data.filename.trim();
+        const updatedUser = { ...user, photo: bareFilename };
         setUser(updatedUser);
-        setPreviewUrl(fullPhotoUrl);
+        setPreviewUrl(getFullPhotoUrl(bareFilename));
         setSelectedFile(null);
         setMessage({ type: 'success', text: t('photoUpdated') });
         localStorage.setItem('user', JSON.stringify(updatedUser));

@@ -101,17 +101,25 @@ export default function CompleterTrajetPage() {
 
   const fetchVehicules = async (token: string) => {
     try {
+      const cleanToken = token.replace(/"/g, '').trim();
       const res = await fetch(`${API_URL}/conducteur/vehicule`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${cleanToken}` }
       });
+      if (!res.ok) { setVehicules([]); return; }
       const data = await res.json();
       if (data.hasVehicule && data.vehicule) {
         setVehicules([{ ...data.vehicule, estDefaut: true }]);
         if (data.vehicule.id) setVehiculeId(String(data.vehicule.id));
       } else if (Array.isArray(data)) {
         setVehicules(data);
+        if (data.length > 0 && data[0].id) setVehiculeId(String(data[0].id));
+      } else {
+        setVehicules([]);
       }
-    } catch {}
+    } catch (err) {
+      console.error('Erreur chargement véhicules:', err);
+      setVehicules([]);
+    }
   };
 
   const handleSubmit = async () => {

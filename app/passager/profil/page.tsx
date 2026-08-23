@@ -80,17 +80,17 @@ export default function PassagerProfil() {
     if (userData && userData !== 'undefined' && userData !== 'null') {
       try {
         const parsed = JSON.parse(userData);
-        const fullPhotoUrl = getFullPhotoUrl(parsed.photo);
+        const barePhoto = parsed.photo?.startsWith('/uploads/') ? parsed.photo.replace('/uploads/profils/', '') : parsed.photo;
         
-        const userWithFullPhoto = { ...parsed, photo: fullPhotoUrl };
-        setUser(userWithFullPhoto);
+        const userWithBarePhoto = { ...parsed, photo: barePhoto || null };
+        setUser(userWithBarePhoto);
         
         setFormData({
           nom: parsed.nom || '', prenom: parsed.prenom || '',
           telephone: parsed.telephone || '', biographie: parsed.biographie || '',
         });
         
-        if (fullPhotoUrl) setPreviewUrl(fullPhotoUrl);
+        if (barePhoto) setPreviewUrl(getFullPhotoUrl(barePhoto));
         setLoading(false);
         return; 
       } catch (error) {
@@ -106,17 +106,16 @@ export default function PassagerProfil() {
         if (!res.ok) throw new Error('Non autorisé');
         const data = await res.json();
         
-        const fullPhotoUrl = getFullPhotoUrl(data.photo);
-        const userWithFullPhoto = { ...data, photo: fullPhotoUrl };
+        const userWithBarePhoto = { ...data, photo: data.photo || null };
 
-        setUser(userWithFullPhoto);
+        setUser(userWithBarePhoto);
         setFormData({
           nom: data.nom || '', prenom: data.prenom || '',
           telephone: data.telephone || '', biographie: data.biographie || '',
         });
         
-        if (fullPhotoUrl) setPreviewUrl(fullPhotoUrl);
-        localStorage.setItem('user', JSON.stringify(userWithFullPhoto));
+        if (data.photo) setPreviewUrl(getFullPhotoUrl(data.photo));
+        localStorage.setItem('user', JSON.stringify(userWithBarePhoto));
       })
       .catch((err) => {
         console.error(" Impossible de charger le profil:", err);
@@ -176,15 +175,15 @@ export default function PassagerProfil() {
       }
 
       if (res.ok && data.filename) {
-        const fullPhotoUrl = getFullPhotoUrl(data.filename.trim());
+        const bareFilename = data.filename.trim();
         
-        const updatedUser = { ...user, photo: fullPhotoUrl };
+        const updatedUser = { ...user, photo: bareFilename };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         
         setMessage('Photo de profil mise à jour avec succès !');
         setSelectedFile(null);
-        setPreviewUrl(fullPhotoUrl);
+        setPreviewUrl(getFullPhotoUrl(bareFilename));
         window.dispatchEvent(new Event('user-updated'));
       } else {
         setMessage((data.error || data.message || 'Erreur lors de l\'upload.'));
