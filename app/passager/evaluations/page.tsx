@@ -195,7 +195,7 @@ export default function PassagerEvaluationsPage() {
           display: 'flex', alignItems: 'center', gap: '12px'
         }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="star" size={20} color={E} />
+            <img src="/covocam_logo.png" alt="CovoCam" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'contain' }} />
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: '600', color: tc }}>Merci pour votre avis sur la plateforme !</div>
@@ -293,7 +293,7 @@ export default function PassagerEvaluationsPage() {
           onMouseLeave={e => { e.currentTarget.style.borderColor = E; e.currentTarget.style.background = bg; }}
         >
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name="star" size={20} color={E} />
+            <img src="/covocam_logo.png" alt="CovoCam" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'contain' }} />
           </div>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '14px', fontWeight: '700', color: tc }}>Évaluer la plateforme CovoCam</div>

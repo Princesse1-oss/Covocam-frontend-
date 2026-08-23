@@ -319,6 +319,17 @@ export default function MesReservations() {
           setNote(0);
           setCommentaire('');
           setEvaluationSuccess(false);
+          const freshToken = localStorage.getItem('token')?.replace(/"/g, '').trim();
+          if (freshToken) {
+            fetch('/api/reservations/mes-reservations', {
+              headers: { Authorization: `Bearer ${freshToken}` }
+            })
+              .then(r => r.json())
+              .then(data => {
+                if (Array.isArray(data)) setReservations(data);
+              })
+              .catch(() => {});
+          }
         }, 2500);
       } else {
         setError(data.error || 'Erreur lors de l\'envoi');

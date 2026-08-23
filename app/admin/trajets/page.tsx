@@ -112,13 +112,14 @@ export default function AdminTrajets() {
   const filtered = trajets.filter(t => {
     const matchSearch = (t.villeDepart + ' ' + t.villeArrivee + ' ' + t.conducteur?.nom + ' ' + t.conducteur?.prenom)
       .toLowerCase().includes(search.toLowerCase());
-    const matchStatut = filterStatut === 'tous' || t.statut === filterStatut;
+    const matchStatut = filterStatut === 'tous' || t.statut?.toUpperCase() === filterStatut;
     return matchSearch && matchStatut;
   });
 
   const totalTrajets = trajets.length;
   const trajetsOuverts = trajets.filter(t => t.statut?.toUpperCase() === 'OUVERT' || t.statut?.toUpperCase() === 'OPEN').length;
   const trajetsComplets = trajets.filter(t => t.statut?.toUpperCase() === 'COMPLET' || t.statut?.toUpperCase() === 'FULL').length;
+  const trajetsEnCours = trajets.filter(t => t.statut?.toUpperCase() === 'EN_COURS' || t.statut?.toUpperCase() === 'EN_ATTENTE_DEPART' || t.statut?.toUpperCase() === 'EN_ATTENTE_VALIDATION').length;
   const trajetsAnnules = trajets.filter(t => {
     const status = t.statut?.toUpperCase() || '';
     return status === 'ANNULE' || status === 'ANNULÉ' || status === 'CANCELLED';
@@ -129,6 +130,11 @@ export default function AdminTrajets() {
     if (upper === 'OUVERT' || upper === 'OPEN') return { background: '#dcfce7', color: '#15803d' };
     if (upper === 'COMPLET' || upper === 'FULL') return { background: '#dbeafe', color: '#1d4ed8' };
     if (upper === 'ANNULE' || upper === 'ANNULÉ' || upper === 'CANCELLED') return { background: '#fee2e2', color: '#dc2626' };
+    if (upper === 'EN_COURS') return { background: '#dcfce7', color: '#15803d' };
+    if (upper === 'EN_ATTENTE_DEPART') return { background: '#fef3c7', color: '#d97706' };
+    if (upper === 'EN_ATTENTE_VALIDATION') return { background: '#dbeafe', color: '#2563eb' };
+    if (upper === 'TERMINE') return { background: '#f3f4f6', color: '#6b7280' };
+    if (upper === 'BROUILLON') return { background: '#f3f4f6', color: '#9ca3af' };
     return { background: '#f3f4f6', color: '#6b7280' };
   };
 
@@ -137,6 +143,11 @@ export default function AdminTrajets() {
     if (upper === 'OUVERT' || upper === 'OPEN') return 'Ouvert';
     if (upper === 'COMPLET' || upper === 'FULL') return 'Complet';
     if (upper === 'ANNULE' || upper === 'ANNULÉ' || upper === 'CANCELLED') return 'Annulé';
+    if (upper === 'EN_COURS') return 'En cours';
+    if (upper === 'EN_ATTENTE_DEPART') return 'En attente de départ';
+    if (upper === 'EN_ATTENTE_VALIDATION') return 'À valider';
+    if (upper === 'TERMINE') return 'Terminé';
+    if (upper === 'BROUILLON') return 'Brouillon';
     return s || 'Inconnu';
   };
 
@@ -195,6 +206,8 @@ export default function AdminTrajets() {
               <option value="tous">Tous les statuts</option>
               <option value="OUVERT">Ouvert</option>
               <option value="COMPLET">Complet</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="TERMINE">Terminé</option>
               <option value="ANNULE">Annulé</option>
             </select>
           </div>
@@ -203,7 +216,7 @@ export default function AdminTrajets() {
         <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '20px 24px', background: '#f8fafb' }}>
 
           {/* Stat cards avec icônes SVG */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(5, 1fr)', gap: '14px', marginBottom: '24px' }}>
             {[
               { label: 'Total trajets', value: totalTrajets, border: '#22c55e', bg: '#dcfce7', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -213,6 +226,11 @@ export default function AdminTrajets() {
               { label: 'Ouverts', value: trajetsOuverts, border: '#15803d', bg: '#dcfce7', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17L4 12" />
+                </svg>
+              )},
+              { label: 'En cours', value: trajetsEnCours, border: '#d97706', bg: '#fef3c7', icon: (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                 </svg>
               )},
               { label: 'Complets', value: trajetsComplets, border: '#1d4ed8', bg: '#dbeafe', icon: (

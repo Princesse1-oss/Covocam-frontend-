@@ -423,6 +423,13 @@ export default function CarteRamassagePage() {
             color={E}
             driverPosition={driverPos}
             driverLabel={`Position conducteur`}
+            passengerPositions={passagers.filter(p => p.id).map(p => ({
+              id: p.id,
+              nom: p.nom,
+              prenom: p.prenom,
+              lat: VILLES_COORDS[trajet.villeDepart]?.[0] || 3.848,
+              lng: VILLES_COORDS[trajet.villeDepart]?.[1] || 11.502,
+            }))}
           />
         </div>
 
@@ -467,7 +474,7 @@ export default function CarteRamassagePage() {
                 <span>#</span>
                 <span>Nom</span>
                 <span style={{ textAlign: 'center' }}>Places</span>
-                <span style={{ textAlign: 'right' }}>Actions</span>
+                <span style={{ textAlign: 'right' }}>Contact</span>
               </div>
               {passagers.map((passager, i) => (
                 <div 
@@ -557,6 +564,7 @@ export default function CarteRamassagePage() {
       </div>
       <style jsx>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
       `}</style>
     </ConducteurLayout>
   );

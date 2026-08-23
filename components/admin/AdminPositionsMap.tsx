@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl, useMap } from 'react-leaflet';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -50,6 +50,24 @@ const createPhotoIcon = (photoUrl: string | null | undefined, nom: string) => {
   });
 };
 
+const departMiniIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="background:#10B981;width:18px;height:18px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/></svg>
+  </div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+});
+
+const arriveeMiniIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="background:#EF4444;width:18px;height:18px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/></svg>
+  </div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+});
+
 export interface ConductorPosition {
   id: number;
   nom: string;
@@ -61,6 +79,13 @@ export interface ConductorPosition {
   villeDepart: string;
   villeArrivee: string;
   photo?: string | null;
+  pointDepartLat?: number | null;
+  pointDepartLng?: number | null;
+  pointArriveeLat?: number | null;
+  pointArriveeLng?: number | null;
+  quartierDepart?: string | null;
+  quartierArrivee?: string | null;
+  heureDepart?: string | null;
 }
 
 function PanControls({ darkMode }: { darkMode?: boolean }) {
@@ -195,11 +220,16 @@ function MapUpdater({ positions }: { positions: ConductorPosition[] }) {
   useEffect(() => {
     if (positions.length > 0 && !hasFit.current) {
       hasFit.current = true;
-      const bounds = positions.map(p => [p.lat, p.lng] as [number, number]);
-      if (bounds.length === 1) {
-        map.flyTo(bounds[0], 12, { duration: 1 });
+      const allPoints: [number, number][] = [];
+      positions.forEach(p => {
+        allPoints.push([p.lat, p.lng]);
+        if (p.pointDepartLat && p.pointDepartLng) allPoints.push([p.pointDepartLat, p.pointDepartLng]);
+        if (p.pointArriveeLat && p.pointArriveeLng) allPoints.push([p.pointArriveeLat, p.pointArriveeLng]);
+      });
+      if (allPoints.length === 1) {
+        map.flyTo(allPoints[0], 12, { duration: 1 });
       } else {
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+        map.fitBounds(allPoints, { padding: [50, 50], maxZoom: 12 });
       }
     }
   }, [positions, map]);
@@ -264,10 +294,10 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
                 </div>
                 <div style={{ fontSize: '12px', color: '#666', lineHeight: '1.8' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <SvgIcon name="depart" size={12} color="#10B981" /> {p.villeDepart}
+                    <SvgIcon name="depart" size={12} color="#10B981" /> {p.villeDepart}{p.quartierDepart ? ` (${p.quartierDepart})` : ''}{p.heureDepart ? ` - ${p.heureDepart}` : ''}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <SvgIcon name="arrivee" size={12} color="#EF4444" /> {p.villeArrivee}
+                    <SvgIcon name="arrivee" size={12} color="#EF4444" /> {p.villeArrivee}{p.quartierArrivee ? ` (${p.quartierArrivee})` : ''}
                   </div>
                   <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span style={{
@@ -283,6 +313,27 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
             </Popup>
           </Marker>
         ))}
+        {positions.map(p => {
+          const depLat = p.pointDepartLat;
+          const depLng = p.pointDepartLng;
+          const arrLat = p.pointArriveeLat;
+          const arrLng = p.pointArriveeLng;
+          return [
+            depLat && depLng ? (
+              <Marker key={`dep-${p.trajetId}`} position={[depLat, depLng]} icon={departMiniIcon}>
+                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>Départ: {p.villeDepart}{p.quartierDepart ? ` (${p.quartierDepart})` : ''}</div></Popup>
+              </Marker>
+            ) : null,
+            arrLat && arrLng ? (
+              <Marker key={`arr-${p.trajetId}`} position={[arrLat, arrLng]} icon={arriveeMiniIcon}>
+                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#EF4444' }}>Arrivée: {p.villeArrivee}{p.quartierArrivee ? ` (${p.quartierArrivee})` : ''}</div></Popup>
+              </Marker>
+            ) : null,
+            depLat && depLng && arrLat && arrLng ? (
+              <Polyline key={`poly-${p.trajetId}`} positions={[[depLat, depLng], [arrLat, arrLng]]} pathOptions={{ color: GREEN, weight: 2, dashArray: '6, 6', opacity: 0.5 }} />
+            ) : null,
+          ];
+        })}
       </MapContainer>
     </div>
   );

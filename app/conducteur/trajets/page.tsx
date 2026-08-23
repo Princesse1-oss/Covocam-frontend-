@@ -103,6 +103,7 @@ interface Trajet {
   statut: string;
   nbReservations: number;
   nbReservationsConfirmees: number;
+  conducteur?: { noteMoyenne?: number | null };
 }
 
 export default function MesTrajetsPage() {
@@ -233,7 +234,7 @@ export default function MesTrajetsPage() {
     const isBrouillon = u === 'BROUILLON' || u === 'DRAFT';
 
     if (filter === 'tous') {
-      return true;
+      return u !== 'TERMINE' && u !== 'ANNULE' && u !== 'ANNULÉ';
     }
 
     if (filter === 'brouillon') return isBrouillon;
@@ -355,6 +356,12 @@ export default function MesTrajetsPage() {
                     <div>
                       <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff' }}>{trajet.villeDepart} <span style={{ color: '#0D9E7E' }}>→</span> {trajet.villeArrivee}</div>
                       <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>{trajet.quartierDepart && trajet.quartierArrivee ? `${trajet.quartierDepart} → ${trajet.quartierArrivee}` : (t('locationDetails') || 'Détails du lieu')}</div>
+                      {trajet.conducteur?.noteMoyenne != null && trajet.conducteur.noteMoyenne > 0 && (
+                        <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ color: '#F59E0B', fontSize: '11px' }}>{'★'.repeat(Math.round(trajet.conducteur.noteMoyenne))}{'☆'.repeat(5 - Math.round(trajet.conducteur.noteMoyenne))}</span>
+                          <span style={{ color: '#9CA3AF', fontSize: '10px' }}>{trajet.conducteur.noteMoyenne.toFixed(1)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <span style={{ background: statut.bg, color: statut.color, fontSize: '10px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase' }}>
