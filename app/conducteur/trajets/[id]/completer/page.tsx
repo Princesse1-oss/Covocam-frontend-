@@ -131,18 +131,15 @@ export default function CompleterTrajetPage() {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_URL}/conducteur/trajets/${trajetId}`, {
+      const res = await fetch(`${API_URL}/conducteur/trajets/${trajetId}/completer`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
         body: JSON.stringify({
           vehiculeId: parseInt(vehiculeId),
-          pointDepart: trajet?.quartierDepart || '',
-          pointArrivee: trajet?.quartierArrivee || '',
           heureArriveeEstimee: heureArriveeEstimee || undefined,
           bagagesAutorises,
           gpsEnabled,
           description: description || undefined,
-          statut: 'OUVERT',
         })
       });
       const data = await res.json();

@@ -443,7 +443,7 @@ export default function MesReservations() {
       );
     }
 
-    if (statutTrajet === 'TERMINE' && r.statut === 'CONFIRMEE') {
+    if (statutTrajet === 'TERMINE' && ['CONFIRMEE', 'TERMINEE'].includes(r.statut)) {
       return (
         <button
           onClick={() => setEvaluationModal({
@@ -471,22 +471,17 @@ export default function MesReservations() {
   const safeReservations = Array.isArray(reservations) ? reservations : [];
 
   const filtered = safeReservations.filter(r => {
-    const maintenant = new Date();
-    const dateLimite = new Date(r.trajet.dateDepart);
-    dateLimite.setDate(dateLimite.getDate() + 1);
-    if (dateLimite < maintenant) return false;
-
     if (filterStatut === 'tous') return true;
     if (filterStatut === 'EN_ATTENTE') return r.statut === 'EN_ATTENTE' || r.statut === 'A_PAYER';
     if (filterStatut === 'ANNULEE') return r.statut === 'ANNULEE' || r.statut === 'REFUSEE';
     return r.statut === filterStatut;
   });
 
-  const totalConfirmees = safeReservations.filter(r => r.statut === 'CONFIRMEE').length;
+  const totalConfirmees = safeReservations.filter(r => r.statut === 'CONFIRMEE' || r.statut === 'TERMINEE').length;
   const totalEnAttente = safeReservations.filter(r => r.statut === 'EN_ATTENTE' || r.statut === 'A_PAYER').length;
   const totalAnnulees = safeReservations.filter(r => r.statut === 'ANNULEE' || r.statut === 'REFUSEE').length;
   const totalDepense = safeReservations
-    .filter(r => r.statut === 'CONFIRMEE')
+    .filter(r => ['CONFIRMEE', 'TERMINEE'].includes(r.statut))
     .reduce((acc, r) => acc + (r.prixTotal || 0), 0);
 
   const stars = (note: number | null) => {

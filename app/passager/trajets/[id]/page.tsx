@@ -128,7 +128,7 @@ export default function DetailTrajet() {
   const router = useRouter();
   const params = useParams();
   const { t, darkMode } = useTheme();
-  const id = params?.id;
+  const id = String(params?.id || '');
 
   const [trajet, setTrajet] = useState<Trajet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -139,6 +139,7 @@ export default function DetailTrajet() {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasExistingReservation, setHasExistingReservation] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -166,7 +167,20 @@ export default function DetailTrajet() {
       headers: { Authorization: `Bearer ${cleanToken}` },
     })
       .then(r => r.json())
-      .then(data => { setTrajet(data); setLoading(false); })
+      .then(data => {
+        setTrajet(data);
+        fetch(`/api/reservations/mes-reservations`, {
+          headers: { Authorization: `Bearer ${cleanToken}` }
+        })
+          .then(r2 => r2.json())
+          .then(resData => {
+            const list = Array.isArray(resData) ? resData : [];
+            const alreadyReserved = list.some((r: any) => r.trajet?.id === parseInt(id) && !['ANNULEE', 'REFUSEE', 'NON_PRESENT'].includes(r.statut));
+            setHasExistingReservation(alreadyReserved);
+          })
+          .catch(() => {});
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
 
     return () => window.removeEventListener('resize', checkMobile);
@@ -507,7 +521,25 @@ export default function DetailTrajet() {
                     </div>
                   )}
 
-                  {!userPhoto && (
+                  {hasExistingReservation && (
+                    <div style={{ 
+                      background: EMERALD_LIGHT, border: `1px solid ${EMERALD}`, borderRadius: '10px', 
+                      padding: '14px', marginBottom: '16px', color: EMERALD_DARK, fontSize: '13px', lineHeight: '1.5',
+                      display: 'flex', alignItems: 'flex-start', gap: '10px'
+                    }}>
+                      <Icon name="check" size={18} color={EMERALD} />
+                      <div>
+                        <strong>Vous avez déjà réservé ce trajet.</strong> Vous ne pouvez pas réserver une seconde fois.
+                        <Link href="/passager/reservations" style={{ 
+                          display: 'block', marginTop: '8px', color: EMERALD, fontWeight: '700', textDecoration: 'underline' 
+                        }}>
+                          Voir ma réservation
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {!userPhoto && !hasExistingReservation && (
                     <div style={{ 
                       background: EMERALD_LIGHT, border: `1px solid ${EMERALD_DARK}`, borderRadius: '10px', 
                       padding: '14px', marginBottom: '16px', color: '#0A7B62', fontSize: '13px', lineHeight: '1.5',
@@ -557,17 +589,17 @@ export default function DetailTrajet() {
 
                   <button
                     onClick={() => setShowConfirm(true)}
-                    disabled={isComplet || !isOuvert || !userPhoto}
+                    disabled={isComplet || !isOuvert || !userPhoto || hasExistingReservation}
                     style={{
                       width: '100%', padding: '16px',
-                      background: (isComplet || !isOuvert || !userPhoto)
+                      background: (isComplet || !isOuvert || !userPhoto || hasExistingReservation)
                         ? (darkMode ? '#3D3D3D' : '#e5e7eb')
                         : `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`,
                       border: 'none', borderRadius: '12px',
-                      color: (isComplet || !isOuvert || !userPhoto) ? (darkMode ? '#6B7280' : '#9ca3af') : '#FFFFFF',
+                      color: (isComplet || !isOuvert || !userPhoto || hasExistingReservation) ? (darkMode ? '#6B7280' : '#9ca3af') : '#FFFFFF',
                       fontSize: '15px', fontWeight: '700',
-                      cursor: (isComplet || !isOuvert || !userPhoto) ? 'not-allowed' : 'pointer',
-                      boxShadow: (isComplet || !isOuvert || !userPhoto) ? 'none' : `0 4px 15px rgba(13,158,126,0.3)`,
+                      cursor: (isComplet || !isOuvert || !userPhoto || hasExistingReservation) ? 'not-allowed' : 'pointer',
+                      boxShadow: (isComplet || !isOuvert || !userPhoto || hasExistingReservation) ? 'none' : `0 4px 15px rgba(13,158,126,0.3)`,
                       transition: 'all 0.2s',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}
