@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTheme } from '@/app/lib/ThemeContext';
+import ConducteurLayout from '@/components/conducteur/ConducteurLayout';
 
 const API_URL = '/api';
 const E = '#0D9E7E';
@@ -173,17 +174,25 @@ export default function ValidationPresences() {
 
   if (loading) {
     return (
-      <p style={{ color: darkMode ? '#9CA3AF' : GR, textAlign: 'center', padding: '20px' }}>
-        {t('loadingPassengers')}
-      </p>
+      <ConducteurLayout>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px' }}>
+          <p style={{ color: darkMode ? '#9CA3AF' : GR, textAlign: 'center', padding: '20px' }}>
+            {t('loadingPassengers')}
+          </p>
+        </div>
+      </ConducteurLayout>
     );
   }
   
   if (reservations.length === 0) {
     return (
-      <p style={{ color: darkMode ? '#9CA3AF' : GR, textAlign: 'center', padding: '20px' }}>
-        {t('noReservationsForTrip')}
-      </p>
+      <ConducteurLayout>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 16px' }}>
+          <p style={{ color: darkMode ? '#9CA3AF' : GR, textAlign: 'center', padding: '20px' }}>
+            {t('noReservationsForTrip')}
+          </p>
+        </div>
+      </ConducteurLayout>
     );
   }
 
@@ -196,14 +205,16 @@ export default function ValidationPresences() {
   const bgRowHover = darkMode ? '#2D2D2D' : EL;
 
   return (
-    <div style={{ 
-      background: bgCard, 
-      borderRadius: '16px', 
-      border: `1px solid ${borderCard}`, 
-      padding: isMobile ? '16px' : '24px', 
-      marginBottom: '24px', 
-      boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.04)'
-    }}>
+    <ConducteurLayout>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 16px 40px' }}>
+        <div style={{ 
+          background: bgCard, 
+          borderRadius: '16px', 
+          border: `1px solid ${borderCard}`, 
+          padding: isMobile ? '16px' : '24px', 
+          marginBottom: '24px', 
+          boxShadow: darkMode ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.04)'
+        }}>
       {error && (
         <div style={{ padding: '12px 16px', background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '10px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: '#DC2626', fontSize: '13px', fontWeight: '600' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
@@ -417,6 +428,8 @@ export default function ValidationPresences() {
       <style jsx>{`
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
-    </div>
+        </div>
+      </div>
+    </ConducteurLayout>
   );
 }
