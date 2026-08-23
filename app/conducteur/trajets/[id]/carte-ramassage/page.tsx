@@ -275,12 +275,15 @@ export default function CarteRamassagePage() {
     );
   }
 
-  // ✅ Si on n'est pas encore dans la fenêtre de ramassage (sauf si EN_ATTENTE_DEPART ou EN_COURS)
-  if (!estDansFenetreRamassage(trajet.dateDepart, trajet.heureDepart) && trajet.statut !== 'EN_ATTENTE_DEPART' && trajet.statut !== 'EN_COURS') {
-    const maintenant = new Date();
-    const dateOnly = trajet.dateDepart.split(' ')[0];
-    const depart = new Date(`${dateOnly}T${trajet.heureDepart}`);
-    const diffMinutes = Math.round((depart.getTime() - maintenant.getTime()) / (1000 * 60));
+  // ✅ Vérifier si l'heure de départ est déjà passée
+  const maintenant = new Date();
+  const dateOnly = trajet.dateDepart.split(' ')[0];
+  const depart = new Date(`${dateOnly}T${trajet.heureDepart}`);
+  const diffMinutes = Math.round((depart.getTime() - maintenant.getTime()) / (1000 * 60));
+  const departPasse = diffMinutes <= 0;
+
+  // ✅ Si on n'est pas encore dans la fenêtre de ramassage (sauf si départ déjà passé, EN_ATTENTE_DEPART ou EN_COURS)
+  if (!departPasse && !estDansFenetreRamassage(trajet.dateDepart, trajet.heureDepart) && trajet.statut !== 'EN_ATTENTE_DEPART' && trajet.statut !== 'EN_COURS') {
     const heures = Math.floor(diffMinutes / 60);
     const minutes = diffMinutes % 60;
 
