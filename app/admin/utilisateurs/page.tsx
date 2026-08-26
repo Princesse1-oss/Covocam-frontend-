@@ -159,26 +159,6 @@ export default function AdminUtilisateurs() {
     }
   };
 
-  const handleDelete = async (id: number, prenom: string, nom: string) => {
-    const confirmed = window.confirm(`Êtes-vous sûr de vouloir supprimer ${prenom} ${nom} ? Cette action est irréversible.`);
-    if (!confirmed) return;
-
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`${API_URL}/admin/utilisateurs/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
-      setUtilisateurs(prev => prev.filter(u => u.id !== id));
-      setAdminSuccess(`Utilisateur ${prenom} ${nom} supprimé avec succès.`);
-      setTimeout(() => setAdminSuccess(''), 4000);
-    } catch {
-      setAdminError('Erreur lors de la suppression de l\'utilisateur.');
-      setTimeout(() => setAdminError(''), 4000);
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -378,13 +358,6 @@ export default function AdminUtilisateurs() {
                             )}
                             {u.estActif ? t('adminSuspend') : t('adminReactivate')}
                           </button>
-                          <button onClick={() => handleDelete(u.id, u.prenom, u.nom)} style={{ padding: '5px 10px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                            </svg>
-                            Supprimer
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -478,13 +451,6 @@ export default function AdminUtilisateurs() {
                               </svg>
                             )}
                             {u.estActif ? t('adminSuspend') : t('adminReactivate')}
-                          </button>
-                          <button onClick={() => handleDelete(u.id, u.prenom, u.nom)} style={{ padding: '5px 10px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                            </svg>
-                            Supprimer
                           </button>
                         </div>
                       </td>
