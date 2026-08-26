@@ -456,31 +456,10 @@ export default function RegisterPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img src="/covocam_logo.png" alt="CovoCam"
                 style={{
-                  width: '44px', height: '44px', borderRadius: '14px',
+                  width: '56px', height: '56px', borderRadius: '16px',
                   objectFit: 'contain', display: 'block',
                   boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                 }} />
-              <div>
-                <span className="logo-text" style={{
-                  fontSize: '20px',
-                  fontWeight: '800',
-                  color: 'white',
-                  letterSpacing: '-0.4px',
-                  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                }}>
-                  {t('brandName')}<span style={{ color: '#0D9E7E' }}>Cam</span>
-                </span>
-                <br />
-                <span style={{
-                  fontSize: '9px',
-                  color: 'rgba(255,255,255,0.9)',
-                  fontWeight: '500',
-                  letterSpacing: '0.3px',
-                  textShadow: '0 1px 8px rgba(0,0,0,0.2)',
-                }}>
-                  {t('tagline')}
-                </span>
-              </div>
             </div>
 
             <LanguageSelector />

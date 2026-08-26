@@ -183,15 +183,10 @@ export default function AdminTopbar() {
           {/* LOGO */}
           <Link href="/admin/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', display: 'block' }} />
-            <div>
-              <span style={{ fontSize: '20px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px', display: 'block', lineHeight: '1.1' }}>
-                Covo<span style={{ color: GREEN }}>Cam</span>
-              </span>
-              <span style={{ fontSize: '9px', color: GREEN, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                Admin
-              </span>
-            </div>
+              style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block' }} />
+            <span style={{ fontSize: '9px', color: GREEN, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+              Admin
+            </span>
           </Link>
 
           {/* Spacer pour sidebar */}

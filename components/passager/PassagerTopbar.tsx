@@ -246,15 +246,12 @@ export default function PassagerTopbar() {
           {/* LOGO */}
           <Link href="/passager/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 12px rgba(13,158,126,0.3)' }} />
-            <div style={{ display: isMobile ? 'none' : 'block' }}>
-              <span style={{ fontSize: '20px', fontWeight: '800', color: styles.text, letterSpacing: '-0.5px', display: 'block', lineHeight: '1.1' }}>
-                Covo<span style={{ color: EMERALD }}>Cam</span>
-              </span>
+              style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 12px rgba(13,158,126,0.3)' }} />
+            {!isMobile && (
               <span style={{ fontSize: '9px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                 {t('activePassenger')}
               </span>
-            </div>
+            )}
           </Link>
 
           {/* NAV DESKTOP */}

@@ -247,11 +247,8 @@ export default function ConducteurTopbar() {
         <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: '68px', gap: '24px' }}>
           <Link href="/conducteur/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '44px', height: '44px', borderRadius: '14px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 16px rgba(13,158,126,0.35)' }} />
-            <div>
-              <span style={{ fontSize: '22px', fontWeight: '800', color: styles.text, letterSpacing: '-0.5px', display: 'block', lineHeight: '1.1' }}>Covo<span style={{ color: EMERALD }}>Cam</span></span>
-              <span style={{ fontSize: '10px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{t('activeDriver')}</span>
-            </div>
+              style={{ width: '52px', height: '52px', borderRadius: '16px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 16px rgba(13,158,126,0.35)' }} />
+            <span style={{ fontSize: '10px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{t('activeDriver')}</span>
           </Link>
 
           {!isMobile && (

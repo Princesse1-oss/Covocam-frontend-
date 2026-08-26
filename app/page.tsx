@@ -224,23 +224,13 @@ export default function HomePage() {
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/covocam_logo.png" alt="CovoCam"
-            style={{ width: '40px', height: '40px', borderRadius: '12px', objectFit: 'contain', display: 'block' }} />
-          <div>
-            <span style={{
-              fontSize: '20px', fontWeight: '800',
-              color: scrolled ? styles.text : (darkMode ? '#FFFFFF' : '#FFFFFF'),
-              letterSpacing: '-0.4px'
-            }}>
-              {t('brandName')}<span style={{ color: E }}>Cam</span>
-            </span>
-            <br />
-            <span style={{
-              fontSize: '9px', color: E, fontWeight: '600',
-              letterSpacing: '0.6px', textTransform: 'uppercase'
-            }}>
-              {t('tagline')}
-            </span>
-          </div>
+            style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block' }} />
+          <span style={{
+            fontSize: '9px', color: E, fontWeight: '600',
+            letterSpacing: '0.6px', textTransform: 'uppercase'
+          }}>
+            {t('tagline')}
+          </span>
         </div>
 
         {/* Nav buttons */}
@@ -663,13 +653,7 @@ export default function HomePage() {
             marginBottom: '12px'
           }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'contain' }} />
-            <span style={{
-              fontSize: '18px', fontWeight: '800',
-              color: 'white'
-            }}>
-              {t('brandName')}<span style={{ color: E }}>Cam</span>
-            </span>
+              style={{ width: '44px', height: '44px', borderRadius: '10px', objectFit: 'contain' }} />
           </div>
         <p style={{
           fontSize: '13px',

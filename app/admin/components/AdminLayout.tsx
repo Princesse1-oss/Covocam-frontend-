@@ -95,12 +95,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Logo */}
           <div className={`flex items-center justify-between p-5 border-b border-gray-100 ${!sidebarOpen && 'md:justify-center'}`}>
             <Link href="/admin/dashboard" className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <span className="text-white text-xl font-bold">&gt;</span>
-              </div>
+              <img src="/covocam_logo.png" alt="CovoCam"
+                className="w-11 h-11 rounded-2xl object-contain shadow-lg shadow-emerald-500/30" />
               {sidebarOpen && (
                 <div>
-                  <span className="text-xl font-bold text-gray-800">CovoCam</span>
                   <span className="block text-[10px] text-gray-400 font-medium tracking-wider uppercase">Administration</span>
                 </div>
               )}
