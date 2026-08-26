@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/app/lib/ThemeContext';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 
 const E = '#0D9E7E';
@@ -161,6 +162,7 @@ const formatTime = (timeValue: any): string => {
 
 export default function ConducteurNotifications() {
   const router = useRouter();
+  const { t, lang } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [reservations, setReservations] = useState<ReservationNotif[]>([]);
   const [loading, setLoading] = useState(true);
@@ -245,10 +247,11 @@ export default function ConducteurNotifications() {
   const handleMarquerLue = async (id: number) => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       await fetch(`/api/notifications/${id}/lire`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, estLu: true } : n));
       notifierChangementNotifications();
@@ -260,11 +263,12 @@ export default function ConducteurNotifications() {
   const handleMarquerTout = async () => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     setMarkingAll(true);
     try {
       await fetch('/api/notifications/lire-tout', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       setNotifications(prev => prev.map(n => ({ ...n, estLu: true })));
       notifierChangementNotifications();
@@ -278,10 +282,11 @@ export default function ConducteurNotifications() {
   const handleAccepter = async (id: number) => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       const res = await fetch(`/api/reservations/${id}/accepter`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       if (res.ok) {
         setReservations(prev => prev.map(r => r.id === id ? { ...r, statut: 'A_PAYER' } : r));
@@ -296,26 +301,28 @@ export default function ConducteurNotifications() {
     setConfirmRefuseId(null);
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       const res = await fetch(`/api/reservations/${id}/refuser`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       if (res.ok) {
         setReservations(prev => prev.map(r => r.id === id ? { ...r, statut: 'REFUSEE' } : r));
       }
     } catch {
-      setError('Erreur lors du refus'); setTimeout(() => setError(''), 4000);
+      setError(t('rejectError')); setTimeout(() => setError(''), 4000);
     }
   };
 
   const handleSupprimerNotif = async (id: number) => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       const res = await fetch(`/api/notifications/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       if (res.ok) {
         setNotifications(prev => prev.filter(n => n.id !== id));
@@ -330,10 +337,11 @@ export default function ConducteurNotifications() {
     setConfirmSupprimerLues(false);
     const token = localStorage.getItem('token');
     if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       const res = await fetch('/api/notifications/lues/supprimer', {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       if (res.ok) {
         setNotifications(prev => prev.filter(n => !n.estLu));
@@ -353,7 +361,7 @@ export default function ConducteurNotifications() {
       <ConducteurLayout>
         <div style={{ textAlign: 'center', padding: '80px', color: '#6b7280' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}><Icon name="bell" size={48} /></div>
-          <p>Chargement des notifications...</p>
+          <p>{t('loadingNotifications')}</p>
         </div>
       </ConducteurLayout>
     );
@@ -369,26 +377,26 @@ export default function ConducteurNotifications() {
       )}
       {confirmRefuseId !== null && (
         <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous refuser cette réservation ?</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('rejectReservationConfirm')}</span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmRefuseId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
-            <button onClick={() => handleRefuser(confirmRefuseId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, refuser</button>
+            <button onClick={() => setConfirmRefuseId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('no')}</button>
+            <button onClick={() => handleRefuser(confirmRefuseId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('yesRefuse')}</button>
           </div>
         </div>
       )}
       {confirmSupprimerLues && (
         <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Supprimer toutes les notifications lues ?</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('deleteReadNotificationsConfirm')}</span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmSupprimerLues(false)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
-            <button onClick={handleSupprimerLues} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, supprimer</button>
+            <button onClick={() => setConfirmSupprimerLues(false)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('no')}</button>
+            <button onClick={handleSupprimerLues} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('yesDelete')}</button>
           </div>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#111827', margin: '0 0 4px' }}>Notifications <Icon name="bell" size={24} /></h1>
-          <p style={{ fontSize: '13px', color: '#6b7280' }}>Gérez vos réservations et suivez vos activités</p>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#111827', margin: '0 0 4px' }}>{t('notifications')} <Icon name="bell" size={24} /></h1>
+          <p style={{ fontSize: '13px', color: '#6b7280' }}>{t('notificationsSubtitle')}</p>
         </div>
         {notifNonLues > 0 ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -400,7 +408,7 @@ export default function ConducteurNotifications() {
             onMouseEnter={(e) => { if (!markingAll) e.currentTarget.style.background = '#ea580c'; if (!markingAll) e.currentTarget.style.color = '#fff'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.05)'; e.currentTarget.style.color = '#ea580c'; }}
             >
-              {markingAll ? '...' : <><Icon name="check" size={12} /> Tout marquer comme lu</>}
+              {markingAll ? '...' : <><Icon name="check" size={12} /> {t('markAllAsRead')}</>}
             </button>
             {notifications.some(n => n.estLu) && (
               <button onClick={handleSupprimerLues} style={{
@@ -411,7 +419,7 @@ export default function ConducteurNotifications() {
               onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(220,38,38,0.05)'; e.currentTarget.style.color = '#dc2626'; }}
               >
-                <Icon name="trashDone" size={12} /> Supprimer les lues
+                <Icon name="trashDone" size={12} /> {t('deleteReadBtn')}
               </button>
             )}
           </div>
@@ -424,17 +432,17 @@ export default function ConducteurNotifications() {
           onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.color = '#fff'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(220,38,38,0.05)'; e.currentTarget.style.color = '#dc2626'; }}
           >
-            <Icon name="trashDone" size={12} /> Supprimer les lues
+            <Icon name="trashDone" size={12} /> {t('deleteReadBtn')}
           </button>
         ) : null}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '24px' }}>
-        {[
-          { label: 'Nouvelles réservations', value: nouvellesReservations.length, icon: <Icon name="clipboard" size={18} color="#0D9E7E" />, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E' },
-          { label: 'Annulations passagers', value: annulations.length, icon: <Icon name="x" size={18} color="#dc2626" />, border: '#dc2626', bg: '#fee2e2', color: '#dc2626' },
-          { label: 'Notifications non lues', value: notifNonLues, icon: <Icon name="bell" size={18} color="#0D9E7E" />, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E' },
-        ].map((card, i) => (
+          {[
+           { label: t('newReservations'), value: nouvellesReservations.length, icon: <Icon name="clipboard" size={18} color="#0D9E7E" />, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E' },
+           { label: t('annulationsPassagers'), value: annulations.length, icon: <Icon name="x" size={18} color="#dc2626" />, border: '#dc2626', bg: '#fee2e2', color: '#dc2626' },
+           { label: t('unreadNotificationsLabel'), value: notifNonLues, icon: <Icon name="bell" size={18} color="#0D9E7E" />, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E' },
+         ].map((card, i) => (
           <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '16px', border: '1px solid #e5e7eb', borderTop: `3px solid ${card.border}` }}>
             <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: card.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', marginBottom: '10px' }}>{card.icon}</div>
             <div style={{ fontSize: '26px', fontWeight: '800', color: card.color, lineHeight: 1 }}>{card.value}</div>
@@ -445,8 +453,8 @@ export default function ConducteurNotifications() {
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
         {[
-          { key: 'reservations', label: <><Icon name="clipboard" size={14} /> Nouvelles réservations</>, count: nouvellesReservations.length },
-          { key: 'annulations', label: <><Icon name="x" size={14} /> Annulations</>, count: annulations.length },
+          { key: 'reservations', label: <><Icon name="clipboard" size={14} /> {t('newReservations')}</>, count: nouvellesReservations.length },
+          { key: 'annulations', label: <><Icon name="x" size={14} /> {t('cancellations')}</>, count: annulations.length },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key as any)} style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
@@ -469,24 +477,24 @@ export default function ConducteurNotifications() {
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #0a0a0a, #1a0f00)' }}>
             <span style={{ fontSize: '18px' }}><Icon name="clipboard" size={18} color="#f97316" /></span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#f97316' }}>Nouvelles réservations</span>
+            <span style={{ fontSize: '14px', fontWeight: '700', color: '#f97316' }}>{t('newReservations')}</span>
             {nouvellesReservations.length > 0 && (
-              <span style={{ background: '#f97316', color: '#000', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '20px' }}>{nouvellesReservations.length} en attente</span>
+              <span style={{ background: '#f97316', color: '#000', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '20px' }}>{nouvellesReservations.length} {t('pendingWord')}</span>
             )}
           </div>
 
           {nouvellesReservations.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}><Icon name="clipboard" size={48} /></div>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', marginBottom: '6px' }}>Aucune nouvelle réservation</h3>
-              <p style={{ fontSize: '13px', color: '#6b7280' }}>Les réservations en attente de votre confirmation apparaîtront ici</p>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', marginBottom: '6px' }}>{t('noNewReservations')}</h3>
+              <p style={{ fontSize: '13px', color: '#6b7280' }}>{t('pendingReservationsDesc')}</p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    {['Passager', 'Trajet', 'Date trajet', 'Places', 'Date réservation', 'Actions'].map(h => (
+                    {[t('passenger'), t('trip'), t('tripDate'), t('places'), t('reservationDate'), t('actions')].map(h => (
                       <th key={h} style={{ fontSize: '11px', color: '#6b7280', textAlign: 'left', padding: '10px 16px', borderBottom: '1px solid #e5e7eb', textTransform: 'uppercase', letterSpacing: '.5px', fontWeight: '600', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -526,8 +534,8 @@ export default function ConducteurNotifications() {
                       <td style={{ padding: '14px 16px', fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap' }}>{formatDateTime(r.dateReservation)}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                          <button onClick={() => handleAccepter(r.id)} style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#dcfce7', color: '#15803d', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}><Icon name="check" size={12} color="#15803d" /> Accepter</button>
-                          <button onClick={() => handleRefuser(r.id)} style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#fee2e2', color: '#dc2626', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}><Icon name="x" size={12} color="#dc2626" /> Refuser</button>
+                          <button onClick={() => handleAccepter(r.id)} style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#dcfce7', color: '#15803d', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}><Icon name="check" size={12} color="#15803d" /> {t('accept')}</button>
+                          <button onClick={() => handleRefuser(r.id)} style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#fee2e2', color: '#dc2626', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}><Icon name="x" size={12} color="#dc2626" /> {t('reject')}</button>
                         </div>
                       </td>
                     </tr>
@@ -543,7 +551,7 @@ export default function ConducteurNotifications() {
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #0a0a0a, #1a0f00)' }}>
             <span style={{ fontSize: '18px' }}><Icon name="x" size={18} color="#f97316" /></span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#f97316' }}>Annulations de passagers</span>
+            <span style={{ fontSize: '14px', fontWeight: '700', color: '#f97316' }}>{t('passengerCancellations')}</span>
             {annulations.length > 0 && (
               <span style={{ background: '#dc2626', color: '#fff', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '20px' }}>{annulations.length}</span>
             )}
@@ -552,15 +560,15 @@ export default function ConducteurNotifications() {
           {annulations.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}><Icon name="check" size={48} /></div>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', marginBottom: '6px' }}>Aucune annulation</h3>
-              <p style={{ fontSize: '13px', color: '#6b7280' }}>Les annulations de passagers apparaîtront ici</p>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', marginBottom: '6px' }}>{t('noCancellations')}</h3>
+              <p style={{ fontSize: '13px', color: '#6b7280' }}>{t('noCancellationsDesc')}</p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    {['Passager', 'Trajet', 'Date trajet', 'Places annulées', 'Date annulation'].map(h => (
+                    {[t('passenger'), t('trip'), t('tripDate'), t('cancelledSeats'), t('cancellationDate')].map(h => (
                       <th key={h} style={{ fontSize: '11px', color: '#6b7280', textAlign: 'left', padding: '10px 16px', borderBottom: '1px solid #e5e7eb', textTransform: 'uppercase', letterSpacing: '.5px', fontWeight: '600', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -609,9 +617,9 @@ export default function ConducteurNotifications() {
         <div style={{ marginTop: '24px', background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '18px' }}><Icon name="bell" size={18} /></span>
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>Notifications système</span>
+            <span style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>{t('systemNotifications')}</span>
             {notifNonLues > 0 && (
-              <span style={{ background: '#E8F7F3', color: '#0D9E7E', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '20px' }}>{notifNonLues} non lue(s)</span>
+              <span style={{ background: '#E8F7F3', color: '#0D9E7E', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '20px' }}>{notifNonLues} {t('unreadWord')}</span>
             )}
           </div>
           <div>
@@ -640,7 +648,7 @@ export default function ConducteurNotifications() {
                   onMouseEnter={(e) => { e.currentTarget.style.background = '#ea580c'; e.currentTarget.style.color = '#fff'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#ea580c'; }}
                   >
-                    Marquer lu
+                    {t('markAsRead')}
                   </button>
                 )}
                 <button onClick={() => handleSupprimerNotif(n.id)} style={{

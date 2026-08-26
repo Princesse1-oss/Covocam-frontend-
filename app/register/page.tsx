@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Car, Users, Mail, Lock, User, Phone, AlertCircle, Check } from 'lucide-react';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 const EMERALD = '#0D9E7E';
 const EMERALD_DARK = '#0A7B62';
@@ -13,90 +14,10 @@ const GRAY = '#6B7280';
 const GRAY_LIGHT = '#9CA3AF';
 const BORDER = '#E5E7EB';
 
-// Traductions
-const translations = {
-  fr: {
-    title: 'Rejoignez CovoCam aujourd\'hui',
-    step1Title: 'Choisissez votre rôle',
-    step1Desc: 'Êtes-vous conducteur ou passager ?',
-    step2Title: 'Créez votre compte',
-    step2Desc: 'Remplissez vos informations pour rejoindre CovoCam',
-    brand: 'CovoCam',
-    tagline: 'Covoiturage Cameroun',
-    heroTitle: 'Rejoignez la communauté',
-    heroHighlight: 'CovoCam',
-    heroDesc: 'Des milliers de Camerounais voyagent déjà malin. À votre tour !',
-    passenger: 'Passager',
-    passengerDesc: 'Je cherche un trajet',
-    driver: 'Conducteur',
-    driverDesc: 'Je propose un trajet',
-    changeRole: 'Changer de rôle',
-    firstName: 'PRENOM',
-    lastName: 'NOM',
-    email: 'EMAIL',
-    phone: 'TELEPHONE',
-    password: 'MOT DE PASSE',
-    confirmPassword: 'CONFIRMER',
-    firstNamePlaceholder: 'Nicole',
-    lastNamePlaceholder: 'Taffo',
-    emailPlaceholder: 'votre@email.com',
-    phonePlaceholder: '699000000',
-    passwordPlaceholder: '••••••••',
-    register: 'Créer mon compte',
-    loading: 'Création en cours...',
-    haveAccount: 'Déjà un compte ?',
-    login: 'Se connecter',
-    backHome: 'Retour à l\'accueil',
-    error: 'Erreur lors de la création',
-    success: 'Compte créé avec succès ! Redirection...',
-    secure: 'Données sécurisées · Inscription gratuite',
-    changeLater: 'Vous pourrez modifier ce choix plus tard',
-    newHere: 'Nouveau ici ?',
-  },
-  en: {
-    title: 'Join CovoCam today',
-    step1Title: 'Choose your role',
-    step1Desc: 'Are you a driver or a passenger?',
-    step2Title: 'Create your account',
-    step2Desc: 'Fill in your information to join CovoCam',
-    brand: 'CovoCam',
-    tagline: 'Cameroon Ridesharing',
-    heroTitle: 'Join the',
-    heroHighlight: 'CovoCam',
-    heroDesc: 'Thousands of Cameroonians already travel smart. Your turn!',
-    passenger: 'Passenger',
-    passengerDesc: 'I\'m looking for a ride',
-    driver: 'Driver',
-    driverDesc: 'I offer a ride',
-    changeRole: 'Change role',
-    firstName: 'FIRST NAME',
-    lastName: 'LAST NAME',
-    email: 'EMAIL',
-    phone: 'PHONE',
-    password: 'PASSWORD',
-    confirmPassword: 'CONFIRM',
-    firstNamePlaceholder: 'Nicole',
-    lastNamePlaceholder: 'Taffo',
-    emailPlaceholder: 'your@email.com',
-    phonePlaceholder: '699000000',
-    passwordPlaceholder: '••••••••',
-    register: 'Create my account',
-    loading: 'Creating...',
-    haveAccount: 'Already have an account?',
-    login: 'Sign in',
-    backHome: 'Back to home',
-    error: 'Error during registration',
-    success: 'Account created successfully! Redirecting...',
-    secure: 'Secure data · Free registration',
-    changeLater: 'You can change this choice later',
-    newHere: 'New here?',
-  }
-};
-
 export default function RegisterPage() {
   const router = useRouter();
+  const { t, lang, toggleLang } = useTheme();
   const [step, setStep] = useState(1);
-  const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [formData, setFormData] = useState({
     nom: '',
@@ -111,8 +32,6 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  const t = translations[lang];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -129,12 +48,12 @@ export default function RegisterPage() {
     setSuccess('');
 
     if (formData.motDePasse !== formData.confirmMotDePasse) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t('passwordsMismatch'));
       return;
     }
 
     if (formData.motDePasse.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError(t('passwordTooShort'));
       return;
     }
 
@@ -156,19 +75,19 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(t.success);
+        setSuccess(t('accountCreated'));
         setTimeout(() => router.push('/login'), 2000);
       } else {
-        setError(data.error || data.message || t.error);
+        setError(data.error || data.message || t('registerError'));
       }
     } catch {
-      setError('Erreur de connexion au serveur');
+      setError(t('serverConnectionError'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Sélecteur de langue
+  // SÃ©lecteur de langue
   const LanguageSelector = () => (
     <div style={{ position: 'relative' }}>
       <button
@@ -211,7 +130,7 @@ export default function RegisterPage() {
           {['fr', 'en'].map((l) => (
             <button
               key={l}
-              onClick={() => { setLang(l as 'fr' | 'en'); setIsLangOpen(false); }}
+              onClick={() => { if (l !== lang) toggleLang(); setIsLangOpen(false); }}
               style={{
                 display: 'block',
                 width: '100%',
@@ -225,7 +144,7 @@ export default function RegisterPage() {
                 transition: 'all .2s'
               }}
             >
-              {l === 'fr' ? 'Français' : 'English'}
+              {l === 'fr' ? 'FranÃ§ais' : 'English'}
             </button>
           ))}
         </div>
@@ -513,7 +432,7 @@ export default function RegisterPage() {
       `}</style>
 
       <div className="register-container">
-        {/* ─── SECTION HERO : IMAGE ─── */}
+        {/* â”€â”€â”€ SECTION HERO : IMAGE â”€â”€â”€ */}
         <div className="hero-section">
           <div 
             className="hero-image"
@@ -523,7 +442,7 @@ export default function RegisterPage() {
           />
           <div className="hero-overlay" />
 
-          {/* Logo en haut avec sélecteur de langue */}
+          {/* Logo en haut avec sÃ©lecteur de langue */}
           <div style={{
             position: 'absolute',
             top: '28px',
@@ -549,7 +468,7 @@ export default function RegisterPage() {
                   letterSpacing: '-0.4px',
                   textShadow: '0 2px 10px rgba(0,0,0,0.2)',
                 }}>
-                  {t.brand}<span style={{ color: '#0D9E7E' }}>Cam</span>
+                  {t('brandName')}<span style={{ color: '#0D9E7E' }}>Cam</span>
                 </span>
                 <br />
                 <span style={{
@@ -559,7 +478,7 @@ export default function RegisterPage() {
                   letterSpacing: '0.3px',
                   textShadow: '0 1px 8px rgba(0,0,0,0.2)',
                 }}>
-                  {t.tagline}
+                  {t('tagline')}
                 </span>
               </div>
             </div>
@@ -584,8 +503,8 @@ export default function RegisterPage() {
               letterSpacing: '-0.5px',
               textShadow: '0 2px 20px rgba(0,0,0,0.2)',
             }}>
-              {t.heroTitle}<br />
-              <span style={{ color: '#0D9E7E' }}>{t.heroHighlight}</span>
+              {t('registerHeroTitle')}<br />
+              <span style={{ color: '#0D9E7E' }}>{t('brandName')}</span>
             </h1>
             <p className="hero-subtitle" style={{
               fontSize: '14px',
@@ -595,15 +514,15 @@ export default function RegisterPage() {
               maxWidth: '420px',
               textShadow: '0 1px 12px rgba(0,0,0,0.15)',
             }}>
-              {t.heroDesc}
+              {t('registerHeroDesc')}
             </p>
           </div>
         </div>
 
-        {/* ─── SECTION FORMULAIRE ─── */}
+        {/* â”€â”€â”€ SECTION FORMULAIRE â”€â”€â”€ */}
         <div className="form-section">
           <div className="form-wrapper">
-            {/* En-tête */}
+            {/* En-tÃªte */}
             <div style={{ marginBottom: '32px' }}>
               <h2 style={{
                 fontSize: '28px',
@@ -612,18 +531,18 @@ export default function RegisterPage() {
                 margin: '0 0 4px',
                 letterSpacing: '-0.5px',
               }}>
-                {step === 1 ? t.step1Title : t.step2Title}
+                {step === 1 ? t('registerStep1Title') : t('registerStep2Title')}
               </h2>
               <p style={{
                 fontSize: '14px',
                 color: GRAY,
                 margin: 0,
               }}>
-                {step === 1 ? t.step1Desc : t.step2Desc}
+                {step === 1 ? t('registerStep1Desc') : t('registerStep2Desc')}
               </p>
             </div>
 
-            {/* Messages d'erreur/succès */}
+            {/* Messages d'erreur/succÃ¨s */}
             {error && (
               <div style={{
                 background: '#FAFAFA',
@@ -656,7 +575,7 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* ÉTAPE 1 : Choix du rôle */}
+            {/* Ã‰TAPE 1 : Choix du rÃ´le */}
             {step === 1 && (
               <div style={{ animation: 'scaleIn 0.3s ease both' }}>
                 <div style={{
@@ -667,16 +586,16 @@ export default function RegisterPage() {
                   {[
                     { 
                       val: 'passager', 
-                      label: t.passenger, 
+                      label: t('passenger'), 
                       icon: <Users size={40} color={EMERALD} />, 
-                      desc: t.passengerDesc,
+                      desc: t('passengerRoleDesc'),
                       bg: '#DBEAFE'
                     },
                     { 
                       val: 'conducteur', 
-                      label: t.driver, 
+                      label: t('driver'), 
                       icon: <Car size={40} color={EMERALD} />, 
-                      desc: t.driverDesc,
+                      desc: t('driverRoleDesc'),
                       bg: '#DCFCE7'
                     },
                   ].map((r) => (
@@ -716,15 +635,15 @@ export default function RegisterPage() {
                   color: GRAY_LIGHT,
                   marginTop: '16px',
                 }}>
-                  {t.changeLater}
+                  {t('changeRoleLater')}
                 </p>
               </div>
             )}
 
-            {/* ÉTAPE 2 : Formulaire complet */}
+            {/* Ã‰TAPE 2 : Formulaire complet */}
             {step === 2 && (
               <form onSubmit={handleSubmit} style={{ animation: 'scaleIn 0.3s ease both' }}>
-                {/* Retour à l'étape 1 */}
+                {/* Retour Ã  l'Ã©tape 1 */}
                 <button
                   type="button"
                   onClick={() => setStep(1)}
@@ -744,10 +663,10 @@ export default function RegisterPage() {
                   onMouseEnter={e => e.currentTarget.style.color = GRAY}
                   onMouseLeave={e => e.currentTarget.style.color = GRAY_LIGHT}
                 >
-                  ← {t.changeRole}
+                  â† {t('changeRole')}
                 </button>
 
-                {/* Nom et Prénom */}
+                {/* Nom et PrÃ©nom */}
                 <div className="form-grid" style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
@@ -762,7 +681,7 @@ export default function RegisterPage() {
                       fontWeight: 600,
                       marginBottom: '6px',
                     }}>
-                      {t.firstName}
+                      {t('registerFirstNameLabel')}
                     </label>
                     <div className="input-wrapper">
                       <span className="input-icon">
@@ -774,7 +693,7 @@ export default function RegisterPage() {
                         value={formData.prenom}
                         onChange={handleChange}
                         required
-                        placeholder={t.firstNamePlaceholder}
+                        placeholder="Nicole"
                         className="form-input"
                       />
                     </div>
@@ -787,7 +706,7 @@ export default function RegisterPage() {
                       fontWeight: 600,
                       marginBottom: '6px',
                     }}>
-                      {t.lastName}
+                      {t('registerLastNameLabel')}
                     </label>
                     <div className="input-wrapper">
                       <span className="input-icon">
@@ -799,7 +718,7 @@ export default function RegisterPage() {
                         value={formData.nom}
                         onChange={handleChange}
                         required
-                        placeholder={t.lastNamePlaceholder}
+                        placeholder="Taffo"
                         className="form-input"
                       />
                     </div>
@@ -815,7 +734,7 @@ export default function RegisterPage() {
                     fontWeight: 600,
                     marginBottom: '6px',
                   }}>
-                    {t.email}
+                    {t('registerEmailLabel')}
                   </label>
                   <div className="input-wrapper">
                     <span className="input-icon">
@@ -827,13 +746,13 @@ export default function RegisterPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      placeholder={t.emailPlaceholder}
+                      placeholder={t('emailPlaceholder')}
                       className="form-input"
                     />
                   </div>
                 </div>
 
-                {/* Téléphone */}
+                {/* TÃ©lÃ©phone */}
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{
                     display: 'block',
@@ -842,7 +761,7 @@ export default function RegisterPage() {
                     fontWeight: 600,
                     marginBottom: '6px',
                   }}>
-                    {t.phone}
+                    {t('registerPhoneLabel')}
                   </label>
                   <div className="input-wrapper">
                     <span className="input-icon">
@@ -853,7 +772,7 @@ export default function RegisterPage() {
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder={t.phonePlaceholder}
+                      placeholder="699000000"
                       className="form-input"
                     />
                   </div>
@@ -874,7 +793,7 @@ export default function RegisterPage() {
                       fontWeight: 600,
                       marginBottom: '6px',
                     }}>
-                      {t.password}
+                      {t('registerPasswordLabel')}
                     </label>
                     <div className="input-wrapper">
                       <span className="input-icon">
@@ -886,7 +805,7 @@ export default function RegisterPage() {
                         value={formData.motDePasse}
                         onChange={handleChange}
                         required
-                        placeholder={t.passwordPlaceholder}
+                        placeholder={t('passwordPlaceholder')}
                         className="form-input"
                       />
                       <button
@@ -906,7 +825,7 @@ export default function RegisterPage() {
                       fontWeight: 600,
                       marginBottom: '6px',
                     }}>
-                      {t.confirmPassword}
+                      {t('registerConfirmPasswordLabel')}
                     </label>
                     <div className="input-wrapper">
                       <span className="input-icon">
@@ -918,7 +837,7 @@ export default function RegisterPage() {
                         value={formData.confirmMotDePasse}
                         onChange={handleChange}
                         required
-                        placeholder={t.passwordPlaceholder}
+                        placeholder={t('passwordPlaceholder')}
                         className="form-input"
                       />
                     </div>
@@ -942,10 +861,10 @@ export default function RegisterPage() {
                         borderRadius: '50%',
                         animation: 'spin 0.8s linear infinite',
                       }} />
-                      {t.loading}
+                      {t('creatingAccount')}
                     </span>
                   ) : (
-                    t.register
+                    t('createMyAccount')
                   )}
                 </button>
               </form>
@@ -957,7 +876,7 @@ export default function RegisterPage() {
               marginTop: '24px',
             }}>
               <span style={{ color: GRAY, fontSize: 14 }}>
-                {t.haveAccount}{' '}
+                {t('haveAccount')}{' '}
               </span>
               <Link
                 href="/login"
@@ -971,11 +890,11 @@ export default function RegisterPage() {
                 onMouseEnter={e => e.currentTarget.style.color = EMERALD_DARK}
                 onMouseLeave={e => e.currentTarget.style.color = EMERALD}
               >
-                {t.login}
+                {t('login')}
               </Link>
             </div>
 
-            {/* Retour à l'accueil */}
+            {/* Retour Ã  l'accueil */}
             <div style={{ textAlign: 'center', marginTop: '12px' }}>
               <Link
                 href="/"
@@ -991,11 +910,11 @@ export default function RegisterPage() {
                 onMouseEnter={e => e.currentTarget.style.color = GRAY}
                 onMouseLeave={e => e.currentTarget.style.color = GRAY_LIGHT}
               >
-                ← {t.backHome}
+                â† {t('backHome')}
               </Link>
             </div>
 
-            {/* Badge de sécurité */}
+            {/* Badge de sÃ©curitÃ© */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -1013,7 +932,7 @@ export default function RegisterPage() {
                 fontSize: '11px',
                 color: GRAY_LIGHT,
               }}>
-                {t.secure}
+                {t('registerSecureBadge')}
               </span>
             </div>
           </div>

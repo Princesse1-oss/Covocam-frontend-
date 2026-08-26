@@ -137,10 +137,12 @@ export default function PassagerNotifications() {
 
   const marquerLu = async (id: number) => {
     const token = localStorage.getItem('token');
+    if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       await fetch(`${API_URL}/notifications/${id}/lire`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, estLu: true, dateLecture: new Date().toISOString() } : n));
       window.dispatchEvent(new Event('notifications-updated'));
@@ -151,10 +153,12 @@ export default function PassagerNotifications() {
 
   const marquerToutLu = async () => {
     const token = localStorage.getItem('token');
+    if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       await fetch(`${API_URL}/notifications/lire-tout`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       setNotifications(prev => prev.map(n => ({ ...n, estLu: true, dateLecture: new Date().toISOString() })));
       window.dispatchEvent(new Event('notifications-updated'));
@@ -167,10 +171,12 @@ export default function PassagerNotifications() {
     if (confirmDeleteId !== id) { setConfirmDeleteId(id); return; }
     setConfirmDeleteId(null);
     const token = localStorage.getItem('token');
+    if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
     try {
       await fetch(`${API_URL}/notifications/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${cleanToken}` },
       });
       setNotifications(prev => prev.filter(n => n.id !== id));
     } catch {

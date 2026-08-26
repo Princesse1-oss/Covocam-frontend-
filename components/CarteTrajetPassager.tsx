@@ -8,6 +8,7 @@ import LegendeCarte from './LegendeCarte';
 import RouteProgressBand from './RouteProgressBand';
 import { DepartIcon, ArriveeIcon, VoitureIcon, PassagerIcon } from './mapIcons';
 import SvgIcon from './SvgIcon';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 const E = '#0D9E7E';
 
@@ -169,6 +170,7 @@ function RecenterButtons({
 // Pavé directionnel : boutons haut / bas / gauche / droite pour déplacer la carte
 function PanControls({ darkMode }: { darkMode?: boolean }) {
   const map = useMap();
+  const { t, lang } = useTheme();
   const STEP = 160;
 
   const pan = (dx: number, dy: number) => {
@@ -206,11 +208,11 @@ function PanControls({ darkMode }: { darkMode?: boolean }) {
       }}
     >
       <div />
-      <button style={dirBtn} onClick={() => pan(0, -STEP)} aria-label="Déplacer vers le haut" title="Haut">
+      <button style={dirBtn} onClick={() => pan(0, -STEP)} aria-label={t('moveUp')} title={t('moveUp')}>
         <SvgIcon name="chevronUp" size={18} />
       </button>
       <div />
-      <button style={dirBtn} onClick={() => pan(-STEP, 0)} aria-label="Déplacer vers la gauche" title="Gauche">
+      <button style={dirBtn} onClick={() => pan(-STEP, 0)} aria-label={t('moveLeft')} title={t('moveLeft')}>
         <SvgIcon name="chevronLeft" size={18} />
       </button>
       <div
@@ -227,11 +229,11 @@ function PanControls({ darkMode }: { darkMode?: boolean }) {
       >
         OK
       </div>
-      <button style={dirBtn} onClick={() => pan(STEP, 0)} aria-label="Déplacer vers la droite" title="Droite">
+      <button style={dirBtn} onClick={() => pan(STEP, 0)} aria-label={t('moveRight')} title={t('moveRight')}>
         <SvgIcon name="chevronRight" size={18} />
       </button>
       <div />
-      <button style={dirBtn} onClick={() => pan(0, STEP)} aria-label="Déplacer vers le bas" title="Bas">
+      <button style={dirBtn} onClick={() => pan(0, STEP)} aria-label={t('moveDown')} title={t('moveDown')}>
         <SvgIcon name="chevronDown" size={18} />
       </button>
       <div />

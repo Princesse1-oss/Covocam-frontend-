@@ -290,10 +290,10 @@ export default function MesVehicules() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicules([]);
-      setSuccess(t('success') || 'Véhicule supprimé');
+      setSuccess(t('vehicleDeleted'));
       setTimeout(() => setSuccess(''), 3000);
     } catch {
-      setError(t('error') || 'Une erreur est survenue');
+      setError(t('deleteError'));
       setTimeout(() => setError(''), 4000);
     } finally {
       setDeletingId(null);
@@ -344,8 +344,8 @@ export default function MesVehicules() {
         <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('confirmDelete')}</span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
-            <button onClick={() => handleDelete(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('cancel')}</button>
+            <button onClick={() => handleDelete(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('delete')}</button>
           </div>
         </div>
       )}
@@ -415,7 +415,7 @@ export default function MesVehicules() {
               </div>
               <div>
                 <label style={labelStyle}>{t('model')} *</label>
-                <input type="text" name="modele" value={formData.modele} onChange={handleChange} required placeholder="Ex: Corolla, Clio..." style={inputStyle} />
+                <input type="text" name="modele" value={formData.modele} onChange={handleChange} required placeholder={t('modelPlaceholder')} style={inputStyle} />
               </div>
               <div>
                 <label style={labelStyle}>{t('year')} *</label>
@@ -434,7 +434,7 @@ export default function MesVehicules() {
                 <label style={labelStyle}>{t('licensePlate')} *</label>
                 <input
                   type="text" name="immatriculation" value={formData.immatriculation} onChange={handleChange} required 
-                  placeholder="XX-1234-XX" 
+                  placeholder={t('licensePlatePlaceholder')} 
                   style={{ ...inputStyle, textTransform: 'uppercase', borderColor: formData.immatriculation && !validateImmatriculation(formData.immatriculation) ? '#ef4444' : '#e5e7eb' }}
                 />
                 <div style={{ fontSize: '10px', color: darkMode ? '#9CA3AF' : '#9ca3af', marginTop: '4px' }}>{t('licensePlateFormat')}</div>
@@ -448,10 +448,10 @@ export default function MesVehicules() {
               <div>
                 <label style={labelStyle}>{t('fuelType')}</label>
                 <select name="carburant" value={formData.carburant} onChange={handleChange} style={inputStyle}>
-                  <option value="Essence">Essence</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Hybride">Hybride</option>
-                  <option value="Électrique">Électrique</option>
+                  <option value="Essence">{t('gasoline')}</option>
+                  <option value="Diesel">{t('diesel')}</option>
+                  <option value="Hybride">{t('hybrid')}</option>
+                  <option value="Électrique">{t('electric')}</option>
                 </select>
               </div>
               <div>
@@ -584,8 +584,8 @@ export default function MesVehicules() {
                   {[
                     { label: t('color'), value: v.couleur, icon: <Icon name="palette" size={12} /> },
                     { label: t('seats'), value: `${v.nbPlaces} ${t('places')}`, icon: <Icon name="seat" size={12} /> },
-                    { label: t('fuelType'), value: v.carburant || 'N/A', icon: <Icon name="fuel" size={12} /> },
-                    { label: t('transmission'), value: v.boiteVitesse || 'N/A', icon: <Icon name="settings" size={12} /> },
+                    { label: t('fuelType'), value: v.carburant || t('notAvailable'), icon: <Icon name="fuel" size={12} /> },
+                    { label: t('transmission'), value: v.boiteVitesse || t('notAvailable'), icon: <Icon name="settings" size={12} /> },
                   ].map((item, i) => (
                     <div key={i} style={{ background: darkMode ? '#2D2D2D' : '#f9fafb', borderRadius: '8px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '11px', color: darkMode ? '#9CA3AF' : '#9ca3af', marginBottom: '3px' }}>{item.icon} {item.label}</div>

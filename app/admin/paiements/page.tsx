@@ -93,6 +93,40 @@ export default function AdminPaiements() {
   const totalMontant = filtered.filter(p => p.statut === 'REUSSI').reduce((a, p) => a + (p.montantTotal || 0), 0);
   const totalCommission = filtered.filter(p => p.statut === 'REUSSI').reduce((a, p) => a + (p.commission || 0), 0);
 
+  const handleRetirerCommission = async () => {
+    const input = window.prompt('Montant à retirer (XAF) :');
+    if (input === null) return;
+    const montant = parseFloat(input);
+    if (isNaN(montant) || montant <= 0) {
+      window.alert('Montant invalide. Veuillez entrer un montant supérieur à 0.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/paiements/admin/retirer-commission', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ montant }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Erreur serveur' }));
+        window.alert(err.message || 'Erreur lors du retrait de la commission.');
+        return;
+      }
+      window.alert(`${montant.toLocaleString()} XAF retiré avec succès.`);
+      fetch('/api/paiements', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(r => r.json())
+        .then(data => setPaiements(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    } catch {
+      window.alert('Erreur réseau. Veuillez réessayer.');
+    }
+  };
+
   const statutStyle = (s: string): React.CSSProperties => {
     if (s === 'REUSSI') return { background: '#dcfce7', color: '#15803d' };
     if (s === 'EN_ATTENTE') return { background: '#fef3c7', color: '#d97706' };

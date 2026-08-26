@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import PassagerLayout from '../../../../components/passager/PassagerLayout';
 import Link from 'next/link';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 interface Conducteur {
   id: number;
@@ -78,6 +79,7 @@ const Icon = ({ name, size = 20, color = EMERALD }: { name: string; size?: numbe
 export default function ConducteurProfile() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useTheme();
   const id = params?.id;
 
   const [conducteur, setConducteur] = useState<Conducteur | null>(null);
@@ -102,7 +104,7 @@ export default function ConducteurProfile() {
     })
       .then(async (r) => {
         const data = await r.json();
-        if (!r.ok) throw new Error(data.error || 'Erreur de chargement du profil');
+        if (!r.ok) throw new Error(data.error || t('errorLoading'));
         return data;
       })
       .then(data => { 
@@ -128,7 +130,7 @@ export default function ConducteurProfile() {
       <PassagerLayout>
         <div style={{ textAlign: 'center', padding: isMobile ? '60px 20px' : '80px', color: GRAY }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EMERALD_LIGHT}`, borderTopColor: EMERALD, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement du profil du conducteur...</p>
+          <p>{t('loadingProfile')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </PassagerLayout>
@@ -142,11 +144,11 @@ export default function ConducteurProfile() {
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: LIGHT_GRAY, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <Icon name="info" size={32} color={GRAY} />
           </div>
-          <h3 style={{ color: BLACK, marginBottom: '8px' }}>Profil introuvable</h3>
-          <p style={{ color: GRAY, marginBottom: '16px' }}>{error || "Ce conducteur n'existe pas ou n'est plus actif."}</p>
+          <h3 style={{ color: BLACK, marginBottom: '8px' }}>{t('profileNotFound')}</h3>
+          <p style={{ color: GRAY, marginBottom: '16px' }}>{error || t('driverNotFoundDesc')}</p>
           <Link href="/passager/dashboard" style={{ color: EMERALD, textDecoration: 'none', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <Icon name="arrowLeft" size={16} />
-            Retour aux trajets
+            {t('backToTrips')}
           </Link>
         </div>
       </PassagerLayout>
@@ -167,7 +169,7 @@ export default function ConducteurProfile() {
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
             <Icon name="arrowLeft" size={16} />
-            Retour aux trajets
+            {t('backToTrips')}
           </Link>
         </div>
 
@@ -184,7 +186,7 @@ export default function ConducteurProfile() {
               {conducteur.photo && (
                 <img
                   src={conducteur.photo.startsWith('http') ? conducteur.photo : `/uploads/profils/${conducteur.photo}`}
-                  alt={`Photo de ${conducteur.prenom}`}
+                  alt={t('photoOf').replace('{name}', conducteur.prenom)}
                   onError={(e) => (e.currentTarget.style.display = 'none')}
                   style={{
                     width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover',
@@ -215,7 +217,7 @@ export default function ConducteurProfile() {
             <div style={{ fontSize: '16px', color: '#F59E0B', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               {stars(conducteur.noteMoyenne)}
               <span style={{ color: '#d1d5db', fontSize: '14px' }}>
-                {conducteur.noteMoyenne ? `${conducteur.noteMoyenne.toFixed(1)}/5` : 'Nouveau conducteur'}
+                {conducteur.noteMoyenne ? `${conducteur.noteMoyenne.toFixed(1)}/5` : t('newDriver')}
               </span>
             </div>
 
@@ -231,7 +233,7 @@ export default function ConducteurProfile() {
               letterSpacing: '0.5px'
             }}>
               <Icon name="check" size={14} />
-              {conducteur.typeUtilisateur === 'conducteur' ? 'Conducteur Vérifié' : conducteur.typeUtilisateur}
+              {conducteur.typeUtilisateur === 'conducteur' ? t('verifiedDriver') : conducteur.typeUtilisateur}
             </span>
           </div>
 
@@ -239,7 +241,7 @@ export default function ConducteurProfile() {
           <div style={{ padding: isMobile ? '24px 20px' : '32px' }}>
             <h2 style={{ fontSize: '16px', fontWeight: '700', color: BLACK, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Icon name="file" size={20} />
-              Informations de contact
+              {t('contactInfo')}
             </h2>
             
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '32px' }}>
@@ -248,7 +250,7 @@ export default function ConducteurProfile() {
                   <Icon name="mail" size={20} color={EMERALD_DARK} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>Email</div>
+                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>{t('email')}</div>
                   <div style={{ fontSize: '15px', fontWeight: '600', color: BLACK }}>{conducteur.email}</div>
                 </div>
               </div>
@@ -258,9 +260,9 @@ export default function ConducteurProfile() {
                   <Icon name="phone" size={20} color={EMERALD_DARK} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>Téléphone</div>
+                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>{t('phone')}</div>
                   <div style={{ fontSize: '15px', fontWeight: '600', color: BLACK }}>
-                    {conducteur.telephone || 'Non renseigné'}
+                    {conducteur.telephone || t('notProvided')}
                   </div>
                 </div>
               </div>
@@ -270,7 +272,7 @@ export default function ConducteurProfile() {
                   <Icon name="calendar" size={20} color={EMERALD_DARK} />
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>Membre depuis</div>
+                  <div style={{ fontSize: '12px', color: GRAY, marginBottom: '2px' }}>{t('memberSince')}</div>
                   <div style={{ fontSize: '15px', fontWeight: '600', color: BLACK }}>
                     {new Date(conducteur.dateCreation).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })}
                   </div>
@@ -282,7 +284,7 @@ export default function ConducteurProfile() {
               <>
                 <h2 style={{ fontSize: '16px', fontWeight: '700', color: BLACK, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Icon name="message" size={20} />
-                  À propos
+                  {t('about')}
                 </h2>
                 <div style={{ 
                   padding: '20px', background: EMERALD_LIGHT, borderRadius: '12px', 

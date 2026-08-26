@@ -183,10 +183,10 @@ export default function MesTrajetsPage() {
           prev.map((t) => (t.id === id ? { ...t, statut: 'ANNULE' } : t))
         );
       } else {
-        setError('Erreur lors de l\'annulation'); setTimeout(() => setError(''), 4000);
+        setError(t('cancelError')); setTimeout(() => setError(''), 4000);
       }
     } catch {
-      setError('Erreur serveur'); setTimeout(() => setError(''), 4000);
+      setError(t('serverErrorShort')); setTimeout(() => setError(''), 4000);
     } finally {
       setCancellingId(null);
     }
@@ -195,26 +195,26 @@ export default function MesTrajetsPage() {
   const getStatutBadge = (statut: string) => {
     switch (statut?.toUpperCase()) {
       case 'EN_COURS':
-        return { bg: '#d1fae5', color: '#059669', label: 'En cours' };
+        return { bg: '#d1fae5', color: '#059669', label: t('inProgress') };
       case 'EN_ATTENTE_DEPART':
-        return { bg: '#fef3c7', color: '#d97706', label: 'Pret' };
+        return { bg: '#fef3c7', color: '#d97706', label: t('ready') };
       case 'EN_ATTENTE_VALIDATION':
-        return { bg: '#dbeafe', color: '#2563EB', label: 'A valider' };
+        return { bg: '#dbeafe', color: '#2563EB', label: t('toValidate') };
       case 'OUVERT':
       case 'OPEN':
-        return { bg: '#dcfce7', color: '#15803d', label: t('open') || 'Ouvert' };
+        return { bg: '#dcfce7', color: '#15803d', label: t('open') };
       case 'COMPLET':
       case 'FULL':
-        return { bg: '#dbeafe', color: '#1d4ed8', label: t('full') || 'Complet' };
+        return { bg: '#dbeafe', color: '#1d4ed8', label: t('full') };
       case 'ANNULE':
       case 'ANNULÉ':
       case 'CANCELLED':
-        return { bg: '#fee2e2', color: '#dc2626', label: t('cancelled') || 'Annulé' };
+        return { bg: '#fee2e2', color: '#dc2626', label: t('cancelled') };
       case 'TERMINE':
-        return { bg: '#f3f4f6', color: '#4b5563', label: t('completed') || 'Terminé' };
+        return { bg: '#f3f4f6', color: '#4b5563', label: t('completed') };
       case 'BROUILLON':
       case 'DRAFT':
-        return { bg: '#fef3c7', color: '#d97706', label: 'Brouillon' };
+        return { bg: '#fef3c7', color: '#d97706', label: t('draft') };
       default:
         return { bg: '#f3f4f6', color: '#6b7280', label: statut };
     }
@@ -253,11 +253,11 @@ export default function MesTrajetsPage() {
 
   const getFilterLabel = (filterKey: string) => {
     const labels: Record<string, string> = {
-      tous: t('all') || 'Tous',
-      ouvert: t('open') || 'Ouverts',
-      complet: t('full') || 'Complets',
-      annule: t('cancelled') || 'Annulés',
-      brouillon: 'Brouillons', // ✅ AJOUT
+      tous: t('all'),
+      ouvert: t('open'),
+      complet: t('full'),
+      annule: t('cancelled'),
+      brouillon: t('draftTrips'),
     };
     return labels[filterKey] || filterKey;
   };
@@ -267,7 +267,7 @@ export default function MesTrajetsPage() {
       <ConducteurLayout>
         <div style={{ textAlign: 'center', padding: '80px', color: darkMode ? '#9CA3AF' : '#6b7280' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}><Icon name="road" size={48} /></div>
-          <p>{t('loading') || 'Chargement...'}</p>
+          <p>{t('loading')}</p>
         </div>
       </ConducteurLayout>
     );
@@ -283,38 +283,38 @@ export default function MesTrajetsPage() {
       )}
       {confirmAnnulId !== null && (
         <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment annuler ce trajet ?</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('cancelTripConfirm')}</span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmAnnulId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
-            <button onClick={() => handleAnnuler(confirmAnnulId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, annuler</button>
+            <button onClick={() => setConfirmAnnulId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('no')}</button>
+            <button onClick={() => handleAnnuler(confirmAnnulId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('yesCancel')}</button>
           </div>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: darkMode ? '#FFFFFF' : '#111827', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {t('myTrips') || 'Mes trajets'} <Icon name="road" size={24} />
+            {t('myTrips')} <Icon name="road" size={24} />
           </h1>
-          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280' }}>{t('manageTrips') || 'Gérez vos trajets publiés et en brouillon'}</p>
+          <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280' }}>{t('manageTrips')}</p>
         </div>
         <Link href="/conducteur/trajets/creer" style={{
           display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
           background: 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
           boxShadow: '0 4px 15px rgba(13,158,126,0.4)', textDecoration: 'none',
         }}>
-          + {t('publish') || 'Publier'}
+          + {t('publish')}
         </Link>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
         {[
-          { key: 'tous', label: t('all') || 'Tous' }, 
-          { key: 'brouillon', label: 'Brouillons' },
-          { key: 'ouvert', label: t('open') || 'Ouverts' },
-          { key: 'en_cours', label: 'En cours' },
-          { key: 'complet', label: t('full') || 'Complets' }, 
-          { key: 'termine', label: t('completed') || 'Terminés' },
-          { key: 'annule', label: t('cancelled') || 'Annulés' }
+          { key: 'tous', label: t('all') }, 
+          { key: 'brouillon', label: t('draftTrips') },
+          { key: 'ouvert', label: t('open') },
+          { key: 'en_cours', label: t('inProgress') },
+          { key: 'complet', label: t('full') }, 
+          { key: 'termine', label: t('completed') },
+          { key: 'annule', label: t('cancelled') }
         ].map((f) => (
           <button key={f.key} onClick={() => setFilter(f.key as any)} style={{
             padding: '8px 16px', borderRadius: '20px', border: '1px solid #e5e7eb',
@@ -330,16 +330,16 @@ export default function MesTrajetsPage() {
       {filteredTrajets.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 40px', background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}><Icon name="road" size={64} /></div>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>{t('noTripsFound') || 'Aucun trajet trouvé'}</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827', marginBottom: '8px' }}>{t('noTripsFound')}</h3>
           <p style={{ fontSize: '13px', color: darkMode ? '#9CA3AF' : '#6b7280', marginBottom: '24px' }}>
-            {filter === 'tous' ? (t('noTripsPublished') || 'Vous n\'avez encore publié aucun trajet.') : (t('noTripsFilter') || 'Aucun trajet dans la catégorie') + ' "' + getFilterLabel(filter) + '"'}
+            {filter === 'tous' ? t('noTripsPublished') : t('noTripsInCategory') + ' "' + getFilterLabel(filter) + '"'}
           </p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: '16px' }}>
           {filteredTrajets.map((trajet) => {
             const statut = getStatutBadge(trajet.statut);
-            const isActif = statut.label === (t('open') || 'Ouvert') || statut.label === (t('full') || 'Complet');
+            const isActif = statut.label === t('open') || statut.label === t('full');
             const u = trajet.statut.toUpperCase();
             const isActiveEnCours = u === 'EN_COURS' || u === 'EN_ATTENTE_DEPART' || u === 'EN_ATTENTE_VALIDATION';
             const isTermine = u === 'TERMINE';
@@ -355,7 +355,7 @@ export default function MesTrajetsPage() {
                     <Icon name="car" size={24} color="white" />
                     <div>
                       <div style={{ fontSize: '15px', fontWeight: '800', color: '#fff' }}>{trajet.villeDepart} <span style={{ color: '#0D9E7E' }}>→</span> {trajet.villeArrivee}</div>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>{trajet.quartierDepart && trajet.quartierArrivee ? `${trajet.quartierDepart} → ${trajet.quartierArrivee}` : (t('locationDetails') || 'Détails du lieu')}</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>{trajet.quartierDepart && trajet.quartierArrivee ? `${trajet.quartierDepart} → ${trajet.quartierArrivee}` : t('locationDetails')}</div>
                       {trajet.conducteur?.noteMoyenne != null && trajet.conducteur.noteMoyenne > 0 && (
                         <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span style={{ color: '#F59E0B', fontSize: '11px' }}>{'★'.repeat(Math.round(trajet.conducteur.noteMoyenne))}{'☆'.repeat(5 - Math.round(trajet.conducteur.noteMoyenne))}</span>
@@ -373,13 +373,13 @@ export default function MesTrajetsPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ background: darkMode ? '#2D2D2D' : '#f9fafb', borderRadius: '8px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '11px', color: darkMode ? '#9CA3AF' : '#9ca3af', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Icon name="calendar" size={11} /> {t('dateTime') || 'Date & Heure'}
+                        <Icon name="calendar" size={11} /> {t('dateTime')}
                       </div>
                       <div style={{ fontSize: '13px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827' }}>
-                        <div>{t('departure') || 'Départ'} : <span style={{ color: '#0D9E7E' }}>{trajet.heureDepart}</span> <span style={{fontWeight: '400', color: darkMode ? '#9CA3AF' : '#6b7280', fontSize: '11px'}}>({formatDate(trajet.dateDepart)})</span></div>
+                        <div>{t('departure')} : <span style={{ color: '#0D9E7E' }}>{trajet.heureDepart}</span> <span style={{fontWeight: '400', color: darkMode ? '#9CA3AF' : '#6b7280', fontSize: '11px'}}>({formatDate(trajet.dateDepart)})</span></div>
                         {trajet.heureArriveeEstimee && (
                           <div style={{ marginTop: '4px', fontSize: '12px', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Icon name="clock" size={11} color="#059669" /> {t('estimatedArrival') || 'Arrivée est.'} : {trajet.heureArriveeEstimee}
+                            <Icon name="clock" size={11} color="#059669" /> {t('estimatedArrival')} : {trajet.heureArriveeEstimee}
                           </div>
                         )}
                       </div>
@@ -387,10 +387,10 @@ export default function MesTrajetsPage() {
                     
                     <div style={{ background: darkMode ? '#2D2D2D' : '#f9fafb', borderRadius: '8px', padding: '10px 12px' }}>
                       <div style={{ fontSize: '11px', color: darkMode ? '#9CA3AF' : '#9ca3af', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Icon name="users" size={11} /> {t('seatsAndPrice') || 'Places & Prix'}
+                        <Icon name="users" size={11} /> {t('seatsAndPrice')}
                       </div>
                       <div style={{ fontSize: '13px', fontWeight: '700', color: darkMode ? '#FFFFFF' : '#111827' }}>
-                        {trajet.nbReservationsConfirmees}/{trajet.placesDisponibles} {t('reserved') || 'réservés'}<br />
+                        {trajet.nbReservationsConfirmees}/{trajet.placesDisponibles} {t('reserved')}<br />
                         <span style={{ color: '#15803d' }}>{trajet.prixParPlace.toLocaleString('fr-FR')} FCFA</span>
                       </div>
                     </div>
@@ -401,44 +401,44 @@ export default function MesTrajetsPage() {
                     {(trajet.statut.toUpperCase() === 'EN_COURS' || trajet.statut.toUpperCase() === 'EN_ATTENTE_DEPART' || trajet.statut.toUpperCase() === 'EN_ATTENTE_VALIDATION') ? (
                       <>
                         <Link href={`/conducteur/trajets/${trajet.id}/carte-ramassage`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="map" size={12} color="#fff" /> Carte ramassage
+                          <Icon name="map" size={12} color="#fff" /> {t('pickupMapShort')}
                         </Link>
                         {trajet.statut.toUpperCase() === 'EN_ATTENTE_VALIDATION' && (
                           <Link href={`/conducteur/trajets/${trajet.id}`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid rgba(13,158,126,0.3)', background: 'rgba(13,158,126,0.05)', color: '#0D9E7E', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                            <Icon name="users" size={12} color="#0D9E7E" /> Valider présences
+                            <Icon name="users" size={12} color="#0D9E7E" /> {t('validatePresences')}
                           </Link>
                         )}
                       </>
                     ) : trajet.statut.toUpperCase() === 'TERMINE' ? (
                       <>
                         <Link href={`/conducteur/trajets/${trajet.id}`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', background: darkMode ? '#1A1A1A' : '#fff', color: darkMode ? '#FFFFFF' : '#374151', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="eye" size={12} /> {t('details') || 'Details'}
+                          <Icon name="eye" size={12} /> {t('details')}
                         </Link>
                         <Link href={`/conducteur/evaluations`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: '#0D9E7E', color: '#fff', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="star" size={12} color="#fff" /> Noter passagers
+                          <Icon name="star" size={12} color="#fff" /> {t('ratePassengers')}
                         </Link>
                       </>
                     ) : (
                       <>
                         <Link href={`/conducteur/trajets/${trajet.id}`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', background: darkMode ? '#1A1A1A' : '#fff', color: darkMode ? '#FFFFFF' : '#374151', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="eye" size={12} /> {t('details') || 'Details'}
+                          <Icon name="eye" size={12} /> {t('details')}
                         </Link>
                         <Link href={`/conducteur/trajets/${trajet.id}/carte-ramassage`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid rgba(13,158,126,0.3)', background: 'rgba(13,158,126,0.05)', color: '#0D9E7E', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                          <Icon name="map" size={12} color="#0D9E7E" /> {t('pickupMap') || 'Carte'}
+                          <Icon name="map" size={12} color="#0D9E7E" /> {t('pickupMap')}
                         </Link>
                         {isActif && (
                           <>
                             <Link href={`/conducteur/trajets/${trajet.id}/modifier`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid rgba(13,158,126,0.3)', background: 'rgba(13,158,126,0.05)', color: '#0D9E7E', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                              <Icon name="edit" size={12} color="#0D9E7E" /> {t('edit') || 'Modifier'}
+                              <Icon name="edit" size={12} color="#0D9E7E" /> {t('edit')}
                             </Link>
                             <button onClick={() => handleAnnuler(trajet.id)} disabled={cancellingId === trajet.id} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #fca5a5', background: '#fee2e2', color: '#dc2626', fontSize: '12px', fontWeight: '600', cursor: cancellingId === trajet.id ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                              <Icon name="x" size={12} color="#dc2626" /> {cancellingId === trajet.id ? '...' : (t('cancel') || 'Annuler')}
+                              <Icon name="x" size={12} color="#dc2626" /> {cancellingId === trajet.id ? '...' : t('cancel')}
                             </button>
                           </>
                         )}
                         {(trajet.statut.toUpperCase() === 'BROUILLON' || trajet.statut.toUpperCase() === 'DRAFT') && (
                           <Link href={`/conducteur/trajets/${trajet.id}/completer`} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: '#0D9E7E', color: '#fff', fontSize: '12px', fontWeight: '600', textAlign: 'center', textDecoration: 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                            <Icon name="edit" size={12} color="#fff" /> Complete
+                            <Icon name="edit" size={12} color="#fff" /> {t('completeInfo')}
                           </Link>
                         )}
                       </>

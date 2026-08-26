@@ -88,7 +88,7 @@ export default function ConducteurProfilPage() {
         if (!res.ok) {
           const errorText = await res.text();
           console.error("❌ ERREUR BRUTE DU BACKEND:", errorText);
-          throw new Error(`Erreur serveur ${res.status}`);
+          throw new Error(t('serverErrorPrefix') + res.status);
         }
         return res.json();
       })
@@ -264,7 +264,7 @@ export default function ConducteurProfilPage() {
               {displayPhoto ? (
                 <img 
                   src={displayPhoto} 
-                  alt="Aperçu photo" 
+                  alt={t('photoPreviewAlt')} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />

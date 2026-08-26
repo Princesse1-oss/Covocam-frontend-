@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 interface User {
   nom: string;
@@ -54,20 +55,20 @@ const Avatar = ({ user, size = 32 }: { user: User | null; size?: number }) => {
   }
 
   return (
-    <img src={imgSrc} alt="Profil"
+    <img src={imgSrc} alt="Profile"
       onError={() => setImgError(true)}
       style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', background: GREEN }}/>
   );
 };
 
-const navLinks = [
-  { label: 'Dashboard', path: '/admin/dashboard', icon: 'dashboard' },
-  { label: 'Trajets', path: '/admin/trajets', icon: 'trajets' },
-  { label: 'Réservations', path: '/admin/reservations', icon: 'reservations' },
-  { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: 'utilisateurs' },
-  { label: 'Évaluations', path: '/admin/evaluations', icon: 'evaluations' },
-  { label: 'Positions', path: '/admin/positions', icon: 'positions' },
-  { label: 'Paiements', path: '/admin/paiements', icon: 'paiements' },
+const getNavLinks = (t: (k: string) => string) => [
+  { label: t('dashboard'), path: '/admin/dashboard', icon: 'dashboard' },
+  { label: t('trajets'), path: '/admin/trajets', icon: 'trajets' },
+  { label: t('reservations'), path: '/admin/reservations', icon: 'reservations' },
+  { label: t('users'), path: '/admin/utilisateurs', icon: 'utilisateurs' },
+  { label: t('evaluations'), path: '/admin/evaluations', icon: 'evaluations' },
+  { label: t('positions'), path: '/admin/positions', icon: 'positions' },
+  { label: t('payments'), path: '/admin/paiements', icon: 'paiements' },
 ];
 
 const icons = {
@@ -126,32 +127,14 @@ export default function AdminTopbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [lang, setLang] = useState<'fr' | 'en'>('fr');
-
-  const applyDarkMode = (isDark: boolean) => {
-    setDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.body.style.background = '#0D0D0D';
-      document.body.style.color = '#FFFFFF';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.style.background = '#FFFFFF';
-      document.body.style.color = '#0D0D0D';
-    }
-  };
+  const { darkMode, toggleDarkMode: ctxToggleDarkMode, lang, toggleLang: ctxToggleLang, t } = useTheme();
+  const navLinks = getNavLinks((k) => t(k as Parameters<typeof t>[0]));
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode');
-    applyDarkMode(savedDarkMode === null ? false : savedDarkMode === 'true');
   }, []);
 
   useEffect(() => {
@@ -166,9 +149,6 @@ export default function AdminTopbar() {
     };
     updateUser();
 
-    const savedLang = localStorage.getItem('lang') as 'fr' | 'en' | null;
-    if (savedLang) setLang(savedLang);
-
     window.addEventListener('user-updated', updateUser);
     return () => { window.removeEventListener('user-updated', updateUser); };
   }, []);
@@ -179,20 +159,6 @@ export default function AdminTopbar() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push('/login');
-  };
-
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    applyDarkMode(newMode);
-    localStorage.setItem('darkMode', String(newMode));
-    window.dispatchEvent(new Event('darkModeChanged'));
-  };
-
-  const toggleLang = () => {
-    const newLang = lang === 'fr' ? 'en' : 'fr';
-    setLang(newLang);
-    localStorage.setItem('lang', newLang);
-    window.dispatchEvent(new Event('langChanged'));
   };
 
   return (
@@ -239,7 +205,7 @@ export default function AdminTopbar() {
 
             {/* Mode sombre/clair */}
             <div
-              onClick={toggleDarkMode}
+              onClick={ctxToggleDarkMode}
               style={{
                 width: '36px', height: '36px', borderRadius: '10px',
                 background: 'transparent',
@@ -248,7 +214,7 @@ export default function AdminTopbar() {
               }}
               onMouseEnter={e => e.currentTarget.style.background = '#2a1a1a'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              title={darkMode ? 'Mode clair' : 'Mode sombre'}
+              title={darkMode ? t('lightMode') : t('darkMode')}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={darkMode ? '#FCD34D' : '#9ca3af'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 {darkMode ? (
@@ -264,7 +230,7 @@ export default function AdminTopbar() {
 
             {/* Sélecteur de langue */}
             <div
-              onClick={toggleLang}
+              onClick={ctxToggleLang}
               style={{
                 width: '36px', height: '36px', borderRadius: '10px',
                 background: 'transparent',
@@ -317,7 +283,7 @@ export default function AdminTopbar() {
                         <Avatar user={user} size={40}/>
                         <div>
                           <div style={{ fontSize: '14px', fontWeight: '700', color: '#fff' }}>{user?.prenom} {user?.nom}</div>
-                          <div style={{ fontSize: '11px', color: GREEN, marginTop: '2px', fontWeight: '600' }}>Administrateur</div>
+                           <div style={{ fontSize: '11px', color: GREEN, marginTop: '2px', fontWeight: '600' }}>{t('admin')}</div>
                         </div>
                       </div>
                     </div>
@@ -333,7 +299,7 @@ export default function AdminTopbar() {
                           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                           <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        <span style={{ fontSize: '13px', color: '#fff', fontWeight: '500' }}>Mon profil</span>
+                        <span style={{ fontSize: '13px', color: '#fff', fontWeight: '500' }}>{t('myProfile')}</span>
                       </div>
                     </Link>
 
@@ -348,7 +314,7 @@ export default function AdminTopbar() {
                           stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M16 17L21 12L16 7M21 12H9" stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      <span style={{ fontSize: '13px', color: GREEN, fontWeight: '600' }}>Se déconnecter</span>
+                      <span style={{ fontSize: '13px', color: GREEN, fontWeight: '600' }}>{t('logout')}</span>
                     </div>
                   </div>
                 </>
@@ -426,7 +392,7 @@ export default function AdminTopbar() {
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span style={{ fontSize: '15px', color: '#fff', fontWeight: '500' }}>Mon profil</span>
+                <span style={{ fontSize: '15px', color: '#fff', fontWeight: '500' }}>{t('myProfile')}</span>
               </div>
             </Link>
 
@@ -441,7 +407,7 @@ export default function AdminTopbar() {
                   stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M16 17L21 12L16 7M21 12H9" stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span style={{ fontSize: '15px', color: RED, fontWeight: '600' }}>Se déconnecter</span>
+              <span style={{ fontSize: '15px', color: RED, fontWeight: '600' }}>{t('logout')}</span>
             </div>
           </div>
         )}

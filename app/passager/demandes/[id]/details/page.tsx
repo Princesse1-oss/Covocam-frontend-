@@ -37,6 +37,7 @@ const Icon = ({ name, size = 20, color = E }: { name: string; size?: number; col
     info: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
     creditCard: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
     eye: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+    trash: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>,
   };
   return <span style={{ lineHeight: 0, display: 'inline-flex' }}>{icons[name] || null}</span>;
 };
@@ -49,6 +50,7 @@ export default function DemandeConfirmationPage() {
   const [demande, setDemande] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [annulant, setAnnulant] = useState(false);
 
   const id = params?.id as string;
 
@@ -75,7 +77,7 @@ export default function DemandeConfirmationPage() {
         if (found) {
           setDemande(found);
         } else {
-          setError(lang === 'fr' ? `Demande ID ${id} introuvable.` : 'Request not found.');
+          setError(t('requestNotFound'));
         }
       } catch (err: any) {
         clearTimeout(timeoutId);
@@ -103,7 +105,7 @@ export default function DemandeConfirmationPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: darkMode ? '#0D0D0D' : '#F9FAFB' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-        <p style={{ color: textSecondary, fontSize: '14px' }}>{lang === 'fr' ? 'Chargement...' : 'Loading...'}</p>
+        <p style={{ color: textSecondary, fontSize: '14px' }}>{t('loading')}</p>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
@@ -113,10 +115,10 @@ export default function DemandeConfirmationPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: darkMode ? '#0D0D0D' : '#F9FAFB' }}>
       <div style={{ background: bgCard, borderRadius: '24px', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center', border: `1px solid ${borderColor}` }}>
         <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: RL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}><Icon name="alert" size={32} color={RD} /></div>
-        <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '12px' }}>{lang === 'fr' ? 'Oups !' : 'Oops!'}</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '12px' }}>{t('oops')}</h2>
         <p style={{ fontSize: '15px', color: textSecondary, marginBottom: '24px' }}>{error}</p>
         <Link href="/passager/demandes" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', background: E, color: '#FFF', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
-          <Icon name="arrowLeft" size={16} color="#FFF" /> {lang === 'fr' ? 'Retour' : 'Back'}
+          <Icon name="arrowLeft" size={16} color="#FFF" /> {t('back')}
         </Link>
       </div>
     </div>
@@ -124,7 +126,30 @@ export default function DemandeConfirmationPage() {
 
   const isAcceptee = demande.statut === 'ACCEPTEE';
   const isConfirmee = demande.statut === 'CONFIRMEE';
+  const isAnnulable = ['EN_ATTENTE', 'ACCEPTEE'].includes(demande.statut);
   const conducteur = demande.conducteurAcceptant;
+
+  const handleAnnuler = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setAnnulant(true);
+    try {
+      const res = await fetch(`${API_URL}/demandes/${demande.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
+      });
+      if (res.ok) {
+        setDemande((prev: any) => ({ ...prev, statut: 'ANNULEE' }));
+      } else {
+        const data = await res.json();
+        setError(data.error || t('error'));
+      }
+    } catch {
+      setError(t('serverConnectionError'));
+    } finally {
+      setAnnulant(false);
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: darkMode ? '#0D0D0D' : '#F9FAFB', padding: '32px 16px' }}>
@@ -133,7 +158,7 @@ export default function DemandeConfirmationPage() {
 
         {/* Back */}
         <Link href="/passager/demandes" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', color: E, fontSize: '14px', fontWeight: '600', marginBottom: '24px' }}>
-          <Icon name="arrowLeft" size={16} /> {lang === 'fr' ? 'Retour aux demandes' : 'Back to requests'}
+          <Icon name="arrowLeft" size={16} /> {t('backToRequests')}
         </Link>
 
         {/* Success banner */}
@@ -148,12 +173,10 @@ export default function DemandeConfirmationPage() {
             </div>
             <div>
               <h2 style={{ fontSize: '17px', fontWeight: '800', color: '#166534', margin: '0 0 4px' }}>
-                {lang === 'fr' ? 'Demande acceptée !' : 'Request accepted!'}
+                {t('requestAccepted')}
               </h2>
               <p style={{ fontSize: '13px', color: '#15803D', margin: 0, lineHeight: '1.4' }}>
-                {lang === 'fr'
-                  ? 'Un conducteur a accepté votre demande. Procédez au paiement pour confirmer votre place.'
-                  : 'A driver accepted your request. Proceed to payment to confirm your seat.'}
+                {t('acceptedYourRequest')}
               </p>
             </div>
           </div>
@@ -170,10 +193,10 @@ export default function DemandeConfirmationPage() {
             </div>
             <div>
               <h2 style={{ fontSize: '17px', fontWeight: '800', color: ED, margin: '0 0 4px' }}>
-                {lang === 'fr' ? 'Paiement confirmé' : 'Payment confirmed'}
+                {t('paymentConfirmedShort')}
               </h2>
               <p style={{ fontSize: '13px', color: E, margin: 0, lineHeight: '1.4' }}>
-                {lang === 'fr' ? 'Votre réservation est finalisée.' : 'Your reservation is finalized.'}
+                {t('reservationFinalized')}
               </p>
             </div>
           </div>
@@ -182,10 +205,10 @@ export default function DemandeConfirmationPage() {
         {/* Header */}
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: textColor, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Icon name="eye" size={24} /> {lang === 'fr' ? 'Détails de la demande' : 'Request Details'}
+            <Icon name="eye" size={24} /> {t('requestDetailsTitle')}
           </h1>
           <p style={{ fontSize: '14px', color: textSecondary, margin: 0 }}>
-            {lang === 'fr' ? `Demande #${demande.id}` : `Request #${demande.id}`}
+            {t('requestNumber').replace('{id}', String(demande.id))}
           </p>
         </div>
 
@@ -196,7 +219,7 @@ export default function DemandeConfirmationPage() {
             {/* Route */}
             <div style={{ marginBottom: '24px' }}>
               <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icon name="mapPin" size={14} /> {lang === 'fr' ? 'Trajet' : 'Route'}
+                <Icon name="mapPin" size={14} /> {t('routeLabel')}
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px', background: bgSubtle, borderRadius: '14px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
@@ -206,10 +229,10 @@ export default function DemandeConfirmationPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>{demande.villeDepart || '—'}</div>
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{lang === 'fr' ? 'Départ' : 'Departure'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{t('departure')}</div>
                   <div style={{ height: '1px', background: borderColor, margin: '8px 0' }} />
                   <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>{demande.villeArrivee || '—'}</div>
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{lang === 'fr' ? 'Arrivée' : 'Arrival'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{t('arrival')}</div>
                 </div>
               </div>
             </div>
@@ -218,17 +241,17 @@ export default function DemandeConfirmationPage() {
             <div className="det-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '24px' }}>
               <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                 <Icon name="calendar" size={16} color={E} />
-                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Date' : 'Date'}</div>
+                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('date')}</div>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{formatDate(demande.dateDepart)}</div>
               </div>
               <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                 <Icon name="clock" size={16} color={E} />
-                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Heure' : 'Time'}</div>
+                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('time')}</div>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{demande.heureDepart || '—'}</div>
               </div>
               <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                 <Icon name="users" size={16} color={E} />
-                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Places' : 'Seats'}</div>
+                <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('seats')}</div>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{demande.nbPlaces || 0}</div>
               </div>
             </div>
@@ -237,7 +260,7 @@ export default function DemandeConfirmationPage() {
             {conducteur && (
               <div style={{ marginBottom: '24px', padding: '16px', background: bgSubtle, borderRadius: '14px' }}>
                 <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Icon name="users" size={14} /> {lang === 'fr' ? 'Votre conducteur' : 'Your Driver'}
+                  <Icon name="users" size={14} /> {t('yourDriver')}
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
@@ -251,7 +274,7 @@ export default function DemandeConfirmationPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '15px', fontWeight: '700', color: textColor }}>{conducteur.prenom} {conducteur.nom}</div>
                     <div style={{ fontSize: '12px', color: E, fontWeight: '600', marginTop: '2px' }}>
-                      {isAcceptee ? (lang === 'fr' ? 'A accepté votre demande' : 'Accepted your request') : (lang === 'fr' ? 'Conducteur assigné' : 'Assigned driver')}
+                      {isAcceptee ? t('acceptedYourRequest') : t('assignedDriver')}
                     </div>
                   </div>
                   {conducteur.noteMoyenne > 0 && (
@@ -267,18 +290,18 @@ export default function DemandeConfirmationPage() {
             {/* Pricing summary */}
             <div style={{ borderTop: `1px dashed ${borderColor}`, paddingTop: '20px', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icon name="money" size={14} /> {lang === 'fr' ? 'Tarif' : 'Pricing'}
+                <Icon name="money" size={14} /> {t('pricingLabel')}
               </h3>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '14px', color: textSecondary }}>{lang === 'fr' ? 'Prix par place' : 'Price per seat'}</span>
+                <span style={{ fontSize: '14px', color: textSecondary }}>{t('pricePerSeat')}</span>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: textColor }}>{(demande.prixPropose || demande.budgetMax || 0).toLocaleString()} FCFA</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <span style={{ fontSize: '14px', color: textSecondary }}>{lang === 'fr' ? 'Nombre de places' : 'Number of seats'}</span>
+                <span style={{ fontSize: '14px', color: textSecondary }}>{t('numberOfSeats')}</span>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: textColor }}>x {demande.nbPlaces || 0}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: `2px solid ${borderColor}` }}>
-                <span style={{ fontSize: '16px', fontWeight: '800', color: textColor }}>{lang === 'fr' ? 'Total' : 'Total'}</span>
+                <span style={{ fontSize: '16px', fontWeight: '800', color: textColor }}>{t('total')}</span>
                 <span style={{ fontSize: '24px', fontWeight: '800', color: E }}>{((demande.prixPropose || demande.budgetMax || 0) * (demande.nbPlaces || 1)).toLocaleString()} <span style={{ fontSize: '13px', fontWeight: '600', color: textSecondary }}>FCFA</span></span>
               </div>
             </div>
@@ -294,7 +317,7 @@ export default function DemandeConfirmationPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     transition: 'all 0.2s',
                   }}>
-                    <Icon name="message" size={16} /> {lang === 'fr' ? 'Contacter' : 'Chat'}
+                    <Icon name="message" size={16} /> {t('contactChat')}
                   </button>
                 </Link>
               )}
@@ -309,7 +332,7 @@ export default function DemandeConfirmationPage() {
                     boxShadow: `0 4px 14px rgba(13,158,126,0.3)`,
                     transition: 'all 0.2s',
                   }}>
-                    <Icon name="creditCard" size={16} color="#FFF" /> {lang === 'fr' ? 'Payer maintenant' : 'Pay now'}
+                    <Icon name="creditCard" size={16} color="#FFF" /> {t('payNow')}
                   </button>
                 </Link>
               )}
@@ -318,8 +341,30 @@ export default function DemandeConfirmationPage() {
               {isConfirmee && (
                 <div style={{ flex: 1, minWidth: '140px', padding: '14px', borderRadius: '12px', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <Icon name="checkCircle" size={16} />
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: E }}>{lang === 'fr' ? 'Confirmé' : 'Confirmed'}</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: E }}>{t('confirmed')}</span>
                 </div>
+              )}
+
+              {/* Cancel button */}
+              {isAnnulable && (
+                <button
+                  onClick={handleAnnuler}
+                  disabled={annulant}
+                  style={{
+                    flex: 1, minWidth: '140px', padding: '14px', borderRadius: '12px',
+                    border: `1px solid ${RD}`, background: RL, color: RD,
+                    fontSize: '14px', fontWeight: '600', cursor: annulant ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    opacity: annulant ? 0.6 : 1, transition: 'all 0.2s',
+                  }}
+                >
+                  {annulant ? (
+                    <div style={{ width: 16, height: 16, border: `2px solid ${RD}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  ) : (
+                    <Icon name="trash" size={16} color={RD} />
+                  )}
+                  {t('cancel')}
+                </button>
               )}
             </div>
 
@@ -328,9 +373,7 @@ export default function DemandeConfirmationPage() {
               <div style={{ marginTop: '16px', padding: '12px 16px', background: darkMode ? '#1E293B' : '#F0F9FF', borderRadius: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                 <Icon name="info" size={16} color="#3B82F6" />
                 <p style={{ fontSize: '12px', color: darkMode ? '#93C5FD' : '#1D4ED8', margin: 0, lineHeight: '1.5' }}>
-                  {lang === 'fr'
-                    ? 'Votre place sera réservée après le paiement. Le conducteur a été informé de votre demande.'
-                    : 'Your seat will be reserved after payment. The driver has been informed of your request.'}
+                  {t('payConfirmAcceptedMsg')}
                 </p>
               </div>
             )}

@@ -8,6 +8,7 @@ import LegendeCarte from './LegendeCarte';
 import RouteProgressBand from './RouteProgressBand';
 import { DepartIcon, ArriveeIcon, VoitureIcon } from './mapIcons';
 import SvgIcon from './SvgIcon';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 // Fix pour les icônes Leaflet dans Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -93,6 +94,7 @@ export default function MapComponent({
   height = '400px',
   zoom = DEFAULT_ZOOM,
 }: MapComponentProps) {
+  const { t, lang } = useTheme();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function MapComponent({
   if (!isClient) {
     return (
       <div style={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
-        <span style={{ color: '#6b7280', fontSize: '14px' }}>Chargement de la carte...</span>
+        <span style={{ color: '#6b7280', fontSize: '14px' }}>{t('mapLoading')}</span>
       </div>
     );
   }

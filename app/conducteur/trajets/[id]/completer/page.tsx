@@ -84,7 +84,7 @@ export default function CompleterTrajetPage() {
 
   const fetchTrajet = async (token: string) => {
     try {
-      const res = await fetch(`${API_URL}/conducteur/trajets/${trajetId}`, {
+      const res = await fetch(`${API_URL}/trajets/${trajetId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) { setError('Trajet non trouvé'); setLoading(false); return; }

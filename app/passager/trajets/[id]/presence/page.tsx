@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 const API_URL = '/api';
 const E = '#0D9E7E';
@@ -36,6 +37,7 @@ const Icon = ({ name, size = 24, color = E }: { name: string; size?: number; col
 export default function PassagerPresencePage() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useTheme();
   const id = params.id as string;
   
   const [trajet, setTrajet] = useState<any>(null);
@@ -51,12 +53,12 @@ export default function PassagerPresencePage() {
     fetch(`${API_URL}/trajets/${id}`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(data => { setTrajet(data); setLoading(false); })
-      .catch(() => { setError('Erreur de chargement'); setLoading(false); });
+      .catch(() => { setError(t('errorLoading')); setLoading(false); });
   }, [id, router]);
 
   const handleJeSuisLa = async () => {
     if (!navigator.geolocation) {
-      setError('La géolocalisation n\'est pas supportée par votre appareil.');
+      setError(t('geolocationNotSupported'));
       return;
     }
 
@@ -84,19 +86,19 @@ export default function PassagerPresencePage() {
             setSuccess(true);
             setTimeout(() => router.push('/passager/reservations'), 3000);
           } else {
-            setError(data.error || 'Erreur lors de la confirmation');
+            setError(data.error || t('confirmPresenceError'));
           }
         } catch (err) {
-          setError('Erreur de connexion au serveur');
+          setError(t('serverConnectionError'));
         } finally {
           setSubmitting(false);
         }
       },
       (err) => {
-        let msg = 'Impossible d\'accéder à votre position GPS.';
-        if (err.code === 1) msg = 'La géolocalisation est refusée. Autorisez-la dans les paramètres de votre navigateur.';
-        else if (err.code === 2) msg = 'Position indisponible. Vérifiez que le GPS est activé.';
-        else if (err.code === 3) msg = 'Délai d\'attente dépassé. Réessayez dans un lieu dégagé.';
+        let msg = t('gpsUnavailable');
+        if (err.code === 1) msg = t('gpsPermissionDenied');
+        else if (err.code === 2) msg = t('gpsPositionUnavailable');
+        else if (err.code === 3) msg = t('gpsTimeoutRetry');
         setError(msg);
         setSubmitting(false);
       },
@@ -104,7 +106,7 @@ export default function PassagerPresencePage() {
     );
   };
 
-  if (loading) return <><div style={{textAlign:'center', padding:'80px', color:GR}}>Chargement...</div></>;
+  if (loading) return <><div style={{textAlign:'center', padding:'80px', color:GR}}>{t('loading')}</div></>;
   if (error && !trajet) return <><div style={{textAlign:'center', padding:'80px', color:'#dc2626'}}>{error}</div></>;
 
   return (
@@ -113,19 +115,19 @@ export default function PassagerPresencePage() {
         {success ? (
           <div style={{ textAlign: 'center', padding: '40px 20px', background: EL, borderRadius: '16px', border: `1px solid #6EE7B7` }}>
             <div style={{ color: E, marginBottom: '16px' }}><Icon name="check" size={48} color={E} /></div>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', color: ED, marginBottom: '8px' }}>Présence confirmée !</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', color: ED, marginBottom: '8px' }}>{t('presenceConfirmedTitle')}</h2>
             <p style={{ fontSize: '14px', color: ED, lineHeight: '1.6' }}>
-              Le conducteur a été notifié que vous êtes au point de départ. Bon trajet !
+              {t('driverNotifiedDeparture')}
             </p>
           </div>
         ) : (
           <>
             <div style={{ marginBottom: '24px' }}>
               <h1 style={{ fontSize: '22px', fontWeight: '800', color: BK, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Icon name="mapPin" size={24} /> Confirmer votre présence
+                <Icon name="mapPin" size={24} /> {t('confirmPresence')}
               </h1>
               <p style={{ fontSize: '14px', color: GR, lineHeight: '1.5' }}>
-                Vous êtes sur le point de confirmer que vous êtes au point de départ pour le trajet :<br/>
+                {t('confirmPresenceDesc')}<br/>
                 <strong style={{ color: BK }}>{trajet?.villeDepart} → {trajet?.villeArrivee}</strong>
               </p>
             </div>
@@ -149,9 +151,9 @@ export default function PassagerPresencePage() {
                 transition: 'all 0.2s'
               }}
             >
-              {submitting ? 'Localisation en cours...' : (
+              {submitting ? t('locating') : (
                 <>
-                  <Icon name="check" size={20} color="#fff" /> Je suis au point de départ
+                  <Icon name="check" size={20} color="#fff" /> {t('imAtDeparturePoint')}
                 </>
               )}
             </button>
@@ -160,7 +162,7 @@ export default function PassagerPresencePage() {
               onClick={() => router.back()} 
               style={{ width: '100%', marginTop: '12px', padding: '14px', borderRadius: '12px', border: `1px solid ${BD}`, background: '#fff', color: GR, fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
             >
-              Annuler
+              {t('cancel')}
             </button>
           </>
         )}

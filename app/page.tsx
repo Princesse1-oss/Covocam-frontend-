@@ -1,85 +1,14 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useTheme } from '@/app/lib/ThemeContext';
 
-// Couleurs du thème
+// Couleurs du thÃ¨me
 const E = '#0D9E7E';
 const ED = '#0A7B62';
 
-// Traductions
-const translations = {
-  fr: {
-    brand: 'CovoCam',
-    tagline: 'Covoiturage Cameroun',
-    login: 'Se connecter',
-    register: "S'inscrire gratuitement",
-    heroTitle: 'Voyagez ensemble,',
-    heroTitleHighlight: 'économisez plus',
-    heroDesc: 'Trouvez un trajet entre Yaoundé, Douala et toutes les villes du Cameroun. Simple, sûr et abordable.',
-    searchPlaceholder: 'Où souhaitez-vous aller ?',
-    departure: 'Départ',
-    arrival: 'Arrivée',
-    searchBtn: 'Rechercher un trajet',
-    stats: {
-      travelers: 'Voyageurs',
-      drivers: 'Conducteurs',
-      trips: 'Trajets effectués'
-    },
-    featuresTitle: 'Pourquoi choisir CovoCam ?',
-    featuresDesc: 'La solution de covoiturage pensée pour les Camerounais',
-    features: [
-      { title: 'Prix imbattables', desc: 'Partagez les frais de route entre Yaoundé et Douala dès 2 500 FCFA.' },
-      { title: 'Sécurité garantie', desc: 'Tous nos conducteurs sont évalués par la communauté après chaque trajet.' },
-      { title: 'Communication directe', desc: 'Échangez avec votre conducteur ou passager via notre messagerie intégrée.' },
-      { title: 'Système de notation', desc: 'Après chaque trajet, notez et soyez noté pour renforcer la confiance.' },
-      { title: '10 régions couvertes', desc: 'De Maroua à Kribi, CovoCam couvre toutes les grandes villes du Cameroun.' },
-      { title: 'Mobile Money', desc: 'Payez facilement via MTN MoMo ou Orange Money. (Bientôt disponible)' }
-    ],
-    ctaTitle: 'Prêt à voyager autrement ?',
-    ctaDesc: 'Rejoignez des milliers de Camerounais qui voyagent malin avec CovoCam',
-    ctaRegister: 'Créer un compte gratuit',
-    ctaLogin: 'Se connecter',
-    footer: '© 2025 CovoCam — Covoiturage au Cameroun · Projet académique CDAEN',
-    availableTrips: 'trajets disponibles aujourd\'hui'
-  },
-  en: {
-    brand: 'CovoCam',
-    tagline: 'Cameroon Ridesharing',
-    login: 'Sign in',
-    register: 'Sign up free',
-    heroTitle: 'Travel together,',
-    heroTitleHighlight: 'save more',
-    heroDesc: 'Find a ride between Yaoundé, Douala and all cities in Cameroon. Simple, safe and affordable.',
-    searchPlaceholder: 'Where do you want to go?',
-    departure: 'Departure',
-    arrival: 'Arrival',
-    searchBtn: 'Find a ride',
-    stats: {
-      travelers: 'Travelers',
-      drivers: 'Drivers',
-      trips: 'Trips completed'
-    },
-    featuresTitle: 'Why choose CovoCam?',
-    featuresDesc: 'The ridesharing solution designed for Cameroonians',
-    features: [
-      { title: 'Unbeatable prices', desc: 'Share road costs between Yaoundé and Douala from 2,500 FCFA.' },
-      { title: 'Guaranteed safety', desc: 'All our drivers are rated by the community after each trip.' },
-      { title: 'Direct communication', desc: 'Chat with your driver or passenger via our integrated messaging.' },
-      { title: 'Rating system', desc: 'After each trip, rate and be rated to build trust.' },
-      { title: '10 regions covered', desc: 'From Maroua to Kribi, CovoCam covers all major cities in Cameroon.' },
-      { title: 'Mobile Money', desc: 'Pay easily via MTN MoMo or Orange Money. (Coming soon)' }
-    ],
-    ctaTitle: 'Ready to travel differently?',
-    ctaDesc: 'Join thousands of Cameroonians who travel smart with CovoCam',
-    ctaRegister: 'Create a free account',
-    ctaLogin: 'Sign in',
-    footer: '© 2025 CovoCam — Ridesharing in Cameroon · Academic Project CDAEN',
-    availableTrips: 'rides available today'
-  }
-};
-
-// Icônes SVG
+// IcÃ´nes SVG
 const Icons = {
   Logo: ({ color = 'white' }) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -153,14 +82,13 @@ const Icons = {
   )
 };
 
-// Statistiques aléatoires pour la démo
+// Statistiques alÃ©atoires pour la dÃ©mo
 const getRandomTrips = () => Math.floor(Math.random() * 50 + 100);
 
 export default function HomePage() {
   const router = useRouter();
+  const { t, lang, toggleLang, darkMode, toggleDarkMode } = useTheme();
   const [scrolled, setScrolled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [currentTrips] = useState(getRandomTrips());
 
@@ -170,16 +98,7 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
-  const t = translations[lang];
-  const cities = ['Yaoundé', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'Ngaoundéré', 'Bertoua', 'Ebolowa', 'Kribi'];
+  const cities = ['YaoundÃ©', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'NgaoundÃ©rÃ©', 'Bertoua', 'Ebolowa', 'Kribi'];
 
   const getStyles = (isDark: boolean) => {
     const bg = isDark ? '#0D0D0D' : '#FFFFFF';
@@ -290,7 +209,7 @@ export default function HomePage() {
         .dark .search-box { background: #1A1A1A; border-color: #2A2A2A; }
       `}</style>
 
-      {/* ── TOPBAR ── */}
+      {/* â”€â”€ TOPBAR â”€â”€ */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
         background: scrolled ? styles.topbarBg : 'transparent',
@@ -312,14 +231,14 @@ export default function HomePage() {
               color: scrolled ? styles.text : (darkMode ? '#FFFFFF' : '#FFFFFF'),
               letterSpacing: '-0.4px'
             }}>
-              {t.brand}<span style={{ color: E }}>Cam</span>
+              {t('brandName')}<span style={{ color: E }}>Cam</span>
             </span>
             <br />
             <span style={{
               fontSize: '9px', color: E, fontWeight: '600',
               letterSpacing: '0.6px', textTransform: 'uppercase'
             }}>
-              {t.tagline}
+              {t('tagline')}
             </span>
           </div>
         </div>
@@ -362,7 +281,7 @@ export default function HomePage() {
                 {['fr', 'en'].map((l) => (
                   <button
                     key={l}
-                    onClick={() => { setLang(l as 'fr' | 'en'); setIsLangOpen(false); }}
+                    onClick={() => { if (l !== lang) toggleLang(); setIsLangOpen(false); }}
                     style={{
                       display: 'block',
                       width: '100%',
@@ -376,7 +295,7 @@ export default function HomePage() {
                       transition: 'all .2s'
                     }}
                   >
-                    {l === 'fr' ? 'Français' : 'English'}
+                    {l === 'fr' ? 'FranÃ§ais' : 'English'}
                   </button>
                 ))}
               </div>
@@ -385,7 +304,7 @@ export default function HomePage() {
 
           {/* Theme toggle */}
           <button
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={toggleDarkMode}
             style={{
               background: 'transparent',
               border: `1.5px solid ${scrolled ? (darkMode ? '#4A4A4A' : '#E5E7EB') : 'rgba(255,255,255,0.3)'}`,
@@ -412,19 +331,19 @@ export default function HomePage() {
               background: 'transparent'
             }}
           >
-            {t.login}
+            {t('login')}
           </button>
           <button
             className="btn-primary"
             onClick={() => router.push('/register')}
             style={{ padding: '10px 24px', fontSize: '14px' }}
           >
-            {t.register}
+            {t('registerFree')}
           </button>
         </div>
       </header>
 
-      {/* ── HERO ── */}
+      {/* â”€â”€ HERO â”€â”€ */}
       <section className="hero-section" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
         {/* Image gauche */}
         <div className="hero-image-container">
@@ -447,7 +366,7 @@ export default function HomePage() {
           }}>
             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ADE80' }} />
             <span style={{ fontSize: '13px', color: 'white', fontWeight: '600' }}>
-              +{currentTrips} {t.availableTrips}
+              +{currentTrips} {t('availableTripsToday')}
             </span>
           </div>
         </div>
@@ -462,7 +381,7 @@ export default function HomePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <div style={{ width: '32px', height: '2px', background: E, borderRadius: '2px' }} />
             <span style={{ fontSize: '13px', color: E, fontWeight: '600', letterSpacing: '0.5px' }}>
-              <Icons.Globe color={E} /> {lang === 'fr' ? 'Fait pour le Cameroun' : 'Made for Cameroon'}
+              <Icons.Globe color={E} /> {t('madeForCameroon')}
             </span>
           </div>
 
@@ -470,15 +389,15 @@ export default function HomePage() {
             fontSize: '42px', fontWeight: '800', color: styles.text,
             lineHeight: '1.15', letterSpacing: '-1px', margin: '0 0 16px'
           }}>
-            {t.heroTitle}<br />
-            <span style={{ color: E }}>{t.heroTitleHighlight}</span>
+            {t('heroTitle')}<br />
+            <span style={{ color: E }}>{t('heroTitleHighlight')}</span>
           </h1>
 
           <p style={{
             fontSize: '16px', color: styles.textSecondary,
             lineHeight: '1.7', margin: '0 0 36px', maxWidth: '420px'
           }}>
-            {t.heroDesc}
+            {t('heroDesc')}
           </p>
 
           {/* Mini formulaire de recherche */}
@@ -494,7 +413,7 @@ export default function HomePage() {
               marginBottom: '14px',
               textTransform: 'uppercase', letterSpacing: '0.5px'
             }}>
-              {t.searchPlaceholder}
+              {t('homeSearchPlaceholder')}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
               <select style={{
@@ -506,7 +425,7 @@ export default function HomePage() {
                 background: styles.inputBg,
                 outline: 'none'
               }}>
-                <option value="">{t.departure}</option>
+                <option value="">{t('departure')}</option>
                 {cities.map(v => (<option key={v} value={v}>{v}</option>))}
               </select>
               <select style={{
@@ -518,7 +437,7 @@ export default function HomePage() {
                 background: styles.inputBg,
                 outline: 'none'
               }}>
-                <option value="">{t.arrival}</option>
+                <option value="">{t('arrival')}</option>
                 {cities.map(v => (<option key={v} value={v}>{v}</option>))}
               </select>
             </div>
@@ -527,7 +446,7 @@ export default function HomePage() {
               onClick={() => router.push('/login')}
               style={{ width: '100%', padding: '14px', borderRadius: '12px', fontSize: '15px' }}
             >
-              {t.searchBtn}
+              {t('searchTrip')}
             </button>
           </div>
 
@@ -535,26 +454,26 @@ export default function HomePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Icons.Shield color={E} />
               <span style={{ fontSize: '12px', color: styles.textSecondary, fontWeight: '500' }}>
-                {lang === 'fr' ? 'Paiement sécurisé' : 'Secure payment'}
+                {t('securePaymentBadge')}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Icons.Star color={E} />
               <span style={{ fontSize: '12px', color: styles.textSecondary, fontWeight: '500' }}>
-                {lang === 'fr' ? 'Conducteurs vérifiés' : 'Verified drivers'}
+                {t('verifiedDrivers')}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Icons.Mobile color={E} />
               <span style={{ fontSize: '12px', color: styles.textSecondary, fontWeight: '500' }}>
-                {lang === 'fr' ? 'Suivi en temps réel' : 'Real-time tracking'}
+                {t('realTimeTracking')}
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
+      {/* â”€â”€ FEATURES â”€â”€ */}
       <section style={{
         padding: '80px 48px',
         background: styles.sectionBg,
@@ -568,16 +487,23 @@ export default function HomePage() {
               margin: '0 0 12px',
               letterSpacing: '-0.5px'
             }}>
-              {t.featuresTitle}
+              {t('featuresTitle')}
             </h2>
-            <p style={{ fontSize: '16px', color: styles.textSecondary }}>{t.featuresDesc}</p>
+            <p style={{ fontSize: '16px', color: styles.textSecondary }}>{t('featuresDesc')}</p>
           </div>
           <div className="features-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3,1fr)',
             gap: '24px'
           }}>
-            {t.features.map((f, i) => {
+            {[
+              { title: t('feature1Title'), desc: t('feature1Desc') },
+              { title: t('feature2Title'), desc: t('feature2Desc') },
+              { title: t('feature3Title'), desc: t('feature3Desc') },
+              { title: t('feature4Title'), desc: t('feature4Desc') },
+              { title: t('feature5Title'), desc: t('feature5Desc') },
+              { title: t('feature6Title'), desc: t('feature6Desc') },
+            ].map((f, i) => {
               const icons = [
                 <Icons.Car key={i} color={E} />,
                 <Icons.Shield key={i} color="#2563EB" />,
@@ -629,7 +555,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA FINAL ── */}
+      {/* â”€â”€ CTA FINAL â”€â”€ */}
       <section style={{
         padding: '80px 48px',
         background: `linear-gradient(135deg,${E},${ED})`,
@@ -656,14 +582,14 @@ export default function HomePage() {
             margin: '0 0 16px',
             letterSpacing: '-0.5px'
           }}>
-            {t.ctaTitle}
+            {t('ctaTitle')}
           </h2>
           <p style={{
             fontSize: '16px',
             color: 'rgba(255,255,255,0.8)',
             margin: '0 0 36px'
           }}>
-            {t.ctaDesc}
+            {t('ctaDesc')}
           </p>
           <div style={{
             display: 'flex',
@@ -693,7 +619,7 @@ export default function HomePage() {
                 e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
               }}
             >
-              {t.ctaRegister}
+              {t('ctaRegister')}
             </button>
             <button
               onClick={() => router.push('/login')}
@@ -717,13 +643,13 @@ export default function HomePage() {
                 e.currentTarget.style.background = 'transparent';
               }}
             >
-              {t.ctaLogin}
+              {t('login')}
             </button>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
+      {/* â”€â”€ FOOTER â”€â”€ */}
       <footer style={{
         background: darkMode ? '#0D0D0D' : '#0D0D0D',
         padding: '32px 48px',
@@ -742,7 +668,7 @@ export default function HomePage() {
               fontSize: '18px', fontWeight: '800',
               color: 'white'
             }}>
-              {t.brand}<span style={{ color: E }}>Cam</span>
+              {t('brandName')}<span style={{ color: E }}>Cam</span>
             </span>
           </div>
         <p style={{
@@ -750,7 +676,7 @@ export default function HomePage() {
           color: '#6B7280',
           margin: 0
         }}>
-          {t.footer}
+          {t('footer')}
         </p>
       </footer>
     </div>

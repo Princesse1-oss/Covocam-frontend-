@@ -235,7 +235,7 @@ export default function PassagerDashboard() {
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13,158,126,0.4)'; }}
             >
               <Icon name="send" size={18} color="white" />
-              {lang === 'fr' ? 'Émettre une demande' : 'Emit a request'}
+              {t('createRequestCta')}
             </Link>
           </div>
         </div>
@@ -275,9 +275,9 @@ export default function PassagerDashboard() {
         {!searched && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
             {[
-              { label: t ? t('availableTrips') : 'Trajets disponibles', value: totalAvailable, icon: <Icon name="car" size={22} />, color: E, bg: EL, sub: `${totalAvailable} ${t ? t('seats') : 'places'}` },
-              { label: t ? t('activeDrivers') : 'Conducteurs actifs', value: activeDrivers, icon: <Icon name="users" size={22} color={BL} />, color: BL, bg: BLL, sub: lang === 'fr' ? 'Sur la plateforme' : 'On the platform' },
-              { label: t ? t('regionsCovered') : 'Régions couvertes', value: 10, icon: <Icon name="route" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: lang === 'fr' ? 'Cameroun' : 'Cameroon' },
+              { label: t('availableTrips'), value: totalAvailable, icon: <Icon name="car" size={22} />, color: E, bg: EL, sub: `${totalAvailable} ${t('seats')}` },
+              { label: t('activeDrivers'), value: activeDrivers, icon: <Icon name="users" size={22} color={BL} />, color: BL, bg: BLL, sub: t('onPlatformSub') },
+              { label: t('regionsCovered'), value: 10, icon: <Icon name="route" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: t('cameroonCountry') },
             ].map((stat, i) => (
               <div key={i} className="stat-card" style={{
                 background: darkMode ? '#1A1A1A' : '#FFFFFF', borderRadius: '18px', padding: '22px',
@@ -379,7 +379,7 @@ export default function PassagerDashboard() {
         {!searched && (
           <div style={{ marginBottom: 28, animation: 'fadeUp 0.4s ease both', animationDelay: '0.24s' }}>
             <p style={{ fontSize: 12, fontWeight: 700, color: darkMode ? '#6B7280' : GR, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {lang === 'fr' ? 'Destinations populaires' : 'Popular destinations'}
+              {t('popularDestinations')}
             </p>
             <div className="chips-scroll">
               {villes.map(ville => (
@@ -448,10 +448,10 @@ export default function PassagerDashboard() {
               <Icon name="search" size={28} color={GR} />
             </div>
             <h3 style={{ fontSize: 18, fontWeight: 800, color: darkMode ? '#FFFFFF' : BK, marginBottom: 8 }}>
-              {lang === 'fr' ? 'Aucun trajet disponible' : 'No trips available'}
+              {t('noTripsAvailable')}
             </h3>
             <p style={{ fontSize: 14, color: darkMode ? '#6B7280' : GR, margin: 0, maxWidth: 400, marginLeft: 'auto', marginRight: 'auto' }}>
-              {lang === 'fr' ? 'Essayez de modifier vos critères ou revenez plus tard.' : 'Try changing your criteria or come back later.'}
+              {t('noTripsHint')}
             </p>
           </div>
         ) : (

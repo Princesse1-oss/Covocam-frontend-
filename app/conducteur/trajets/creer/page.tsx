@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
@@ -140,6 +140,7 @@ export default function CreerTrajetPage() {
   const { t, darkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const saveAsDraftRef = useRef(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -443,6 +444,7 @@ export default function CreerTrajetPage() {
       gps: form.gps,
       description: form.description,
       bagageAutorise: form.bagageAutorise,
+      statut: saveAsDraftRef.current ? 'BROUILLON' : 'OUVERT',
     };
 
     try {
@@ -471,7 +473,7 @@ export default function CreerTrajetPage() {
       }
 
       const data = JSON.parse(responseText);
-      setSuccess(t('tripPublished'));
+      setSuccess(saveAsDraftRef.current ? (t('tripSavedDraft') || 'Trajet enregistré en brouillon') : t('tripPublished'));
       setTimeout(() => router.push('/conducteur/trajets'), 1500);
       
     } catch (err) {
@@ -479,6 +481,7 @@ export default function CreerTrajetPage() {
       setError(t('serverError'));
     } finally {
       setSubmitting(false);
+      saveAsDraftRef.current = false;
     }
   };
 
@@ -635,7 +638,7 @@ export default function CreerTrajetPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form id="create-trajet-form" onSubmit={handleSubmit}>
         <div style={{ background: darkMode ? '#1A1A1A' : '#fff', borderRadius: '16px', border: `1px solid ${darkMode ? '#2A2A2A' : '#e5e7eb'}`, padding: '28px', marginBottom: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingBottom: '16px', borderBottom: `1px solid ${darkMode ? '#2A2A2A' : '#f3f4f6'}` }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'linear-gradient(135deg, #0A7B62, #0D9E7E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}><Icon name="mapPin" size={20} color="white" /></div>
@@ -853,6 +856,21 @@ export default function CreerTrajetPage() {
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap', paddingBottom: '40px' }}>
           <button type="button" onClick={() => router.push('/conducteur/trajets')} style={{ padding: '12px 24px', borderRadius: '10px', border: `1px solid ${darkMode ? '#2A2A2A' : '#e5e7eb'}`, background: darkMode ? '#1A1A1A' : '#fff', color: darkMode ? '#FFFFFF' : '#374151', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all .2s' }} disabled={submitting} onMouseEnter={e => { if (!submitting) e.currentTarget.style.background = darkMode ? '#2D2D2D' : '#f9fafb'; }} onMouseLeave={e => { e.currentTarget.style.background = darkMode ? '#1A1A1A' : '#fff'; }}>
             {t('cancel')}
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            onClick={() => { saveAsDraftRef.current = true; (document.getElementById('create-trajet-form') as HTMLFormElement)?.requestSubmit(); }}
+            style={{
+              padding: '12px 24px', borderRadius: '10px',
+              border: `1px solid ${darkMode ? '#4B5563' : '#d1d5db'}`,
+              background: darkMode ? '#1F2937' : '#fff',
+              color: darkMode ? '#D1D5DB' : '#374151',
+              fontSize: '14px', fontWeight: '600', cursor: submitting ? 'not-allowed' : 'pointer',
+              transition: 'all .2s'
+            }}
+          >
+            {t('saveDraft') || 'Enregistrer brouillon'}
           </button>
           <button type="submit" disabled={submitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '10px', border: 'none', background: submitting ? '#d1d5db' : 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: submitting ? 'none' : '0 4px 15px rgba(13,158,126,0.4)', transition: 'all .2s' }} onMouseEnter={e => { if (!submitting) e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13,158,126,0.5)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.4)'; }}>
             {submitting ? t('publishing') : <><Icon name="rocket" size={14} color="white" /> {t('publishTrip')}</>}

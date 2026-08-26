@@ -19,8 +19,9 @@ const navLinks = [
   { label: 'Utilisateurs', path: '/admin/utilisateurs', icon: 'utilisateurs', labelEn: 'Users' },
   { label: 'Évaluations', path: '/admin/evaluations', icon: 'evaluations', labelEn: 'Reviews' },
   { label: 'Positions', path: '/admin/positions', icon: 'positions', labelEn: 'GPS Tracking' },
-
   { label: 'Paiements', path: '/admin/paiements', icon: 'paiements', labelEn: 'Payments' },
+  { label: 'Lieux', path: '/admin/lieux', icon: 'lieux', labelEn: 'Locations' },
+  { label: 'Profil', path: '/admin/profil', icon: 'profil', labelEn: 'Profile' },
 ];
 
 const icons = {
@@ -69,6 +70,18 @@ const icons = {
       <rect x="2" y="6" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="1.8"/>
       <path d="M2 10H22" stroke="currentColor" strokeWidth="1.8"/>
       <circle cx="17" cy="15" r="1.5" fill="currentColor"/>
+    </svg>
+  ),
+  lieux: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.8"/>
+      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="1.8"/>
+    </svg>
+  ),
+  profil: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M5 20C5 17.24 7.24 15 10 15H14C16.76 15 19 17.24 19 20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
   ),
 };

@@ -128,7 +128,7 @@ export default function ChatList() {
       <>
         <div style={{ padding: isMobile ? '60px 20px' : '80px', textAlign: 'center', color: darkMode ? '#9CA3AF' : GRAY }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EMERALD_LIGHT}`, borderTopColor: EMERALD, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>{t('loading') || 'Chargement des discussions...'}</p>
+          <p>{t('loading')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </>
@@ -148,10 +148,10 @@ export default function ChatList() {
           </div>
           <div>
             <h1 style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: '800', color: darkMode ? '#FFFFFF' : BLACK, margin: '0 0 4px' }}>
-              {t('chat') || 'Mes Discussions'}
+              {t('chat')}
             </h1>
             <p style={{ fontSize: '14px', color: darkMode ? '#9CA3AF' : GRAY, margin: 0 }}>
-              {contacts.length} discussion{contacts.length > 1 ? 's' : ''}
+              {t('discussionsCount').replace('{count}', String(contacts.length))}
             </p>
           </div>
         </div>
@@ -169,10 +169,10 @@ export default function ChatList() {
               <Icon name="mail" size={32} />
             </div>
             <p style={{ color: darkMode ? '#FFFFFF' : BLACK, fontSize: '16px', fontWeight: '700', margin: '0 0 8px' }}>
-              {t('noMessages') || 'Aucune discussion pour le moment'}
+              {t('noMessages')}
             </p>
             <p style={{ color: darkMode ? '#9CA3AF' : GRAY, fontSize: '14px', marginBottom: '20px' }}>
-              {t('startChat') || 'Commencez à échanger avec vos conducteurs ou passagers.'}
+              {t('startChat')}
             </p>
             <Link 
               href="/passager/dashboard" 
@@ -193,7 +193,7 @@ export default function ChatList() {
               }}
             >
               <Icon name="search" size={18} />
-              {t('search') || 'Trouver un trajet'}
+              {t('findTrip')}
             </Link>
           </div>
         ) : (
@@ -231,7 +231,7 @@ export default function ChatList() {
                   {contact.photo && (
                     <img
                       src={contact.photo.startsWith('http') ? contact.photo : `/uploads/profils/${contact.photo}`}
-                      alt={`Photo de ${contact.prenom}`}
+                      alt={t('photoOf').replace('{name}', contact.prenom)}
                       onError={(e) => (e.currentTarget.style.display = 'none')}
                       style={{
                         width: '100%', height: '100%', borderRadius: '50%',

@@ -78,7 +78,7 @@ interface Evaluation {
   } | null;
 }
 
-function getRelativeTime(dateStr: string): string {
+function getRelativeTime(dateStr: string, lang: 'fr' | 'en'): string {
   const now = new Date();
   const date = new Date(dateStr);
   const diffMs = now.getTime() - date.getTime();
@@ -89,26 +89,32 @@ function getRelativeTime(dateStr: string): string {
   const diffSemaine = Math.floor(diffJour / 7);
   const diffMois = Math.floor(diffJour / 30);
 
-  if (diffMin < 1) return "à l'instant";
-  if (diffMin < 60) return `il y a ${diffMin} min`;
-  if (diffHeure < 24) return `il y a ${diffHeure}h`;
-  if (diffJour === 1) return "hier";
-  if (diffJour < 7) return `il y a ${diffJour} jours`;
-  if (diffSemaine === 1) return "il y a 1 semaine";
-  if (diffSemaine < 4) return `il y a ${diffSemaine} semaines`;
-  if (diffMois === 1) return "il y a 1 mois";
-  if (diffMois < 12) return `il y a ${diffMois} mois`;
-  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (diffMin < 1) return lang === 'en' ? "just now" : "à l'instant";
+  if (diffMin < 60) return lang === 'en' ? `${diffMin} min ago` : `il y a ${diffMin} min`;
+  if (diffHeure < 24) return lang === 'en' ? `${diffHeure}h ago` : `il y a ${diffHeure}h`;
+  if (diffJour === 1) return lang === 'en' ? "yesterday" : "hier";
+  if (diffJour < 7) return lang === 'en' ? `${diffJour} days ago` : `il y a ${diffJour} jours`;
+  if (diffSemaine === 1) return lang === 'en' ? "1 week ago" : "il y a 1 semaine";
+  if (diffSemaine < 4) return lang === 'en' ? `${diffSemaine} weeks ago` : `il y a ${diffSemaine} semaines`;
+  if (diffMois === 1) return lang === 'en' ? "1 month ago" : "il y a 1 mois";
+  if (diffMois < 12) return lang === 'en' ? `${diffMois} months ago` : `il y a ${diffMois} mois`;
+  return new Date(dateStr).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function MesEvaluationsPage() {
   const router = useRouter();
-  const { darkMode } = useTheme();
+  const { t, lang, darkMode } = useTheme();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
   const [noteMoyenne, setNoteMoyenne] = useState<number>(0);
   const [totalEvaluations, setTotalEvaluations] = useState<number>(0);
   const [filtreNote, setFiltreNote] = useState<number | null>(null);
+  const [reservationsAEvaluer, setReservationsAEvaluer] = useState<any[]>([]);
+  const [evalNote, setEvalNote] = useState<number>(0);
+  const [evalComment, setEvalComment] = useState('');
+  const [evaluatingId, setEvaluatingId] = useState<number | null>(null);
+  const [evalSentIds, setEvalSentIds] = useState<Set<number>>(new Set());
+  const [activeTab, setActiveTab] = useState<'evaluer' | 'recues'>('evaluer');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -150,6 +156,42 @@ export default function MesEvaluationsPage() {
     ? evaluations.filter(e => e.note === filtreNote)
     : evaluations;
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
+    fetch(`${API_URL}/conducteur/reservations-a-evaluer`, {
+      headers: { Authorization: `Bearer ${cleanToken}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setReservationsAEvaluer(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleEvaluerPassager = async (reservationId: number) => {
+    if (evalNote < 1) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const cleanToken = token.replace(/"/g, '').trim();
+    setEvaluatingId(reservationId);
+    try {
+      const res = await fetch(`${API_URL}/conducteur/evaluations/evaluer-passager`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cleanToken}` },
+        body: JSON.stringify({ reservationId, note: evalNote, commentaire: evalComment }),
+      });
+      if (res.ok) {
+        setEvalSentIds(prev => new Set([...prev, reservationId]));
+        setReservationsAEvaluer(prev => prev.map(r => r.id === reservationId ? { ...r, dejaEvalue: true } : r));
+        setEvalNote(0);
+        setEvalComment('');
+      }
+    } catch {}
+    setEvaluatingId(null);
+  };
+
   const bg = darkMode ? '#1A1A1A' : '#FFFFFF';
   const textColor = darkMode ? '#FFFFFF' : BK;
   const textSec = darkMode ? '#9CA3AF' : GR;
@@ -160,12 +202,14 @@ export default function MesEvaluationsPage() {
       <ConducteurLayout>
         <div style={{ padding: '80px', textAlign: 'center', color: textSec }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement de vos évaluations...</p>
+          <p>{t('loadingEvaluations')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </ConducteurLayout>
     );
   }
+
+  const unevaluatedCount = reservationsAEvaluer.filter(r => !r.dejaEvalue && !evalSentIds.has(r.id)).length;
 
   return (
     <ConducteurLayout>
@@ -174,13 +218,143 @@ export default function MesEvaluationsPage() {
         {/* Header */}
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: textColor, margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Icon name="star" size={24} color={E} /> Avis des passagers
+            <Icon name="star" size={24} color={E} /> {t('evaluationsTitle') || 'Évaluations'}
           </h1>
-          <p style={{ fontSize: '14px', color: textSec, margin: 0 }}>
-            {totalEvaluations} avis reçus au total
-          </p>
         </div>
 
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+          <button
+            onClick={() => setActiveTab('evaluer')}
+            style={{
+              padding: '10px 20px', borderRadius: '10px', border: `1px solid ${activeTab === 'evaluer' ? E : borderC}`,
+              background: activeTab === 'evaluer' ? E : 'transparent', color: activeTab === 'evaluer' ? '#FFF' : textSec,
+              fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+            </svg>
+            {t('evaluatePassengers') || 'Évaluer passagers'}
+            {unevaluatedCount > 0 && (
+              <span style={{ background: '#ef4444', color: '#fff', fontSize: '11px', padding: '2px 7px', borderRadius: '20px', fontWeight: '700' }}>{unevaluatedCount}</span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('recues')}
+            style={{
+              padding: '10px 20px', borderRadius: '10px', border: `1px solid ${activeTab === 'recues' ? E : borderC}`,
+              background: activeTab === 'recues' ? E : 'transparent', color: activeTab === 'recues' ? '#FFF' : textSec,
+              fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            <Icon name="star" size={14} color={activeTab === 'recues' ? '#FFF' : '#F59E0B'} />
+            {t('passengerReviewsLabel') || 'Avis reçus'} ({totalEvaluations})
+          </button>
+        </div>
+
+        {/* ═══ TAB: Évaluer passagers ═══ */}
+        {activeTab === 'evaluer' && (
+          <div>
+            {reservationsAEvaluer.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px', background: bg, borderRadius: '16px', border: `1px dashed ${borderC}` }}>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <Icon name="users" size={32} color={E} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>
+                  {t('noTripsToEvaluate') || 'Aucun trajet à évaluer'}
+                </h3>
+                <p style={{ fontSize: '14px', color: textSec, margin: 0 }}>
+                  {t('noTripsToEvaluateDesc') || 'Les trajets terminés avec des passagers apparaîtront ici.'}
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {reservationsAEvaluer.map((reservation) => {
+                  const isEvaluated = reservation.dejaEvalue || evalSentIds.has(reservation.id);
+                  return (
+                    <div key={reservation.id} style={{ background: bg, borderRadius: '16px', padding: '22px 24px', border: `1px solid ${borderC}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                      <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                        <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
+                          {reservation.passager.photo && (
+                            <img src={reservation.passager.photo.startsWith('http') ? reservation.passager.photo : `/uploads/profils/${reservation.passager.photo}`} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 2, border: `2px solid ${darkMode ? '#2A2A2A' : '#F3F4F6'}` }} />
+                          )}
+                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: `linear-gradient(135deg, ${E}, ${ED})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '700', color: '#FFF', position: 'relative', zIndex: 1 }}>
+                            {reservation.passager.prenom?.charAt(0)}{reservation.passager.nom?.charAt(0)}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: '700', color: textColor, fontSize: '15px', marginBottom: '4px' }}>{reservation.passager.prenom} {reservation.passager.nom}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: textSec, marginBottom: isEvaluated ? 0 : '12px' }}>
+                            <Icon name="mapPin" size={12} color={textSec} />
+                            {reservation.trajet.villeDepart} → {reservation.trajet.villeArrivee}
+                            <span style={{ margin: '0 4px' }}>·</span>
+                            {reservation.trajet.dateDepart}
+                          </div>
+                          {isEvaluated ? (
+                            <div style={{ padding: '8px 14px', background: EL, borderRadius: '8px', fontSize: '13px', color: ED, fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={E} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17L4 12" /></svg>
+                              {evalSentIds.has(reservation.id) ? (t('evaluationSent') || 'Évaluation envoyée') : (t('alreadyEvaluated') || 'Déjà évalué')}
+                            </div>
+                          ) : (
+                            <div>
+                              {/* Star selector */}
+                              <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                  <button key={star} onClick={() => setEvalNote(star)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', transition: 'transform 0.15s' }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.2)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                  >
+                                    <Icon name={star <= evalNote ? 'star' : 'starEmpty'} size={22} color={star <= evalNote ? '#F59E0B' : '#D1D5DB'} />
+                                  </button>
+                                ))}
+                                <span style={{ fontSize: '13px', color: textSec, marginLeft: '8px', alignSelf: 'center' }}>
+                                  {evalNote > 0 ? `${evalNote}/5` : (t('selectRating') || 'Choisir une note')}
+                                </span>
+                              </div>
+                              <textarea
+                                value={evalComment}
+                                onChange={e => setEvalComment(e.target.value)}
+                                placeholder={t('optionalComment') || 'Commentaire (optionnel)...'}
+                                rows={2}
+                                style={{
+                                  width: '100%', padding: '10px 14px', background: darkMode ? '#2A2A2A' : '#F3F4F6',
+                                  border: `1px solid ${borderC}`, borderRadius: '10px', fontSize: '13px', resize: 'vertical',
+                                  color: textColor, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '10px'
+                                }}
+                              />
+                              <button
+                                onClick={() => handleEvaluerPassager(reservation.id)}
+                                disabled={evaluatingId === reservation.id || evalNote < 1}
+                                style={{
+                                  padding: '8px 18px', borderRadius: '8px', border: 'none',
+                                  background: evaluatingId === reservation.id || evalNote < 1 ? GR : `linear-gradient(135deg, ${E}, ${ED})`,
+                                  color: '#fff', fontSize: '13px', fontWeight: '600',
+                                  cursor: evaluatingId === reservation.id || evalNote < 1 ? 'not-allowed' : 'pointer',
+                                  display: 'flex', alignItems: 'center', gap: '6px'
+                                }}
+                              >
+                                {evaluatingId === reservation.id ? (
+                                  <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                ) : null}
+                                {t('sendEvaluation') || 'Envoyer l\'évaluation'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══ TAB: Avis reçus ═══ */}
+        {activeTab === 'recues' && (<>
         {/* ═══ Stats Section ═══ */}
         {totalEvaluations > 0 && (
           <div style={{
@@ -206,7 +380,7 @@ export default function MesEvaluationsPage() {
                 ))}
               </div>
               <div style={{ fontSize: '13px', color: textSec }}>
-                {totalEvaluations} avis
+                {totalEvaluations} {t('reviewsShort')}
               </div>
             </div>
 
@@ -245,7 +419,7 @@ export default function MesEvaluationsPage() {
           marginBottom: '20px', flexWrap: 'wrap'
         }}>
           <Icon name="filter" size={16} color={textSec} />
-          <span style={{ fontSize: '13px', fontWeight: '600', color: textSec, marginRight: '4px' }}>Filtrer :</span>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: textSec, marginRight: '4px' }}>{t('filterLabel')}</span>
           <button
             onClick={() => setFiltreNote(null)}
             style={{
@@ -255,7 +429,7 @@ export default function MesEvaluationsPage() {
               fontSize: '12px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            Tous ({totalEvaluations})
+            {t('all')} ({totalEvaluations})
           </button>
           {[5, 4, 3, 2, 1].map(star => {
             const count = evaluations.filter(e => e.note === star).length;
@@ -293,10 +467,10 @@ export default function MesEvaluationsPage() {
               <Icon name="star" size={32} color={E} />
             </div>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>
-              {filtreNote !== null ? `Aucun avis avec ${filtreNote} étoile${filtreNote > 1 ? 's' : ''}` : 'Aucune évaluation pour le moment'}
+              {filtreNote !== null ? `${t('noReviewsWithPrefix')} ${filtreNote} ${filtreNote > 1 ? t('starsPlural') : t('starSingular')}` : t('noEvaluationsYet')}
             </h3>
             <p style={{ fontSize: '14px', color: textSec, margin: 0 }}>
-              {filtreNote !== null ? 'Essayez un autre filtre.' : 'Vos évaluations apparaîtront ici une fois que les passagers auront terminé leurs trajets.'}
+              {filtreNote !== null ? t('tryAnotherFilter') : t('noEvaluationsDesc')}
             </p>
           </div>
         ) : (
@@ -330,7 +504,7 @@ export default function MesEvaluationsPage() {
                       {photo && (
                         <img
                           src={photo.startsWith('http') ? photo : `/uploads/profils/${photo}`}
-                          alt="Photo passager"
+                          alt={t('passengerPhotoAlt')}
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                           style={{
                             width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover',
@@ -358,7 +532,7 @@ export default function MesEvaluationsPage() {
                           {evaluation.auteur.prenom} {evaluation.auteur.nom}
                         </span>
                         <span style={{ fontSize: '12px', color: textSec, whiteSpace: 'nowrap' }}>
-                          {getRelativeTime(evaluation.dateEvaluation)}
+                          {getRelativeTime(evaluation.dateEvaluation, lang)}
                         </span>
                       </div>
 
@@ -408,6 +582,7 @@ export default function MesEvaluationsPage() {
             })}
           </div>
         )}
+        </>)}
       </div>
 
       <style jsx>{`

@@ -1,3 +1,7 @@
+'use client';
+
+import { useTheme } from '@/app/lib/ThemeContext';
+
 interface TrajetCardProps {
   trajet: any;
   onDetail?: () => void;
@@ -16,13 +20,14 @@ const Icon = ({ name, size = 16, color = '#374151' }: { name: string; size?: num
 };
 
 export default function TrajetCard({ trajet, onDetail, onModifier, onAnnuler }: TrajetCardProps) {
+  const { t, lang } = useTheme();
   return (
     <div style={{ background: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
       <p>{trajet.ville_depart} ({trajet.lieu_depart}) &rarr; {trajet.ville_arrivee} ({trajet.lieu_arrivee})</p>
       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
         <button onClick={onDetail} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Icon name="eye" /> Detail</button>
-        <button onClick={onModifier} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Icon name="edit" /> Modifier</button>
-        <button onClick={onAnnuler} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626' }}><Icon name="x" color="#dc2626" /> Annuler</button>
+        <button onClick={onModifier} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Icon name="edit" /> {t('edit')}</button>
+        <button onClick={onAnnuler} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626' }}><Icon name="x" color="#dc2626" /> {t('cancel')}</button>
       </div>
     </div>
   );

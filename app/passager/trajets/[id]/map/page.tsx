@@ -96,7 +96,7 @@ interface Trajet {
 export default function PassagerMapPage() {
   const params = useParams();
   const router = useRouter();
-  const { darkMode } = useTheme();
+  const { t, darkMode } = useTheme();
   const [trajet, setTrajet] = useState<Trajet | null>(null);
   const [loading, setLoading] = useState(true);
   const [driverPosition, setDriverPosition] = useState<[number, number] | null>(null);
@@ -191,7 +191,7 @@ export default function PassagerMapPage() {
       <PassagerLayout>
         <div style={{ padding: '80px', textAlign: 'center', color: darkMode ? '#9CA3AF' : GR }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement de la carte...</p>
+          <p>{t('loadingMap')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </PassagerLayout>
@@ -227,7 +227,7 @@ export default function PassagerMapPage() {
           </button>
           <div>
             <h1 style={{ fontSize: '22px', fontWeight: '800', color: textColor, margin: '0 0 4px' }}>
-              Suivre le trajet
+              {t('trackTrip')}
             </h1>
             <p style={{ fontSize: '13px', color: textSecondary, margin: 0 }}>
               {trajet?.villeDepart} → {trajet?.villeArrivee}
@@ -276,7 +276,7 @@ export default function PassagerMapPage() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '12px', fontWeight: '600', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                Distance au départ
+                {t('distanceToDeparture')}
               </div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>
                 {distToDepart !== null ? (
@@ -287,7 +287,7 @@ export default function PassagerMapPage() {
                     </span>
                   </>
                 ) : (
-                  'En attente du GPS…'
+                  t('waitingGps')
                 )}
               </div>
             </div>
@@ -311,7 +311,7 @@ export default function PassagerMapPage() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '12px', fontWeight: '600', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                Arrivée estimée
+                {t('estimatedArrivalLabel')}
               </div>
               <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>
                 {distToArrival !== null ? (
@@ -322,7 +322,7 @@ export default function PassagerMapPage() {
                     </span>
                   </>
                 ) : (
-                  'En attente du GPS…'
+                  t('waitingGps')
                 )}
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function PassagerMapPage() {
             {trajet.conducteur.photo ? (
               <img
                 src={trajet.conducteur.photo.startsWith('http') ? trajet.conducteur.photo : `/uploads/profils/${trajet.conducteur.photo}`}
-                alt="Conducteur"
+                alt={t('driverPhotoAlt')}
                 style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
               />
             ) : (
@@ -388,13 +388,13 @@ export default function PassagerMapPage() {
                     background: driverPosition ? E : textSecondary,
                     display: 'inline-block'
                   }} />
-                  {driverPosition ? 'Conducteur en ligne' : 'En attente du conducteur'}
+                  {driverPosition ? t('driverOnline') : t('waitingDriver')}
                 </span>
               </div>
               {trajet.dateDepart && trajet.heureDepart && (
                 <div style={{ fontSize: '12px', color: textSecondary, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <Icon name="clock" size={12} />
-                  {trajet.villeDepart} → {trajet.villeArrivee} · {new Date(trajet.dateDepart).toLocaleDateString('fr-FR')} à {trajet.heureDepart}
+                  {trajet.villeDepart} → {trajet.villeArrivee} · {t('dateAtTime').replace('{date}', new Date(trajet.dateDepart).toLocaleDateString('fr-FR')).replace('{heure}', trajet.heureDepart)}
                 </div>
               )}
             </div>
@@ -408,7 +408,7 @@ export default function PassagerMapPage() {
                   background: EL, color: E, flexShrink: 0, textDecoration: 'none',
                   boxShadow: '0 2px 8px rgba(13,158,126,0.2)'
                 }}
-                title="Appeler le conducteur"
+                title={t('callDriver')}
               >
                 <Icon name="phone" size={18} />
               </a>

@@ -1,9 +1,10 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 const API_BASE_URL = '/api';
 
@@ -14,65 +15,38 @@ const GRAY = '#6B7280';
 const GRAY_LIGHT = '#9CA3AF';
 const BORDER = '#E5E7EB';
 
-// Traductions
-const translations = {
-  fr: {
-    title: 'Bon retour !',
-    subtitle: 'Connectez-vous à votre compte CovoCam',
-    email: 'Adresse email',
-    password: 'Mot de passe',
-    emailPlaceholder: 'votre@email.com',
-    passwordPlaceholder: '••••••••',
-    login: 'Se connecter',
-    loading: 'Connexion...',
-    noAccount: 'Pas encore de compte ?',
-    signup: 'Créer un compte',
-    backHome: 'Retour à l\'accueil',
-    error: 'Erreur de connexion',
-    forgotPassword: 'Mot de passe oublié ?',
-    secure: 'Connexion sécurisée · Données chiffrées',
-    brand: 'CovoCam',
-    tagline: 'Covoiturage Cameroun',
-    heroTitle: 'Voyagez ensemble,',
-    heroHighlight: 'économisez plus',
-    heroDesc: 'Rejoignez des milliers de Camerounais qui partagent leurs trajets',
-    newHere: 'Nouveau ici ?',
-  },
-  en: {
-    title: 'Welcome back!',
-    subtitle: 'Sign in to your CovoCam account',
-    email: 'Email address',
-    password: 'Password',
-    emailPlaceholder: 'your@email.com',
-    passwordPlaceholder: '••••••••',
-    login: 'Sign in',
-    loading: 'Signing in...',
-    noAccount: 'Don\'t have an account?',
-    signup: 'Create an account',
-    backHome: 'Back to home',
-    error: 'Connection error',
-    forgotPassword: 'Forgot password?',
-    secure: 'Secure connection · Encrypted data',
-    brand: 'CovoCam',
-    tagline: 'Cameroon Ridesharing',
-    heroTitle: 'Travel together,',
-    heroHighlight: 'save more',
-    heroDesc: 'Join thousands of Cameroonians who share their rides',
-    newHere: 'New here?',
-  }
-};
-
 export default function LoginPage() {
   const router = useRouter();
+  const { t, lang, toggleLang } = useTheme();
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+  const lockoutIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const t = translations[lang];
+  // Cleanup countdown interval on unmount
+  useEffect(() => {
+    return () => { if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current); };
+  }, []);
+
+  // Countdown effect
+  useEffect(() => {
+    if (lockoutTimer > 0) {
+      lockoutIntervalRef.current = setInterval(() => {
+        setLockoutTimer(prev => {
+          if (prev <= 1) {
+            if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (lockoutIntervalRef.current) clearInterval(lockoutIntervalRef.current); };
+  }, [lockoutTimer > 0]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +54,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('📤 Envoi login:', { email, motDePasse: '***' });
+      console.log('ðŸ“¤ Envoi login:', { email, motDePasse: '***' });
       
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
@@ -89,46 +63,53 @@ export default function LoginPage() {
       });
 
       const rawText = await response.text();
-      console.log('📥 Réponse brute:', response.status, rawText);
+      console.log('ðŸ“¥ RÃ©ponse brute:', response.status, rawText);
 
       let data: any = {};
       try { data = JSON.parse(rawText); } 
       catch { /* pas du JSON */ }
 
       if (!response.ok) {
-        const msg = data.error || data.message || data.detail || `Erreur ${response.status}`;
+        // ✅ RATE LIMITING : gérer le 429 avec countdown
+        if (response.status === 429 && data.retryAfter) {
+          setLockoutTimer(data.retryAfter);
+          setError(data.error || t('tooManyAttempts'));
+          setLoading(false);
+          return;
+        }
+        const msg = data.error || data.message || data.detail || t('errorStatus').replace('{status}', String(response.status));
         throw new Error(msg);
       }
 
       if (!data.token) {
-        throw new Error('Token manquant dans la réponse');
+        throw new Error(t('missingToken'));
       }
 
       localStorage.setItem('token', data.token);
       let profile = data.user;
 
       if (!profile) {
-        console.log('🔍 Récupération profil via /api/me...');
+        console.log('ðŸ” RÃ©cupÃ©ration profil via /api/me...');
         const profileRes = await fetch(`${API_BASE_URL}/me`, {
           headers: { 'Authorization': `Bearer ${data.token}`, 'Accept': 'application/json' }
         });
         
         const profileText = await profileRes.text();
-        console.log('📥 Profil brut:', profileRes.status, profileText);
+        console.log('ðŸ“¥ Profil brut:', profileRes.status, profileText);
         
         if (!profileRes.ok) {
-          throw new Error("Impossible de charger le profil utilisateur");
+          throw new Error(t('loadProfileError'));
         }
         profile = JSON.parse(profileText);
       }
 
-      console.log('✅ Profil reçu:', profile);
+      console.log('âœ… Profil reÃ§u:', profile);
       localStorage.setItem('user', JSON.stringify(profile));
       
       const roles = profile.roles || [];
       const typeUtilisateur = profile.typeUtilisateur || profile.role?.toLowerCase() || 'passager';
       
-      console.log('🎯 Rôles détectés:', roles, '| Type:', typeUtilisateur);
+      console.log('ðŸŽ¯ RÃ´les dÃ©tectÃ©s:', roles, '| Type:', typeUtilisateur);
       
       let redirectPath = '/passager/dashboard';
       if (roles.includes('ROLE_ADMIN') || typeUtilisateur === 'admin') {
@@ -137,18 +118,18 @@ export default function LoginPage() {
         redirectPath = '/conducteur/dashboard';
       }
 
-      console.log('➡️ Redirection vers:', redirectPath);
+      console.log('âž¡ï¸ Redirection vers:', redirectPath);
       router.push(redirectPath);
 
     } catch (error: any) {
-      console.error('❌ Erreur complète:', error);
-      setError(error.message || t.error);
+      console.error('âŒ Erreur complÃ¨te:', error);
+      setError(error.message || t('loginError'));
     } finally {
       setLoading(false);
     }
   };
 
-  // Sélecteur de langue
+  // SÃ©lecteur de langue
   const LanguageSelector = () => (
     <div style={{ position: 'relative' }}>
       <button
@@ -191,7 +172,7 @@ export default function LoginPage() {
           {['fr', 'en'].map((l) => (
             <button
               key={l}
-              onClick={() => { setLang(l as 'fr' | 'en'); setIsLangOpen(false); }}
+              onClick={() => { if (l !== lang) toggleLang(); setIsLangOpen(false); }}
               style={{
                 display: 'block',
                 width: '100%',
@@ -205,7 +186,7 @@ export default function LoginPage() {
                 transition: 'all .2s'
               }}
             >
-              {l === 'fr' ? 'Français' : 'English'}
+              {l === 'fr' ? 'FranÃ§ais' : 'English'}
             </button>
           ))}
         </div>
@@ -426,7 +407,7 @@ export default function LoginPage() {
       `}</style>
 
       <div className="login-container">
-        {/* ─── SECTION HERO : IMAGE ─── */}
+        {/* â”€â”€â”€ SECTION HERO : IMAGE â”€â”€â”€ */}
         <div className="hero-section">
           <div 
             className="hero-image"
@@ -436,7 +417,7 @@ export default function LoginPage() {
           />
           <div className="hero-overlay" />
 
-          {/* Logo en haut avec sélecteur de langue */}
+          {/* Logo en haut avec sÃ©lecteur de langue */}
           <div style={{
             position: 'absolute',
             top: '28px',
@@ -462,7 +443,7 @@ export default function LoginPage() {
                   letterSpacing: '-0.4px',
                   textShadow: '0 2px 10px rgba(0,0,0,0.2)',
                 }}>
-                  {t.brand}<span style={{ color: '#0D9E7E' }}>Cam</span>
+                  {t('brandName')}<span style={{ color: '#0D9E7E' }}>Cam</span>
                 </span>
                 <br />
                 <span style={{
@@ -472,7 +453,7 @@ export default function LoginPage() {
                   letterSpacing: '0.3px',
                   textShadow: '0 1px 8px rgba(0,0,0,0.2)',
                 }}>
-                  {t.tagline}
+                  {t('tagline')}
                 </span>
               </div>
             </div>
@@ -497,8 +478,8 @@ export default function LoginPage() {
               letterSpacing: '-0.5px',
               textShadow: '0 2px 20px rgba(0,0,0,0.2)',
             }}>
-              {t.heroTitle}<br />
-              <span style={{ color: '#0D9E7E' }}>{t.heroHighlight}</span>
+              {t('heroTitle')}<br />
+              <span style={{ color: '#0D9E7E' }}>{t('heroTitleHighlight')}</span>
             </h1>
             <p className="hero-subtitle" style={{
               fontSize: '14px',
@@ -508,15 +489,15 @@ export default function LoginPage() {
               maxWidth: '420px',
               textShadow: '0 1px 12px rgba(0,0,0,0.15)',
             }}>
-              {t.heroDesc}
+              {t('loginHeroDesc')}
             </p>
           </div>
         </div>
 
-        {/* ─── SECTION FORMULAIRE ─── */}
+        {/* â”€â”€â”€ SECTION FORMULAIRE â”€â”€â”€ */}
         <div className="form-section">
           <div className="form-wrapper">
-            {/* En-tête */}
+            {/* En-tÃªte */}
             <div style={{ marginBottom: '32px' }}>
               <h2 style={{
                 fontSize: '28px',
@@ -525,22 +506,22 @@ export default function LoginPage() {
                 margin: '0 0 4px',
                 letterSpacing: '-0.5px',
               }}>
-                {t.title}
+                {t('loginTitle')}
               </h2>
               <p style={{
                 fontSize: '14px',
                 color: GRAY,
                 margin: 0,
               }}>
-                {t.subtitle}
+                {t('loginSubtitle')}
               </p>
             </div>
 
             {/* Message d'erreur */}
             {error && (
               <div style={{
-                background: '#FAFAFA',
-                border: '1px solid #E5E7EB',
+                background: lockoutTimer > 0 ? '#FFF7ED' : '#FAFAFA',
+                border: lockoutTimer > 0 ? '1px solid #FDBA74' : '1px solid #E5E7EB',
                 borderRadius: 12,
                 padding: '12px 16px',
                 display: 'flex',
@@ -548,8 +529,23 @@ export default function LoginPage() {
                 gap: 10,
                 marginBottom: 24,
               }}>
-                <AlertCircle size={18} color={GRAY} style={{ flexShrink: 0, marginTop: 1 }} />
-                <span style={{ color: GRAY, fontSize: 13, fontWeight: 500, lineHeight: 1.4 }}>{error}</span>
+                <AlertCircle size={18} color={lockoutTimer > 0 ? '#EA580C' : GRAY} style={{ flexShrink: 0, marginTop: 1 }} />
+                <div style={{ flex: 1 }}>
+                  <span style={{ color: lockoutTimer > 0 ? '#9A3412' : GRAY, fontSize: 13, fontWeight: 500, lineHeight: 1.4 }}>{error}</span>
+                  {lockoutTimer > 0 && (
+                    <div style={{
+                      marginTop: 8,
+                      background: '#FFEDD5',
+                      borderRadius: 8,
+                      padding: '6px 12px',
+                      display: 'inline-block',
+                    }}>
+                      <span style={{ color: '#9A3412', fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>
+                        {lockoutTimer}s
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -564,7 +560,7 @@ export default function LoginPage() {
                   fontWeight: 600,
                   marginBottom: '6px',
                 }}>
-                  {t.email}
+                  {t('emailAddress')}
                 </label>
                 <div className="input-wrapper">
                   <span className="input-icon">
@@ -575,8 +571,9 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder={t.emailPlaceholder}
+                    placeholder={t('emailPlaceholder')}
                     className="form-input"
+                    disabled={lockoutTimer > 0}
                   />
                 </div>
               </div>
@@ -590,7 +587,7 @@ export default function LoginPage() {
                   fontWeight: 600,
                   marginBottom: '6px',
                 }}>
-                  {t.password}
+                  {t('passwordLabel')}
                 </label>
                 <div className="input-wrapper">
                   <span className="input-icon">
@@ -601,8 +598,9 @@ export default function LoginPage() {
                     value={motDePasse}
                     onChange={(e) => setMotDePasse(e.target.value)}
                     required
-                    placeholder={t.passwordPlaceholder}
+                    placeholder={t('passwordPlaceholder')}
                     className="form-input"
+                    disabled={lockoutTimer > 0}
                   />
                   <button
                     type="button"
@@ -617,7 +615,7 @@ export default function LoginPage() {
               {/* Bouton Connexion */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || lockoutTimer > 0}
                 className="submit-btn"
               >
                 {loading ? (
@@ -631,15 +629,15 @@ export default function LoginPage() {
                       borderRadius: '50%',
                       animation: 'spin 0.8s linear infinite',
                     }} />
-                    {t.loading}
+                    {t('loggingIn')}
                   </span>
                 ) : (
-                  t.login
+                  t('login')
                 )}
               </button>
             </form>
 
-            {/* Séparateur */}
+            {/* SÃ©parateur */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -654,7 +652,7 @@ export default function LoginPage() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
               }}>
-                {t.newHere}
+                {t('newHere')}
               </span>
               <div style={{ flex: 1, height: '1px', background: '#E5E7EB' }} />
             </div>
@@ -662,7 +660,7 @@ export default function LoginPage() {
             {/* Lien d'inscription */}
             <div style={{ textAlign: 'center' }}>
               <span style={{ color: GRAY, fontSize: 14 }}>
-                {t.noAccount}{' '}
+                {t('noAccount')}{' '}
               </span>
               <Link
                 href="/register"
@@ -676,11 +674,11 @@ export default function LoginPage() {
                 onMouseEnter={e => e.currentTarget.style.color = EMERALD_DARK}
                 onMouseLeave={e => e.currentTarget.style.color = EMERALD}
               >
-                {t.signup}
+                {t('createAccount')}
               </Link>
             </div>
 
-            {/* Retour à l'accueil */}
+            {/* Retour Ã  l'accueil */}
             <div style={{ textAlign: 'center', marginTop: '16px' }}>
               <Link
                 href="/"
@@ -696,11 +694,11 @@ export default function LoginPage() {
                 onMouseEnter={e => e.currentTarget.style.color = GRAY}
                 onMouseLeave={e => e.currentTarget.style.color = GRAY_LIGHT}
               >
-                ← {t.backHome}
+                â† {t('backHome')}
               </Link>
             </div>
 
-            {/* Badge de sécurité */}
+            {/* Badge de sÃ©curitÃ© */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -718,7 +716,7 @@ export default function LoginPage() {
                 fontSize: '11px',
                 color: GRAY_LIGHT,
               }}>
-                {t.secure}
+                {t('loginSecureBadge')}
               </span>
             </div>
           </div>

@@ -148,7 +148,7 @@ export default function ConducteurDemandesPage() {
       if (!res.ok) {
         const errorText = await res.text();
         console.error("ERREUR DU BACKEND:\n", errorText);
-        setError('Erreur serveur: ' + errorText);
+        setError(t('serverErrorPrefix') + errorText);
         setDemandes([]);
         setLoading(false);
         return;
@@ -173,7 +173,7 @@ export default function ConducteurDemandesPage() {
 
   const handleAccepter = async () => {
     if (!selectedDemande || !prixPropose || parseFloat(prixPropose) <= 0) {
-      setError('Veuillez entrer un prix valide');
+      setError(t('enterValidPrice'));
       return;
     }
     setError('');
@@ -198,7 +198,7 @@ export default function ConducteurDemandesPage() {
         data = JSON.parse(responseText);
       } catch (e) {
         console.error("ERREUR DU BACKEND:\n", responseText);
-        setError("Erreur Serveur: " + responseText);
+        setError(t('serverErrorPrefix') + responseText);
         setAcceptingId(null);
         return;
       }
@@ -209,7 +209,7 @@ export default function ConducteurDemandesPage() {
         setShowModal(false);
         fetchDemandes();
       } else {
-        setError(data.error || 'Erreur lors de l\'acceptation');
+        setError(data.error || t('acceptError'));
       }
     } catch (err) {
       console.error('Erreur réseau:', err);
@@ -234,7 +234,7 @@ export default function ConducteurDemandesPage() {
       <ConducteurLayout>
         <div style={{ padding: '80px', textAlign: 'center', color: textSecondary }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement des demandes...</p>
+          <p>{t('loadingRequests')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </ConducteurLayout>
@@ -249,23 +249,23 @@ export default function ConducteurDemandesPage() {
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
               <Icon name="check" size={40} color={E} />
             </div>
-            <h2 style={{ fontSize: '24px', fontWeight: '800', color: textColor, margin: '0 0 12px' }}>Demande acceptée !</h2>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: textColor, margin: '0 0 12px' }}>{t('requestAcceptedTitle')}</h2>
             <p style={{ fontSize: '15px', color: textSecondary, marginBottom: '24px', lineHeight: '1.6' }}>
-              Vous avez accepté la demande de <strong>{acceptationSuccess.passager.prenom} {acceptationSuccess.passager.nom}</strong> pour le trajet <strong>{acceptationSuccess.villeDepart} → {acceptationSuccess.villeArrivee}</strong>.
+              {t('acceptedRequestOf')} <strong>{acceptationSuccess.passager.prenom} {acceptationSuccess.passager.nom}</strong> {t('forTrip')} <strong>{acceptationSuccess.villeDepart} → {acceptationSuccess.villeArrivee}</strong>.
             </p>
             <div style={{ background: darkMode ? '#2A2A2A' : EL, borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-              <div style={{ fontSize: '13px', color: textSecondary, marginBottom: '4px' }}>Prix proposé</div>
+              <div style={{ fontSize: '13px', color: textSecondary, marginBottom: '4px' }}>{t('proposedPrice')}</div>
               <div style={{ fontSize: '24px', fontWeight: '800', color: E }}>{prixAccepte.toLocaleString()} FCFA/place</div>
             </div>
             <div style={{ padding: '14px', background: AL, borderRadius: '10px', marginBottom: '24px', fontSize: '13px', color: AM, textAlign: 'left' }}>
-              <strong>Prochaine étape :</strong> Un trajet brouillon a été créé. Vous avez 24h pour le compléter (véhicule, heure précise, point de RDV).
+              <strong>{t('nextStep')}</strong> {t('draftCreated24h')}
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <Link href="/conducteur/trajets/brouillons" style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#FFF', fontSize: '14px', fontWeight: '700', cursor: 'pointer', textDecoration: 'none', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <Icon name="check" size={16} color="#FFF" /> Compléter le trajet
+                <Icon name="check" size={16} color="#FFF" /> {t('completeTrip')}
               </Link>
               <button onClick={() => setAcceptationSuccess(null)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: `1.5px solid ${borderColor}`, background: 'transparent', color: textColor, fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
-                Retour aux demandes
+                {t('backToRequests')}
               </button>
             </div>
           </div>
@@ -281,10 +281,10 @@ export default function ConducteurDemandesPage() {
         {/* Header */}
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: textColor, margin: '0 0 8px' }}>
-            Demandes de trajets
+            {t('tripRequests')}
           </h1>
           <p style={{ fontSize: '14px', color: textSecondary, margin: 0 }}>
-            Trouvez des passagers et acceptez les demandes qui vous intéressent
+            {t('driverRequestsDesc')}
           </p>
         </div>
 
@@ -303,27 +303,27 @@ export default function ConducteurDemandesPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <Icon name="filter" size={18} color={E} />
-            <span style={{ fontSize: '14px', fontWeight: '700', color: textColor }}>Filtres</span>
+            <span style={{ fontSize: '14px', fontWeight: '700', color: textColor }}>{t('filters')}</span>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>Ville de départ</label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>{t('departureCity')}</label>
               <select value={filtreVilleDepart} onChange={(e) => setFiltreVilleDepart(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none' }}>
-                <option value="">Toutes</option>
+                <option value="">{t('allCities')}</option>
                 {['Yaoundé', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua'].map(v => (<option key={v} value={v}>{v}</option>))}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>Ville d'arrivée</label>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>{t('arrivalCity')}</label>
               <select value={filtreVilleArrivee} onChange={(e) => setFiltreVilleArrivee(e.target.value)} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none' }}>
-                <option value="">Toutes</option>
+                <option value="">{t('allCities')}</option>
                 {['Yaoundé', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua'].map(v => (<option key={v} value={v}>{v}</option>))}
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>Budget minimum (FCFA)</label>
-              <input type="number" value={filtreBudgetMin} onChange={(e) => setFiltreBudgetMin(e.target.value)} placeholder="Ex: 3000" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none' }} />
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: textSecondary, marginBottom: '6px' }}>{t('minBudget')}</label>
+              <input type="number" value={filtreBudgetMin} onChange={(e) => setFiltreBudgetMin(e.target.value)} placeholder={t('minBudgetPlaceholder')} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: `1px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '13px', outline: 'none' }} />
             </div>
           </div>
         </div>
@@ -334,9 +334,9 @@ export default function ConducteurDemandesPage() {
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Icon name="eye" size={32} color={GR} />
             </div>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>Aucune demande disponible</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>{t('noRequestsAvailable')}</h3>
             <p style={{ fontSize: '14px', color: textSecondary }}>
-              {filtreVilleDepart || filtreVilleArrivee || filtreBudgetMin ? 'Aucune demande ne correspond à vos filtres. Essayez de les modifier.' : 'Revenez plus tard, de nouvelles demandes seront publiées !'}
+              {filtreVilleDepart || filtreVilleArrivee || filtreBudgetMin ? t('noRequestsMatchFilters') : t('checkBackLater')}
             </p>
           </div>
         ) : (
@@ -349,12 +349,12 @@ export default function ConducteurDemandesPage() {
                 <div style={{ background: demande.estPrivee ? BLL : EL, padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${borderColor}` }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {demande.estPrivee ? (
-                      <><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: BL, display: 'inline-block' }} /><span style={{ fontSize: '12px', fontWeight: '600', color: BL }}>Demande privée</span></>
+                      <><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: BL, display: 'inline-block' }} /><span style={{ fontSize: '12px', fontWeight: '600', color: BL }}>{t('privateRequest')}</span></>
                     ) : (
-                      <><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: E, display: 'inline-block' }} /><span style={{ fontSize: '12px', fontWeight: '600', color: E }}>Demande publique</span></>
+                      <><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: E, display: 'inline-block' }} /><span style={{ fontSize: '12px', fontWeight: '600', color: E }}>{t('publicRequest')}</span></>
                     )}
                   </div>
-                  <span style={{ fontSize: '11px', color: textSecondary }}>Publiée le {formatDate(demande.dateCreation)}</span>
+                  <span style={{ fontSize: '11px', color: textSecondary }}>{t('publishedOnLabel')} {formatDate(demande.dateCreation)}</span>
                 </div>
 
                 <div style={{ padding: '20px' }}>
@@ -373,19 +373,19 @@ export default function ConducteurDemandesPage() {
                       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="calendar" size={14} color={GR} />{formatDate(demande.dateDepart)}</div>
                         {demande.heureDepart && (<div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="clock" size={14} color={GR} />{demande.heureDepart}</div>)}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="users" size={14} color={GR} />{demande.nbPlaces} {demande.nbPlaces > 1 ? 'places' : 'place'}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="money" size={14} color="#16A34A" />Budget: {demande.budgetMax.toLocaleString()} FCFA</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="users" size={14} color={GR} />{demande.nbPlaces} {demande.nbPlaces > 1 ? t('seats') : t('place')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}><Icon name="money" size={14} color="#16A34A" />{t('budgetColon')} {demande.budgetMax.toLocaleString()} FCFA</div>
                       </div>
                       {demande.description && (
                         <div style={{ padding: '12px', background: darkMode ? '#2A2A2A' : '#F9FAFB', borderRadius: '8px', fontSize: '13px', color: textSecondary, lineHeight: '1.5' }}>
-                          <span style={{ fontWeight: '600', color: textColor }}>Note du passager : </span>{demande.description}
+                          <span style={{ fontWeight: '600', color: textColor }}>{t('passengerRatingLabel')}</span>{demande.description}
                         </div>
                       )}
                     </div>
                     
                     {/* ✅ CORRECTION : Affichage de la photo du passager avec fallback sur les initiales */}
                     <div style={{ padding: '12px 16px', background: darkMode ? '#2A2A2A' : '#F9FAFB', borderRadius: '12px', minWidth: '180px' }}>
-                      <div style={{ fontSize: '11px', color: textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Passager</div>
+                      <div style={{ fontSize: '11px', color: textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>{t('passenger')}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         
                         {/* Conteneur relatif pour superposer l'image et les initiales */}
@@ -395,7 +395,7 @@ export default function ConducteurDemandesPage() {
                               src={demande.passager.photo.startsWith('http') 
                                 ? demande.passager.photo 
                                 : `/uploads/profils/${demande.passager.photo}`} 
-                              alt="Photo passager" 
+                              alt={t('passengerPhotoAlt')} 
                               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} 
                               style={{ 
                                 width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', 
@@ -424,9 +424,9 @@ export default function ConducteurDemandesPage() {
                   <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'flex-end' }}>
                     <button onClick={() => handleAccepterClick(demande)} disabled={acceptingId === demande.id} style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: acceptingId === demande.id ? GR : `linear-gradient(135deg, ${E}, ${ED})`, color: '#FFF', fontSize: '14px', fontWeight: '700', cursor: acceptingId === demande.id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: acceptingId === demande.id ? 'none' : `0 4px 15px rgba(13, 158, 126, 0.3)`, transition: 'all 0.2s' }}>
                       {acceptingId === demande.id ? (
-                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />Traitement...</>
+                        <><div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />{t('processing')}</>
                       ) : (
-                        <><Icon name="check" size={16} color="#FFF" />Accepter cette demande</>
+                        <><Icon name="check" size={16} color="#FFF" />{t('acceptRequest')}</>
                       )}
                     </button>
                   </div>
@@ -445,21 +445,21 @@ export default function ConducteurDemandesPage() {
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Icon name="check" size={28} color={E} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '8px' }}>Accepter cette demande</h3>
+              <h3 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '8px' }}>{t('acceptRequest')}</h3>
               <p style={{ fontSize: '14px', color: textSecondary }}>{selectedDemande.villeDepart} → {selectedDemande.villeArrivee}</p>
             </div>
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>Prix par place (FCFA) *</label>
-              <input type="number" value={prixPropose} onChange={(e) => setPrixPropose(e.target.value)} placeholder="Ex: 5000" min="0" autoFocus style={{ width: '100%', padding: '14px 16px', borderRadius: '10px', border: `2px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '16px', fontWeight: '600', outline: 'none', textAlign: 'center' }} onFocus={(e) => e.currentTarget.style.borderColor = E} onBlur={(e) => e.currentTarget.style.borderColor = borderColor} />
-              <div style={{ fontSize: '12px', color: textSecondary, marginTop: '6px', textAlign: 'center' }}>Budget du passager : {selectedDemande.budgetMax.toLocaleString()} FCFA</div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>{t('pricePerSeatLabel')}</label>
+              <input type="number" value={prixPropose} onChange={(e) => setPrixPropose(e.target.value)} placeholder={t('pricePlaceholder')} min="0" autoFocus style={{ width: '100%', padding: '14px 16px', borderRadius: '10px', border: `2px solid ${borderColor}`, background: inputBg, color: textColor, fontSize: '16px', fontWeight: '600', outline: 'none', textAlign: 'center' }} onFocus={(e) => e.currentTarget.style.borderColor = E} onBlur={(e) => e.currentTarget.style.borderColor = borderColor} />
+              <div style={{ fontSize: '12px', color: textSecondary, marginTop: '6px', textAlign: 'center' }}>{t('passengerBudgetPrefix')} {selectedDemande.budgetMax.toLocaleString()} FCFA</div>
             </div>
             <div style={{ padding: '14px', background: AL, borderRadius: '10px', marginBottom: '24px', fontSize: '13px', color: AM }}>
-              <strong>Important :</strong> En acceptant, un trajet sera créé en brouillon. Vous aurez 24h pour le compléter (véhicule, heure précise, point de RDV).
+              <strong>{t('importantLabel')}</strong> {t('acceptingCreatesDraft')}
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: `1.5px solid ${borderColor}`, background: 'transparent', color: textColor, fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+              <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: `1.5px solid ${borderColor}`, background: 'transparent', color: textColor, fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>{t('cancel')}</button>
               <button onClick={handleAccepter} disabled={!prixPropose || parseFloat(prixPropose) <= 0} style={{ flex: 2, padding: '14px', borderRadius: '10px', border: 'none', background: !prixPropose || parseFloat(prixPropose) <= 0 ? GR : `linear-gradient(135deg, ${E}, ${ED})`, color: '#FFF', fontSize: '14px', fontWeight: '700', cursor: !prixPropose || parseFloat(prixPropose) <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <Icon name="check" size={16} color="#FFF" />Confirmer l'acceptation
+                <Icon name="check" size={16} color="#FFF" />{t('confirmAcceptance')}
               </button>
             </div>
           </div>

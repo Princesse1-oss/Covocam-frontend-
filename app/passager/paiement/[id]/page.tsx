@@ -91,13 +91,13 @@ export default function PaiementPage() {
             setData(found);
             setType('reservation');
           } else {
-            setError(lang === 'fr' ? `Élément ID ${itemId} introuvable.` : 'Item not found.');
+            setError(t('itemIdNotFound').replace('{id}', String(itemId)));
           }
         }
         clearTimeout(timeoutId);
       } catch (err: any) {
         clearTimeout(timeoutId);
-        setError(err.name === 'AbortError' ? 'Délai d\'attente dépassé.' : `Erreur: ${err.message}`);
+        setError(err.name === 'AbortError' ? t('timeoutError') : `${t('errorPrefix')}${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -124,7 +124,7 @@ export default function PaiementPage() {
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error || 'Erreur lors du paiement');
+          throw new Error(errorData.error || t('paymentError'));
         }
         
         setSuccess(true);
@@ -138,13 +138,13 @@ export default function PaiementPage() {
           }
         });
 
-        if (!res.ok) throw new Error('Erreur lors du paiement');
+        if (!res.ok) throw new Error(t('paymentError'));
         
         setSuccess(true);
         setTimeout(() => router.push('/passager/reservations'), 3000);
       }
     } catch (err: any) {
-      setError(err.message || (lang === 'fr' ? 'Erreur lors du paiement.' : 'Payment error.')); setTimeout(() => setError(''), 4000);
+      setError(err.message || t('paymentErrorGeneric')); setTimeout(() => setError(''), 4000);
     } finally {
       setProcessing(false);
     }
@@ -160,7 +160,7 @@ export default function PaiementPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: darkMode ? '#0D0D0D' : '#F9FAFB' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-        <p style={{ color: textSecondary, fontSize: '14px' }}>{lang === 'fr' ? 'Chargement...' : 'Loading...'}</p>
+        <p style={{ color: textSecondary, fontSize: '14px' }}>{t('loading')}</p>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
@@ -170,10 +170,10 @@ export default function PaiementPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: darkMode ? '#0D0D0D' : '#F9FAFB' }}>
       <div style={{ background: bgCard, borderRadius: '24px', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center', border: `1px solid ${borderColor}` }}>
         <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: RL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}><Icon name="alert" size={32} color={RD} /></div>
-        <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '12px' }}>{lang === 'fr' ? 'Oups !' : 'Oops!'}</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '12px' }}>{t('oops')}</h2>
         <p style={{ fontSize: '15px', color: textSecondary, marginBottom: '24px' }}>{error}</p>
         <Link href="/passager/demandes" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', background: E, color: '#FFF', textDecoration: 'none', fontSize: '14px', fontWeight: '700' }}>
-          <Icon name="arrowLeft" size={16} color="#FFF" /> {lang === 'fr' ? 'Retour' : 'Back'}
+          <Icon name="arrowLeft" size={16} color="#FFF" /> {t('back')}
         </Link>
       </div>
     </div>
@@ -183,9 +183,9 @@ export default function PaiementPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: darkMode ? '#0D0D0D' : '#F9FAFB' }}>
       <div style={{ background: bgCard, borderRadius: '24px', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center', border: `1px solid ${borderColor}` }}>
         <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}><Icon name="checkCircle" size={40} color="#16A34A" /></div>
-        <h2 style={{ fontSize: '22px', fontWeight: '800', color: textColor, marginBottom: '8px' }}>{lang === 'fr' ? 'Paiement confirmé !' : 'Payment confirmed!'}</h2>
-        <p style={{ fontSize: '14px', color: textSecondary, marginBottom: '8px' }}>{lang === 'fr' ? 'Votre paiement a été traité avec succès.' : 'Your payment has been processed successfully.'}</p>
-        <p style={{ fontSize: '13px', color: GR }}>{lang === 'fr' ? 'Redirection automatique...' : 'Redirecting...'}</p>
+        <h2 style={{ fontSize: '22px', fontWeight: '800', color: textColor, marginBottom: '8px' }}>{t('paymentConfirmedShort')}</h2>
+        <p style={{ fontSize: '14px', color: textSecondary, marginBottom: '8px' }}>{t('paymentProcessedSuccess')}</p>
+        <p style={{ fontSize: '13px', color: GR }}>{t('autoRedirecting')}</p>
       </div>
     </div>
   );
@@ -212,27 +212,27 @@ export default function PaiementPage() {
         
         {/* Back link */}
         <Link href={isDemande ? "/passager/demandes" : "/passager/reservations"} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', color: E, fontSize: '14px', fontWeight: '600', marginBottom: '24px' }}>
-          <Icon name="arrowLeft" size={16} /> {lang === 'fr' ? 'Retour' : 'Back'}
+          <Icon name="arrowLeft" size={16} /> {t('back')}
         </Link>
 
         {/* Header */}
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '26px', fontWeight: '800', color: textColor, margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Icon name="money" size={26} /> {lang === 'fr' ? 'Valider le paiement' : 'Validate Payment'}
+            <Icon name="money" size={26} /> {t('validatePaymentTitle')}
           </h1>
           <p style={{ fontSize: '14px', color: textSecondary, margin: 0 }}>
-            {isDemande 
-              ? (lang === 'fr' ? 'Le conducteur a accepté votre demande. Confirmez pour finaliser.' : 'The driver accepted your request. Confirm to finalize.')
-              : (lang === 'fr' ? 'Vérifiez les détails de votre réservation avant de payer.' : 'Verify your reservation details before paying.')}
+            {isDemande
+              ? t('payConfirmAcceptedMsg')
+              : t('payVerifyDetailsMsg')}
           </p>
         </div>
 
         {/* Progress steps */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '28px', padding: '16px 20px', background: bgCard, borderRadius: '14px', border: `1px solid ${borderColor}` }}>
           {[
-            { label: lang === 'fr' ? 'Réservation' : 'Booking', done: true },
-            { label: lang === 'fr' ? 'Accepté' : 'Accepted', done: true },
-            { label: lang === 'fr' ? 'Paiement' : 'Payment', done: false, active: true },
+            { label: t('stepBooking'), done: true },
+            { label: t('stepAccepted'), done: true },
+            { label: t('stepPayment'), done: false, active: true },
           ].map((step, i) => (
             <div key={i} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{
@@ -258,8 +258,8 @@ export default function PaiementPage() {
           <div style={{ background: EL, padding: '14px 24px', borderBottom: `1px solid ${borderColor}`, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Icon name="shield" size={22} color={E} />
             <div>
-              <div style={{ fontSize: '13px', fontWeight: '700', color: E }}>{lang === 'fr' ? 'Paiement sécurisé' : 'Secure Payment'}</div>
-              <div style={{ fontSize: '11px', color: GR }}>{lang === 'fr' ? 'Vos données sont protégées par CovoCam' : 'Your data is protected by CovoCam'}</div>
+              <div style={{ fontSize: '13px', fontWeight: '700', color: E }}>{t('securePaymentBox')}</div>
+              <div style={{ fontSize: '11px', color: GR }}>{t('dataProtectedBy')}</div>
             </div>
           </div>
 
@@ -268,7 +268,7 @@ export default function PaiementPage() {
             {/* Trip details */}
             <div style={{ marginBottom: '24px' }}>
               <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icon name="car" size={14} /> {lang === 'fr' ? 'Détails du trajet' : 'Trip Details'}
+                <Icon name="car" size={14} /> {t('tripDetailsSection')}
               </h3>
               
               {/* Route */}
@@ -280,10 +280,10 @@ export default function PaiementPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>{villeDepart || '—'}</div>
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{lang === 'fr' ? 'Départ' : 'Departure'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{t('departure')}</div>
                   <div style={{ height: '1px', background: borderColor, margin: '8px 0' }} />
                   <div style={{ fontSize: '16px', fontWeight: '700', color: textColor }}>{villeArrivee || '—'}</div>
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{lang === 'fr' ? 'Arrivée' : 'Arrival'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '2px' }}>{t('arrival')}</div>
                 </div>
               </div>
 
@@ -291,17 +291,17 @@ export default function PaiementPage() {
               <div className="pmt-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                 <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                   <Icon name="calendar" size={16} color={E} />
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Date' : 'Date'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('date')}</div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{formatDate(dateDepart)}</div>
                 </div>
                 <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                   <Icon name="clock" size={16} color={E} />
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Heure' : 'Time'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('time')}</div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{heureDepart || '—'}</div>
                 </div>
                 <div style={{ background: bgSubtle, padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
                   <Icon name="users" size={16} color={E} />
-                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{lang === 'fr' ? 'Places' : 'Seats'}</div>
+                  <div style={{ fontSize: '11px', color: textSecondary, marginTop: '4px' }}>{t('seats')}</div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: textColor, marginTop: '2px' }}>{nbPlaces || 0}</div>
                 </div>
               </div>
@@ -311,7 +311,7 @@ export default function PaiementPage() {
             {conducteur && (
               <div style={{ marginBottom: '24px', padding: '16px', background: bgSubtle, borderRadius: '14px' }}>
                 <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Icon name="users" size={14} /> {lang === 'fr' ? 'Votre conducteur' : 'Your Driver'}
+                  <Icon name="users" size={14} /> {t('yourDriver')}
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ position: 'relative', width: '44px', height: '44px', flexShrink: 0 }}>
@@ -325,9 +325,7 @@ export default function PaiementPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '15px', fontWeight: '700', color: textColor }}>{conducteur.prenom} {conducteur.nom}</div>
                     <div style={{ fontSize: '12px', color: E, fontWeight: '600', marginTop: '2px' }}>
-                      {isDemande 
-                        ? (lang === 'fr' ? 'A accepté votre demande' : 'Accepted your request')
-                        : (lang === 'fr' ? 'Conducteur du trajet' : 'Trip driver')}
+                      {isDemande ? t('acceptedYourRequest') : t('tripDriver')}
                     </div>
                   </div>
                   {conducteur.noteMoyenne > 0 && (
@@ -343,19 +341,19 @@ export default function PaiementPage() {
             {/* Pricing */}
             <div style={{ borderTop: `1px dashed ${borderColor}`, paddingTop: '20px' }}>
               <h3 style={{ fontSize: '11px', fontWeight: '700', color: textSecondary, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Icon name="money" size={14} /> {lang === 'fr' ? 'Récapitulatif' : 'Summary'}
+                <Icon name="money" size={14} /> {t('summarySection')}
               </h3>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ fontSize: '14px', color: textSecondary }}>{lang === 'fr' ? 'Prix par place' : 'Price per seat'}</span>
+                <span style={{ fontSize: '14px', color: textSecondary }}>{t('pricePerSeat')}</span>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: textColor }}>{prixUnitaire ? prixUnitaire.toLocaleString() : '0'} FCFA</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'spaceBetween', marginBottom: '16px' }}>
-                <span style={{ fontSize: '14px', color: textSecondary }}>{lang === 'fr' ? 'Nombre de places' : 'Number of seats'}</span>
+                <span style={{ fontSize: '14px', color: textSecondary }}>{t('numberOfSeats')}</span>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: textColor }}>x {nbPlaces || 0}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: `2px solid ${borderColor}` }}>
-                <span style={{ fontSize: '16px', fontWeight: '800', color: textColor }}>{lang === 'fr' ? 'Total à payer' : 'Total to pay'}</span>
+                <span style={{ fontSize: '16px', fontWeight: '800', color: textColor }}>{t('totalToPay')}</span>
                 <span style={{ fontSize: '26px', fontWeight: '800', color: E }}>{totalAPayer ? totalAPayer.toLocaleString() : '0'} <span style={{ fontSize: '13px', fontWeight: '600', color: textSecondary }}>FCFA</span></span>
               </div>
             </div>
@@ -364,9 +362,7 @@ export default function PaiementPage() {
             <div style={{ marginTop: '20px', padding: '12px 16px', background: darkMode ? '#1E293B' : '#F0F9FF', borderRadius: '10px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
               <Icon name="info" size={16} color="#3B82F6" />
               <p style={{ fontSize: '12px', color: darkMode ? '#93C5FD' : '#1D4ED8', margin: 0, lineHeight: '1.5' }}>
-                {isDemande
-                  ? (lang === 'fr' ? 'En confirmant, vous validez l\'acceptation du conducteur pour votre demande de trajet.' : 'By confirming, you validate the driver\'s acceptance of your trip request.')
-                  : (lang === 'fr' ? 'En payant, vous confirmez votre place dans ce trajet. Le conducteur sera notifié.' : 'By paying, you confirm your seat on this trip. The driver will be notified.')}
+                {isDemande ? t('confirmDisclaimer') : t('payDisclaimer')}
               </p>
             </div>
 
@@ -383,14 +379,12 @@ export default function PaiementPage() {
               {processing ? (
                 <>
                   <div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  {lang === 'fr' ? 'Traitement en cours...' : 'Processing...'}
+                  {t('processing')}
                 </>
               ) : (
                 <>
                   <Icon name="lock" size={18} color="#FFF" />
-                  {isDemande
-                    ? (lang === 'fr' ? 'Confirmer et Payer' : 'Confirm and Pay')
-                    : (lang === 'fr' ? 'Payer maintenant' : 'Pay Now')}
+                  {isDemande ? t('confirmAndPay') : t('payNow')}
                 </>
               )}
             </button>

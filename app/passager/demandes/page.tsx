@@ -36,6 +36,7 @@ const Icon = ({ name, size = 20, color = E }: { name: string; size?: number; col
     creditCard: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
     plus: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8V16M8 12H16"/></svg>,
     x: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+    trash: <svg style={s} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>,
   };
   return <span style={{ lineHeight: 0, display: 'inline-flex' }}>{icons[name] || null}</span>;
 };
@@ -91,15 +92,15 @@ export default function MesDemandesPage() {
         if (Array.isArray(data)) {
           setDemandes(data);
         } else {
-          setError(lang === 'fr' ? 'Format de données invalide.' : 'Invalid data format.');
+          setError(t('invalidDataFormat'));
         }
       } catch (err: any) {
         clearTimeout(timeoutId);
         if (err.name === 'AbortError') {
-          setError(lang === 'fr' ? 'Le serveur met trop de temps à répondre (Timeout). Le backend est peut-être bloqué.' : 'Server timeout.');
+          setError(t('serverTimeoutLong'));
         } else {
           console.error('Erreur chargement:', err);
-          setError(lang === 'fr' ? 'Erreur de connexion au serveur.' : 'Server connection error.');
+          setError(t('serverConnectionError'));
         }
       } finally {
         setLoading(false);
@@ -121,14 +122,40 @@ export default function MesDemandesPage() {
     }
   });
 
+  const [annulantId, setAnnulantId] = useState<number | null>(null);
+
+  const handleAnnuler = async (id: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setAnnulantId(id);
+    try {
+      const res = await fetch(`${API_URL}/demandes/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
+      });
+      if (res.ok) {
+        setDemandes(prev => prev.map(d => d.id === id ? { ...d, statut: 'ANNULEE' } : d));
+      } else {
+        const data = await res.json();
+        setError(data.error || t('error'));
+        setTimeout(() => setError(''), 4000);
+      }
+    } catch {
+      setError(t('serverConnectionError'));
+      setTimeout(() => setError(''), 4000);
+    } finally {
+      setAnnulantId(null);
+    }
+  };
+
   const getStatutBadge = (statut: string) => {
     switch (statut) {
-      case 'EN_ATTENTE': return { label: lang === 'fr' ? 'En attente' : 'Pending', bg: AL, color: AM, icon: <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: AM, display: 'inline-block' }} /> };
-      case 'ACCEPTEE': return { label: lang === 'fr' ? 'Acceptée' : 'Accepted', bg: BLL, color: BL, icon: <Icon name="check" size={14} color={BL} /> };
-      case 'CONFIRMEE': return { label: lang === 'fr' ? 'Confirmée' : 'Confirmed', bg: EL, color: E, icon: <Icon name="check" size={14} color={E} /> };
-      case 'EXPIREE': return { label: lang === 'fr' ? 'Expirée' : 'Expired', bg: darkMode ? '#2A2A2A' : '#F3F4F6', color: GR, icon: <Icon name="clock" size={14} color={GR} /> };
+      case 'EN_ATTENTE': return { label: t('statusEnAttente'), bg: AL, color: AM, icon: <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: AM, display: 'inline-block' }} /> };
+      case 'ACCEPTEE': return { label: t('acceptedStatus'), bg: BLL, color: BL, icon: <Icon name="check" size={14} color={BL} /> };
+      case 'CONFIRMEE': return { label: t('confirmedFem'), bg: EL, color: E, icon: <Icon name="check" size={14} color={E} /> };
+      case 'EXPIREE': return { label: t('expiredStatus'), bg: darkMode ? '#2A2A2A' : '#F3F4F6', color: GR, icon: <Icon name="clock" size={14} color={GR} /> };
       case 'ANNULEE': 
-      case 'REFUSEE': return { label: lang === 'fr' ? 'Annulée' : 'Cancelled', bg: RL, color: RD, icon: <Icon name="x" size={14} color={RD} /> };
+      case 'REFUSEE': return { label: t('cancelledFem'), bg: RL, color: RD, icon: <Icon name="x" size={14} color={RD} /> };
       default: return { label: statut, bg: GR, color: '#FFF', icon: <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GR, display: 'inline-block' }} /> };
     }
   };
@@ -147,7 +174,7 @@ export default function MesDemandesPage() {
     return (
       <div style={{ padding: '80px', textAlign: 'center', color: textSecondary }}>
         <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-        <p>{lang === 'fr' ? 'Chargement de vos demandes...' : 'Loading your requests...'}</p>
+        <p>{t('loadingYourRequests')}</p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
       </div>
     );
@@ -162,7 +189,7 @@ export default function MesDemandesPage() {
         <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '12px' }}>Oups !</h2>
         <p style={{ fontSize: '15px', color: textSecondary, marginBottom: '24px' }}>{error}</p>
         <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', background: E, color: '#FFF', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '600' }}>
-          {lang === 'fr' ? 'Réessayer' : 'Retry'}
+          {t('retry')}
         </button>
       </div>
     );
@@ -173,10 +200,10 @@ export default function MesDemandesPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '28px', fontWeight: '800', color: textColor, margin: '0 0 8px' }}>
-            {lang === 'fr' ? 'Mes demandes de trajet' : 'My Trip Requests'}
+            {t('myTripRequests')}
           </h1>
           <p style={{ fontSize: '14px', color: textSecondary, margin: 0 }}>
-            {lang === 'fr' ? 'Suivez l\'état de vos demandes et effectuez vos paiements' : 'Track your requests and make payments'}
+            {t('myRequestsSubtitle')}
           </p>
         </div>
         <Link href="/passager/demandes/creer" style={{ textDecoration: 'none' }}>
@@ -189,15 +216,15 @@ export default function MesDemandesPage() {
             transition: 'all 0.2s'
           }}>
             <Icon name="plus" size={16} color="#FFF" />
-            {lang === 'fr' ? 'Nouvelle demande' : 'New Request'}
+            {t('newRequest')}
           </div>
         </Link>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: `1px solid ${borderColor}`, paddingBottom: '12px' }}>
         {[
-          { key: 'en_cours', label: lang === 'fr' ? 'En cours' : 'Active', count: demandes.filter(d => ['EN_ATTENTE', 'ACCEPTEE'].includes(d.statut)).length },
-          { key: 'historique', label: lang === 'fr' ? 'Historique' : 'History', count: demandes.filter(d => {
+          { key: 'en_cours', label: t('tabActive'), count: demandes.filter(d => ['EN_ATTENTE', 'ACCEPTEE'].includes(d.statut)).length },
+          { key: 'historique', label: t('historyTab'), count: demandes.filter(d => {
             if (!['CONFIRMEE', 'EXPIREE', 'ANNULEE', 'REFUSEE'].includes(d.statut)) return false;
             const maintenant = new Date();
             const dateLimite = new Date(d.dateDepart);
@@ -236,7 +263,7 @@ export default function MesDemandesPage() {
               <Icon name={activeTab === 'en_cours' ? 'eye' : 'calendar'} size={32} color={GR} />
             </div>
           <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>
-            {activeTab === 'en_cours' ? (lang === 'fr' ? 'Aucune demande en cours' : 'No active requests') : (lang === 'fr' ? 'Aucun historique' : 'No history')}
+            {activeTab === 'en_cours' ? t('noActiveRequests') : t('noHistory')}
           </h3>
         </div>
       ) : (
@@ -262,7 +289,7 @@ export default function MesDemandesPage() {
                     </span>
                   </div>
                   <span style={{ fontSize: '11px', color: textSecondary }}>
-                    {lang === 'fr' ? 'Créée le' : 'Created on'} {formatDate(demande.dateDepart)}
+                    {t('createdOn')} {formatDate(demande.dateDepart)}
                   </span>
                 </div>
 
@@ -297,7 +324,7 @@ export default function MesDemandesPage() {
                         )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}>
                           <Icon name="users" size={14} color={GR} />
-                          {demande.nbPlaces} {demande.nbPlaces > 1 ? (lang === 'fr' ? 'places' : 'seats') : (lang === 'fr' ? 'place' : 'seat')}
+                          {demande.nbPlaces} {demande.nbPlaces > 1 ? t('seatWordPlural') : t('seatWord')}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}>
                           <Icon name="money" size={14} color="#16A34A" />
@@ -313,7 +340,7 @@ export default function MesDemandesPage() {
                         borderRadius: '12px', minWidth: '200px'
                       }}>
                         <div style={{ fontSize: '11px', color: textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>
-                          {lang === 'fr' ? 'Conducteur' : 'Driver'}
+                          {t('driver')}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           
@@ -349,7 +376,7 @@ export default function MesDemandesPage() {
                             </div>
                             {demande.prixPropose && (
                               <div style={{ fontSize: '12px', color: E, fontWeight: '600' }}>
-                                {demande.prixPropose.toLocaleString()} FCFA/{lang === 'fr' ? 'place' : 'seat'}
+                                {demande.prixPropose.toLocaleString()} FCFA/{t('seatWord')}
                               </div>
                             )}
                           </div>
@@ -372,7 +399,7 @@ export default function MesDemandesPage() {
                         display: 'flex', alignItems: 'center', gap: '6px',
                         transition: 'all 0.2s'
                       }}>
-                        <Icon name="eye" size={14} color={E} /> {lang === 'fr' ? 'Détails' : 'Details'}
+                        <Icon name="eye" size={14} color={E} /> {t('detailsBtn')}
                       </button>
                     </Link>
 
@@ -386,7 +413,7 @@ export default function MesDemandesPage() {
                           display: 'flex', alignItems: 'center', gap: '6px',
                           transition: 'all 0.2s'
                         }}>
-                          <Icon name="message" size={14} color={BL} /> {lang === 'fr' ? 'Converser' : 'Chat'}
+                          <Icon name="message" size={14} color={BL} /> {t('chatBtn')}
                         </button>
                       </Link>
                     )}
@@ -402,9 +429,32 @@ export default function MesDemandesPage() {
                           boxShadow: `0 4px 12px rgba(13,158,126,0.3)`,
                           transition: 'all 0.2s'
                         }}>
-                          <Icon name="creditCard" size={14} color="#FFF" /> {lang === 'fr' ? 'Payer' : 'Pay'}
+                          <Icon name="creditCard" size={14} color="#FFF" /> {t('payBtn')}
                         </button>
                       </Link>
+                    )}
+
+                    {/* 4. Bouton Annuler (visible si EN_ATTENTE ou ACCEPTEE) */}
+                    {['EN_ATTENTE', 'ACCEPTEE'].includes(demande.statut) && (
+                      <button
+                        onClick={() => handleAnnuler(demande.id)}
+                        disabled={annulantId === demande.id}
+                        style={{
+                          padding: '10px 18px', borderRadius: '10px',
+                          border: `1px solid ${RD}`, background: RL, color: RD,
+                          fontSize: '13px', fontWeight: '600', cursor: annulantId === demande.id ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', gap: '6px',
+                          opacity: annulantId === demande.id ? 0.6 : 1,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {annulantId === demande.id ? (
+                          <div style={{ width: 14, height: 14, border: `2px solid ${RD}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        ) : (
+                          <Icon name="trash" size={14} color={RD} />
+                        )}
+                        {t('cancel')}
+                      </button>
                     )}
                   </div>
                 </div>

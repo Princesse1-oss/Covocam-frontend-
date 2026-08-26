@@ -51,7 +51,7 @@ const Icon = ({ name, size = 20, color = EMERALD }: { name: string; size?: numbe
 export default function ConversationPage() {
   const params = useParams();
   const router = useRouter();
-  const { darkMode } = useTheme();
+  const { t, darkMode } = useTheme();
   const theme = darkMode ? 'dark' : 'light';
   const userId = Number(params.userId);
   
@@ -59,7 +59,7 @@ export default function ConversationPage() {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [contactName, setContactName] = useState('Discussion');
+  const [contactName, setContactName] = useState('');
   const [contactPhoto, setContactPhoto] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showSignaler, setShowSignaler] = useState<number | null>(null);
@@ -155,7 +155,7 @@ export default function ConversationPage() {
       
       if (!res.ok) {
         setMessages(prev => prev.filter(m => m.id !== tempId));
-        setError('Échec de l\'envoi du message.'); setTimeout(() => setError(''), 4000);
+        setError(t('messageSendFailed')); setTimeout(() => setError(''), 4000);
       } else {
         fetchConversation(); 
       }
@@ -191,7 +191,7 @@ export default function ConversationPage() {
       <>
         <div style={{ padding: '40px', textAlign: 'center', color: GRAY }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EMERALD_LIGHT}`, borderTopColor: EMERALD, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement de la conversation...</p>
+          <p>{t('loadingConversation')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </>
@@ -248,7 +248,7 @@ export default function ConversationPage() {
             {contactPhoto && (
               <img
                 src={contactPhoto.startsWith('http') ? contactPhoto : `/uploads/profils/${contactPhoto}`}
-                alt={`Photo de ${contactName}`}
+                alt={t('photoOf').replace('{name}', contactName)}
                 onError={(e) => (e.currentTarget.style.display = 'none')}
                 style={{
                   width: '100%', height: '100%', borderRadius: '50%',
@@ -270,10 +270,10 @@ export default function ConversationPage() {
           </div>
 
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '15px', fontWeight: '700', color: theme === 'dark' ? '#FFFFFF' : BLACK }}>{contactName}</div>
+            <div style={{ fontSize: '15px', fontWeight: '700', color: theme === 'dark' ? '#FFFFFF' : BLACK }}>{contactName || t('conversation')}</div>
             <div style={{ fontSize: '12px', color: EMERALD, display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: EMERALD, display: 'inline-block' }}></span>
-              En ligne
+              {t('online')}
             </div>
           </div>
         </div>
@@ -293,8 +293,8 @@ export default function ConversationPage() {
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: EMERALD_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Icon name="message" size={28} />
               </div>
-              <p style={{ fontSize: '15px', fontWeight: '600', color: theme === 'dark' ? '#FFFFFF' : BLACK }}>Démarrez la conversation !</p>
-              <p style={{ fontSize: '13px', color: GRAY, marginTop: '4px' }}>Envoyez votre premier message</p>
+              <p style={{ fontSize: '15px', fontWeight: '600', color: theme === 'dark' ? '#FFFFFF' : BLACK }}>{t('startConversation')}</p>
+              <p style={{ fontSize: '13px', color: GRAY, marginTop: '4px' }}>{t('sendFirstMessage')}</p>
             </div>
           )}
 
@@ -337,15 +337,15 @@ export default function ConversationPage() {
                   )}
                 </span>
                 {!msg.estMoi && !msg.estSignale && showSignaler !== msg.id && (
-                  <button onClick={() => setShowSignaler(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#8E8E8E', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '3px' }} title="Signaler">
+                  <button onClick={() => setShowSignaler(msg.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#8E8E8E', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '3px' }} title={t('reportMessage')}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                    Signaler
+                    {t('reportMessage')}
                   </button>
                 )}
                 {msg.estSignale && (
                   <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '3px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                    Signalé
+                    {t('reportedLabel')}
                   </span>
                 )}
               </div>
@@ -355,12 +355,12 @@ export default function ConversationPage() {
                     type="text"
                     value={raisonSignalement}
                     onChange={e => setRaisonSignalement(e.target.value)}
-                    placeholder="Raison (optionnel)"
+                    placeholder={t('reasonOptional')}
                     style={{ padding: '8px 10px', borderRadius: '6px', border: '1px solid #FECACA', fontSize: '12px', outline: 'none', width: '100%', boxSizing: 'border-box' }}
                   />
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => handleSignaler(msg.id)} style={{ flex: 1, padding: '6px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Confirmer</button>
-                    <button onClick={() => { setShowSignaler(null); setRaisonSignalement(''); }} style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#374151', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
+                    <button onClick={() => handleSignaler(msg.id)} style={{ flex: 1, padding: '6px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>{t('confirmBtn')}</button>
+                    <button onClick={() => { setShowSignaler(null); setRaisonSignalement(''); }} style={{ flex: 1, padding: '6px', background: '#F3F4F6', color: '#374151', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>{t('cancel')}</button>
                   </div>
                 </div>
               )}
@@ -381,7 +381,7 @@ export default function ConversationPage() {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Écrivez votre message..."
+            placeholder={t('writeMessagePlaceholder')}
             style={{ 
               flex: 1, 
               padding: '12px 18px', 

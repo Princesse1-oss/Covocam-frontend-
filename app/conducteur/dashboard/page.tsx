@@ -202,9 +202,9 @@ export default function ConducteurDashboard() {
   };
 
   const statutLabel = (s: string) => {
-    if (['CONFIRMEE','A_PAYER'].includes(s)) return t('confirmed') || 'Confirmée';
-    if (s === 'EN_ATTENTE') return t('pending') || 'En attente';
-    if (['ANNULEE','REFUSEE'].includes(s)) return t('cancelled') || 'Annulée';
+    if (['CONFIRMEE','A_PAYER'].includes(s)) return t('confirmed');
+    if (s === 'EN_ATTENTE') return t('pending');
+    if (['ANNULEE','REFUSEE'].includes(s)) return t('cancelled');
     return s;
   };
 
@@ -212,17 +212,17 @@ export default function ConducteurDashboard() {
 
   // ✅ CORRECTION : Remplacement de "F" par "FCFA" pour un affichage clair
   const statCards = [
-    { label: t('totalTrips') || 'Trajets', value: stats?.totalTrajets ?? 0, sub: `${stats?.trajetsOuverts ?? 0} ${t('pending') || 'en cours'}`, icon: <Icon name="car" size={22} />, color: E, bg: EL, delay: '0s' },
-    { label: t('totalReservations') || 'Réservations', value: stats?.totalReservations ?? 0, sub: `${stats?.reservationsEnAttente ?? 0} ${t('pending') || 'en attente'}`, icon: <Icon name="calendar" size={22} color={BL} />, color: BL, bg: BLL, delay: '0.08s' },
-    { label: t('totalEarnings') || 'Gains', value: `${(stats?.totalNet ?? 0).toLocaleString()} FCFA`, sub: t('totalEarningsDesc') || 'Total net', icon: <Icon name="money" size={22} />, color: '#16A34A', bg: '#F0FDF4', delay: '0.16s' },
-    { label: t('rating') || 'Note', value: stats?.noteMoyenne ? `${stats.noteMoyenne.toFixed(1)}/5` : 'N/A', sub: `${stats?.totalEvaluations ?? 0} ${t('reviewsCount') || 'avis'}`, icon: <Icon name="star" size={22} />, color: AM, bg: AL, delay: '0.24s' },
+    { label: t('totalTrips'), value: stats?.totalTrajets ?? 0, sub: `${stats?.trajetsOuverts ?? 0} ${t('inProgress')}`, icon: <Icon name="car" size={22} />, color: E, bg: EL, delay: '0s' },
+    { label: t('totalReservations'), value: stats?.totalReservations ?? 0, sub: `${stats?.reservationsEnAttente ?? 0} ${t('pending')}`, icon: <Icon name="calendar" size={22} color={BL} />, color: BL, bg: BLL, delay: '0.08s' },
+    { label: t('totalEarnings'), value: `${(stats?.totalNet ?? 0).toLocaleString()} FCFA`, sub: t('totalEarningsDesc'), icon: <Icon name="money" size={22} />, color: '#16A34A', bg: '#F0FDF4', delay: '0.16s' },
+    { label: t('rating'), value: stats?.noteMoyenne ? `${stats.noteMoyenne.toFixed(1)}/5` : 'N/A', sub: `${stats?.totalEvaluations ?? 0} ${t('reviewsCount')}`, icon: <Icon name="star" size={22} />, color: AM, bg: AL, delay: '0.24s' },
   ];
 
   const statusItems = [
-    { label: 'Brouillons', val: stats?.trajetsBrouillons ?? 0, color: AM, bg: AL, icon: <Icon name="draft" size={24} color={AM} /> },
-    { label: t('pending') || 'En attente', val: stats?.trajetsOuverts ?? 0, color: '#15803d', bg: EL, icon: <Icon name="clock" size={24} color="#15803d" /> },
-    { label: t('completed') || 'Terminés', val: stats?.trajetsComplets ?? 0, color: BL, bg: BLL, icon: <Icon name="checkCircle" size={24} color={BL} /> },
-    { label: t('cancelled') || 'Annulés', val: stats?.trajetsAnnules ?? 0, color: RD, bg: RL, icon: <Icon name="xCircle" size={24} color={RD} /> },
+    { label: t('draftTrips'), val: stats?.trajetsBrouillons ?? 0, color: AM, bg: AL, icon: <Icon name="draft" size={24} color={AM} /> },
+    { label: t('pending'), val: stats?.trajetsOuverts ?? 0, color: '#15803d', bg: EL, icon: <Icon name="clock" size={24} color="#15803d" /> },
+    { label: t('completed'), val: stats?.trajetsComplets ?? 0, color: BL, bg: BLL, icon: <Icon name="checkCircle" size={24} color={BL} /> },
+    { label: t('cancelled'), val: stats?.trajetsAnnules ?? 0, color: RD, bg: RL, icon: <Icon name="xCircle" size={24} color={RD} /> },
   ];
 
   if (loading) {
@@ -230,7 +230,7 @@ export default function ConducteurDashboard() {
       <ConducteurLayout>
         <div style={{ padding: '80px', textAlign: 'center', color: darkMode ? '#9CA3AF' : '#6b7280' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>{t('loading') || 'Chargement...'}</p>
+          <p>{t('loading')}</p>
         </div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
       </ConducteurLayout>
@@ -287,7 +287,7 @@ export default function ConducteurDashboard() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: E }}/>
-                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>{t('dashboard') || 'Tableau de bord'}</span>
+                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>{t('dashboard')}</span>
               </div>
               <h1 style={{ 
                 fontSize: '30px', 
@@ -301,12 +301,12 @@ export default function ConducteurDashboard() {
                 flexWrap: 'wrap' 
               }}>
                 <span>
-                  {t('welcome') || 'Bienvenue'} {mounted && user?.prenom ? user.prenom : 'Conducteur'} !
+                  {t('welcome')}                   {mounted && user?.prenom ? user.prenom : t('driver')} !
                 </span>
                 <Icon name="wave" size={32} color="#FCD34D" />
               </h1>
               <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-                {t('welcomeBack') || 'Heureux de vous revoir sur CovoCam.'}
+                {t('welcomeBack')}
               </p>
             </div>
             <Link href="/conducteur/trajets/creer" style={{
@@ -318,7 +318,7 @@ export default function ConducteurDashboard() {
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 6px 20px rgba(13,158,126,0.4)`; }}
             >
               <Icon name="plus" size={18} color="white" />
-              {t('publish') || 'Publier un trajet'}
+              {t('publish')}
             </Link>
           </div>
         </div>
@@ -335,10 +335,10 @@ export default function ConducteurDashboard() {
               <Icon name="hourglass" size={32} color={darkMode ? '#FCD34D' : '#92400E'} />
               <div>
                 <div style={{ fontSize: '15px', fontWeight: '700', color: darkMode ? '#FCD34D' : '#92400E' }}>
-                  {stats?.trajetsBrouillons} trajet(s) en attente de publication
+                  {stats?.trajetsBrouillons} {t('draftsPendingWord')}
                 </div>
                 <div style={{ fontSize: '13px', color: darkMode ? '#FCD34D99' : '#A16207' }}>
-                  Compleetez-les (vehicule, heure) pour les rendre visibles.
+                  {t('completeDraftsDesc')}
                 </div>
               </div>
             </div>
@@ -349,7 +349,7 @@ export default function ConducteurDashboard() {
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              Voir mes brouillons
+              {t('viewDrafts')}
             </Link>
           </div>
         )}
@@ -374,14 +374,14 @@ export default function ConducteurDashboard() {
               </div>
               <div>
                 <div style={{ fontSize: '11px', fontWeight: '600', color: darkMode ? '#6EE7B7' : '#059669', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
-                  {activeTrajet.statut.toUpperCase() === 'EN_ATTENTE_DEPART' ? 'Pret a partir' : 'Trajet en cours'}
+                  {activeTrajet.statut.toUpperCase() === 'EN_ATTENTE_DEPART' ? t('readyToDepart') : t('tripInProgressShort')}
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: '800', color: darkMode ? '#FFFFFF' : '#064E3B' }}>
                   {activeTrajet.villeDepart} <span style={{ color: E }}>&rarr;</span> {activeTrajet.villeArrivee}
                 </div>
                 <div style={{ fontSize: '13px', color: darkMode ? '#A7F3D0' : '#047857', marginTop: '4px' }}>
                   {activeTrajet.heureDepart} {activeTrajet.dateDepart ? `(${new Date(activeTrajet.dateDepart).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })})` : ''}
-                  {activeTrajet.placesDisponibles !== undefined && ` - ${activeTrajet.nbReservationsConfirmees || 0}/${activeTrajet.placesDisponibles} places`}
+                  {activeTrajet.placesDisponibles !== undefined && ` - ${activeTrajet.nbReservationsConfirmees || 0}/${activeTrajet.placesDisponibles} ${t('seats')}`}
                 </div>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function ConducteurDashboard() {
                 onMouseEnter={e => { e.currentTarget.style.background = E; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = darkMode ? '#A7F3D0' : '#065F46'; }}
               >
-                <Icon name="map" size={16} /> Carte ramassage
+                <Icon name="map" size={16} /> {t('pickupMapShort')}
               </Link>
               {activeTrajet.statut?.toUpperCase() === 'EN_ATTENTE_VALIDATION' && (
                 <Link href={`/conducteur/trajets/${activeTrajet.id}`} style={{
@@ -407,7 +407,7 @@ export default function ConducteurDashboard() {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(13,158,126,0.4)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.3)'; }}
                 >
-                  <Icon name="users" size={16} color="#fff" /> Valider présences
+                  <Icon name="users" size={16} color="#fff" /> {t('validatePresences')}
                 </Link>
               )}
             </div>
@@ -457,11 +457,11 @@ export default function ConducteurDashboard() {
           <div style={{ background: darkMode ? '#1A1A1A' : '#FFFFFF', borderRadius: '20px', border: `1px solid ${darkMode ? '#2A2A2A' : BD}`, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
             <div style={{ padding: '20px 24px', borderBottom: `1px solid ${darkMode ? '#2A2A2A' : BD}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: darkMode ? '#FFFFFF' : BK, margin: '0 0 2px' }}>{t('recentTrips') || 'Trajets récents'}</h3>
-                <p style={{ fontSize: '12px', color: darkMode ? '#9CA3AF' : GR, margin: 0 }}>{trajets.length} {t('myTrips') || 'trajets'}</p>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: darkMode ? '#FFFFFF' : BK, margin: '0 0 2px' }}>{t('recentTrips')}</h3>
+                <p style={{ fontSize: '12px', color: darkMode ? '#9CA3AF' : GR, margin: 0 }}>{trajets.length} {t('myTrips')}</p>
               </div>
               <Link href="/conducteur/trajets" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: E, textDecoration: 'none', fontWeight: '600' }}>
-                {t('viewAll') || 'Voir tout'} <Icon name="arrowRight" size={14} />
+                {t('viewAll')} <Icon name="arrowRight" size={14} />
               </Link>
             </div>
 
@@ -470,9 +470,9 @@ export default function ConducteurDashboard() {
                 <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
                   <Icon name="car" size={48} color={darkMode ? '#4B5563' : '#9CA3AF'} />
                 </div>
-                <p style={{ color: darkMode ? '#9CA3AF' : GR, fontSize: '14px', marginBottom: '20px' }}>{t('noRecentTrips') || 'Aucun trajet récent'}</p>
+                <p style={{ color: darkMode ? '#9CA3AF' : GR, fontSize: '14px', marginBottom: '20px' }}>{t('noRecentTrips')}</p>
                 <Link href="/conducteur/trajets/creer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: E, color: 'white', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>
-                  <Icon name="plus" size={16} color="white" /> {t('publish') || 'Publier'}
+                  <Icon name="plus" size={16} color="white" /> {t('publish')}
                 </Link>
               </div>
             ) : trajets.map((trajet, i) => (
@@ -500,7 +500,7 @@ export default function ConducteurDashboard() {
                   <span style={{ ...statutColorTrajet(trajet.statut), padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                     {trajet.statut}
                   </span>
-                  <span style={{ fontSize: '11px', color: darkMode ? '#9CA3AF' : GR }}>{trajet.nbReservationsConfirmees ?? 0} {t('reservationsCount') || 'résa.'}</span>
+                  <span style={{ fontSize: '11px', color: darkMode ? '#9CA3AF' : GR }}>{trajet.nbReservationsConfirmees ?? 0} {t('reservationsCount')}</span>
                 </div>
               </Link>
             ))}
@@ -511,17 +511,17 @@ export default function ConducteurDashboard() {
             <div style={{ padding: '20px 24px', borderBottom: `1px solid ${darkMode ? '#2A2A2A' : BD}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: darkMode ? '#FFFFFF' : BK, margin: '0 0 2px' }}>{t('reservationsCount') || 'Réservations'}</h3>
-                  <p style={{ fontSize: '12px', color: darkMode ? '#9CA3AF' : GR, margin: 0 }}>{reservations.length} {t('reservationsCount') || 'réservations'}</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: darkMode ? '#FFFFFF' : BK, margin: '0 0 2px' }}>{t('reservationsCount')}</h3>
+                  <p style={{ fontSize: '12px', color: darkMode ? '#9CA3AF' : GR, margin: 0 }}>{reservations.length} {t('reservationsCount')}</p>
                 </div>
                 {(stats?.reservationsEnAttente ?? 0) > 0 && (
                   <span style={{ background: AL, color: AM, fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>
-                    {stats?.reservationsEnAttente} {t('pending') || 'en attente'}
+                    {stats?.reservationsEnAttente} {t('pending')}
                   </span>
                 )}
               </div>
               <Link href="/conducteur/demandes" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: E, textDecoration: 'none', fontWeight: '600' }}>
-                {t('viewAll') || 'Voir tout'} <Icon name="arrowRight" size={14} />
+                {t('viewAll')} <Icon name="arrowRight" size={14} />
               </Link>
             </div>
 
@@ -530,7 +530,7 @@ export default function ConducteurDashboard() {
                 <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
                   <Icon name="clipboard" size={48} color={darkMode ? '#4B5563' : '#9CA3AF'} />
                 </div>
-                <p style={{ color: darkMode ? '#9CA3AF' : GR, fontSize: '14px' }}>{t('noData') || 'Aucune donnée'}</p>
+                <p style={{ color: darkMode ? '#9CA3AF' : GR, fontSize: '14px' }}>{t('noData')}</p>
               </div>
             ) : reservations.map((r, i) => (
               <div key={r.id} className="hover-row"
@@ -555,7 +555,7 @@ export default function ConducteurDashboard() {
                       {r.passager?.prenom} {r.passager?.nom}
                     </div>
                     <div style={{ fontSize: '12px', color: darkMode ? '#9CA3AF' : GR, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {r.trajet?.villeDepart} → {r.trajet?.villeArrivee} · {r.placesReservees} {t('seats') || 'places'}
+                      {r.trajet?.villeDepart} → {r.trajet?.villeArrivee} · {r.placesReservees} {t('seats')}
                     </div>
                   </div>
                 </div>
