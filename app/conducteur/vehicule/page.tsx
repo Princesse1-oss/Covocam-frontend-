@@ -358,7 +358,15 @@ export default function MesVehicules() {
             {t('vehicleDescription')}
           </p>
         </div>
-
+        {!showForm && (
+          <button onClick={() => { setShowForm(true); setError(''); }} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', border: 'none',
+            background: `linear-gradient(135deg, ${E}, ${ED})`, color: '#fff', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+            boxShadow: `0 4px 15px rgba(13,158,126,0.3)`,
+          }}>
+            <Icon name="plus" size={16} color="#fff" /> {t('addVehicle')}
+          </button>
+        )}
       </div>
 
       {!showForm && vehicules.length === 0 && !loading && (

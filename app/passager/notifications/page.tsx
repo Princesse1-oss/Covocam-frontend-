@@ -81,8 +81,7 @@ const formatDate = (dateValue: any) => {
 
 export default function PassagerNotifications() {
   const router = useRouter();
-  // ✅ CORRECTION : On récupère 'darkMode' au lieu de 'theme'
-  const { darkMode } = useTheme();
+  const { darkMode, t } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -205,7 +204,7 @@ export default function PassagerNotifications() {
             animation: 'spin 1s linear infinite', 
             margin: '0 auto 12px' 
           }} />
-          <p style={{ color: GRAY, fontSize: '14px' }}>Chargement des notifications...</p>
+          <p style={{ color: GRAY, fontSize: '14px' }}>{t('loadingNotifications')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </div>
@@ -216,10 +215,10 @@ export default function PassagerNotifications() {
     <div style={{ padding: isMobile ? '20px 16px' : '32px 24px', maxWidth: '800px', margin: '0 auto' }}>
       {confirmDeleteId !== null && (
         <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Supprimer cette notification ?</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('deleteNotificationConfirm')}</span>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
-            <button onClick={() => supprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+            <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('cancel')}</button>
+            <button onClick={() => supprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('delete')}</button>
           </div>
         </div>
       )}
@@ -243,14 +242,13 @@ export default function PassagerNotifications() {
             alignItems: 'center',
             gap: '10px'
           }}>
-            <Icon name="bell" size={28} />
-            Notifications
+            <Icon name="bell" size={28} /> {t('notifications')}
           </h1>
           <p style={{ color: GRAY, fontSize: isMobile ? '13px' : '14px', margin: 0 }}>
             {nonLues > 0 ? (
-              <span style={{ color: EMERALD, fontWeight: '600' }}>{nonLues} notification(s) non lue(s)</span>
+              <span style={{ color: EMERALD, fontWeight: '600' }}>{nonLues} {t('unreadWord')}</span>
             ) : (
-              'Tout est lu !'
+              t('allRead')
             )}
           </p>
         </div>
@@ -282,7 +280,7 @@ export default function PassagerNotifications() {
             }}
           >
             <Icon name="check" size={16} />
-            Tout marquer comme lu
+            {t('markAllAsRead')}
           </button>
         )}
       </div>
@@ -310,8 +308,8 @@ export default function PassagerNotifications() {
           }}>
             <Icon name="bell" size={32} />
           </div>
-          <p style={{ color: darkMode ? '#FFFFFF' : BLACK, fontSize: '16px', fontWeight: '700', margin: '0 0 8px' }}>Aucune notification</p>
-          <p style={{ color: GRAY, fontSize: '14px', margin: 0 }}>Vous serez notifié des nouvelles activités ici.</p>
+          <p style={{ color: darkMode ? '#FFFFFF' : BLACK, fontSize: '16px', fontWeight: '700', margin: '0 0 8px' }}>{t('noNotifications')}</p>
+          <p style={{ color: GRAY, fontSize: '14px', margin: 0 }}>{t('notificationsDescription')}</p>
         </div>
       ) : (
         /* List */
@@ -426,7 +424,7 @@ export default function PassagerNotifications() {
                         fontWeight: '600'
                       }}>
                         <Icon name="check" size={14} />
-                        Lu
+                        {t('read')}
                       </span>
                     )}
                   </div>
@@ -477,7 +475,7 @@ export default function PassagerNotifications() {
                           gap: '4px'
                         }}
                       >
-                        Voir
+                        {t('see')}
                       </a>
                     )}
                     {isTermine && (
@@ -498,7 +496,7 @@ export default function PassagerNotifications() {
                           gap: '4px'
                         }}
                       >
-                        Évaluer
+                        {t('evaluate')}
                       </Link>
                     )}
                     {!notif.estLu && (
@@ -522,7 +520,7 @@ export default function PassagerNotifications() {
                         onMouseLeave={(e) => { e.currentTarget.style.background = EMERALD_LIGHT; }}
                       >
                         <Icon name="check" size={14} />
-                        Lu
+                        {t('read')}
                       </button>
                     )}
                     <button

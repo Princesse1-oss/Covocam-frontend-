@@ -38,6 +38,7 @@ const BL = '#2563EB';
 const BLL = '#DBEAFE';
 const RD = '#DC2626';
 const RL = '#FEE2E2';
+const API_URL = '/api';
 
 const Icon = ({ name, size = 20, color = E }: { name: string; size?: number; color?: string }) => {
   const s = { width: size, height: size, display: 'inline-block', verticalAlign: 'middle' } as React.CSSProperties;
@@ -68,6 +69,7 @@ export default function PassagerDashboard() {
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [totalAvailable, setTotalAvailable] = useState(0);
   const [activeDrivers, setActiveDrivers] = useState(0);
+  const [totalDrivers, setTotalDrivers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -128,7 +130,6 @@ export default function PassagerDashboard() {
       const all = Array.isArray(data) ? data : [];
       setTrajets(all.slice(0, 10));
       setTotalAvailable(all.filter((t: Trajet) => (t.placesDisponibles ?? t.nbPlacesDisponibles ?? 0) > 0).length);
-      setActiveDrivers(new Set(all.map((t: Trajet) => t.conducteur?.id).filter(Boolean)).size);
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         setError("Impossible de charger les trajets. Vérifiez votre connexion.");
@@ -141,7 +142,20 @@ export default function PassagerDashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) fetchTrajets(token);
+    if (token) {
+      fetchTrajets(token);
+      fetch(`${API_URL}/stats/conducteurs`, {
+        headers: { Authorization: `Bearer ${token.replace(/"/g, '').trim()}` },
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) {
+            setTotalDrivers(data.total || 0);
+            setActiveDrivers(data.actifs || 0);
+          }
+        })
+        .catch(() => {});
+    }
   }, [fetchTrajets]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -273,11 +287,12 @@ export default function PassagerDashboard() {
 
         {/* ===== STATS ===== */}
         {!searched && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
             {[
               { label: t('availableTrips'), value: totalAvailable, icon: <Icon name="car" size={22} />, color: E, bg: EL, sub: `${totalAvailable} ${t('seats')}` },
-              { label: t('activeDrivers'), value: activeDrivers, icon: <Icon name="users" size={22} color={BL} />, color: BL, bg: BLL, sub: t('onPlatformSub') },
-              { label: t('regionsCovered'), value: 10, icon: <Icon name="route" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: t('cameroonCountry') },
+              { label: t('totalDrivers') || 'Conducteurs', value: totalDrivers, icon: <Icon name="users" size={22} color={BL} />, color: BL, bg: BLL, sub: t('onPlatformSub') },
+              { label: t('activeDrivers'), value: activeDrivers, icon: <Icon name="users" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: t('onPlatformSub') },
+              { label: t('regionsCovered'), value: 10, icon: <Icon name="route" size={22} color="#7C3AED" />, color: '#7C3AED', bg: '#F5F3FF', sub: t('cameroonCountry') },
             ].map((stat, i) => (
               <div key={i} className="stat-card" style={{
                 background: darkMode ? '#1A1A1A' : '#FFFFFF', borderRadius: '18px', padding: '22px',
