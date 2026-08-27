@@ -69,7 +69,6 @@ export default function PassagerDashboard() {
   const [trajets, setTrajets] = useState<Trajet[]>([]);
   const [totalAvailable, setTotalAvailable] = useState(0);
   const [activeDrivers, setActiveDrivers] = useState(0);
-  const [totalDrivers, setTotalDrivers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -150,7 +149,6 @@ export default function PassagerDashboard() {
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data) {
-            setTotalDrivers(data.total || 0);
             setActiveDrivers(data.actifs || 0);
           }
         })
@@ -287,10 +285,9 @@ export default function PassagerDashboard() {
 
         {/* ===== STATS ===== */}
         {!searched && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
             {[
               { label: t('availableTrips'), value: totalAvailable, icon: <Icon name="car" size={22} />, color: E, bg: EL, sub: `${totalAvailable} ${t('seats')}` },
-              { label: t('totalDrivers') || 'Conducteurs', value: totalDrivers, icon: <Icon name="users" size={22} color={BL} />, color: BL, bg: BLL, sub: t('onPlatformSub') },
               { label: t('activeDrivers'), value: activeDrivers, icon: <Icon name="users" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: t('onPlatformSub') },
               { label: t('regionsCovered'), value: 10, icon: <Icon name="route" size={22} color="#7C3AED" />, color: '#7C3AED', bg: '#F5F3FF', sub: t('cameroonCountry') },
             ].map((stat, i) => (
