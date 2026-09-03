@@ -76,12 +76,32 @@ const conducteurIcon = new L.DivIcon({
   iconAnchor: [20, 20],
 });
 
+const createPhotoIcon = (photoUrl: string, size: number = 48, borderColor: string = E) => {
+  return new L.DivIcon({
+    className: 'custom-photo-marker',
+    html: `<div style="
+      width: ${size}px; height: ${size}px;
+      border-radius: 50%;
+      border: 3px solid ${borderColor};
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      overflow: hidden;
+      background: ${borderColor};
+    ">
+      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"/>
+    </div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
+};
+
 interface CartePassagerItem {
   id: number;
   prenom: string;
   nom: string;
   latitude?: number;
   longitude?: number;
+  photo?: string | null;
 }
 
 interface CarteTrajetConducteurProps {
@@ -92,6 +112,7 @@ interface CarteTrajetConducteurProps {
   passagers: CartePassagerItem[];
   driverPosition?: [number, number] | null;
   darkMode?: boolean;
+  driverPhoto?: string | null;
 }
 
 export default function CarteTrajetConducteur({
@@ -102,6 +123,7 @@ export default function CarteTrajetConducteur({
   passagers,
   driverPosition,
   darkMode = false,
+  driverPhoto,
 }: CarteTrajetConducteurProps) {
   const center: [number, number] = driverPosition || departure || CAMEROON_CENTER;
   const zoom = driverPosition ? 12 : 10;
@@ -147,11 +169,18 @@ export default function CarteTrajetConducteur({
             <Marker
               key={passager.id}
               position={[passager.latitude, passager.longitude]}
-              icon={passagerIcon}
+              icon={passager.photo
+                ? createPhotoIcon(passager.photo.startsWith('http') ? passager.photo : `/uploads/profils/${passager.photo}`, 40, '#3B82F6')
+                : passagerIcon}
             >
               <Popup>
                 <div style={{ fontWeight: '600', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <SvgIcon name="passager" size={16} color="#3B82F6" /> {passager.prenom} {passager.nom}
+                  {passager.photo && (
+                    <img src={passager.photo.startsWith('http') ? passager.photo : `/uploads/profils/${passager.photo}`}
+                      style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                  )}
+                  {passager.prenom} {passager.nom}
                 </div>
               </Popup>
             </Marker>
@@ -159,7 +188,7 @@ export default function CarteTrajetConducteur({
         ))}
 
         {driverPosition && (
-          <Marker position={driverPosition} icon={conducteurIcon}>
+          <Marker position={driverPosition} icon={driverPhoto ? createPhotoIcon(driverPhoto.startsWith('http') ? driverPhoto : `/uploads/profils/${driverPhoto}`, 48, E) : conducteurIcon}>
             <Popup>
               <div style={{ fontWeight: '600', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <SvgIcon name="car" size={16} color="#0D9E7E" /> Vous (position actuelle)

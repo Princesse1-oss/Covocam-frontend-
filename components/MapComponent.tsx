@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl, useMap } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -52,6 +52,44 @@ const driverIcon = createSvgIcon(`
   </svg>
 `, 40);
 
+const createPhotoIcon = (photoUrl: string, size: number = 48) => {
+  return new L.DivIcon({
+    className: 'custom-photo-icon',
+    html: `<div style="
+      width: ${size}px; height: ${size}px;
+      border-radius: 50%;
+      border: 3px solid #0D9E7E;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      overflow: hidden;
+      background: #0D9E7E;
+    ">
+      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"/>
+    </div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
+};
+
+const createPassengerIcon = (photoUrl: string, size: number = 40) => {
+  return new L.DivIcon({
+    className: 'custom-passenger-photo-icon',
+    html: `<div style="
+      width: ${size}px; height: ${size}px;
+      border-radius: 50%;
+      border: 3px solid #3B82F6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      overflow: hidden;
+      background: #3B82F6;
+    ">
+      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"/>
+    </div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
+};
+
 
 function MapUpdater({ currentPosition }: { currentPosition?: [number, number] | null }) {
   const map = useMap();
@@ -74,6 +112,8 @@ interface MapComponentProps {
   showRoute?: boolean;
   height?: string;
   zoom?: number;
+  driverPhoto?: string | null;
+  passengers?: Array<{ id: number; prenom: string; nom: string; latitude?: number; longitude?: number; photo?: string | null }>;
 }
 
 const CAMEROON_CENTER: [number, number] = [5.7, 12.5];
@@ -93,6 +133,8 @@ export default function MapComponent({
   showRoute = true,
   height = '400px',
   zoom = DEFAULT_ZOOM,
+  driverPhoto,
+  passengers = [],
 }: MapComponentProps) {
   const { t, lang } = useTheme();
   const [isClient, setIsClient] = useState(false);
@@ -145,6 +187,8 @@ export default function MapComponent({
   if (currentCoords) routePoints.push(currentCoords);
   if (arrivalCoords) routePoints.push(arrivalCoords);
 
+  const driverMarker = driverPhoto ? createPhotoIcon(driverPhoto, 48) : driverIcon;
+
   return (
     <div style={{ borderRadius: '16px', overflow: 'hidden', border: '2px solid #0D9E7E' }}>
       <div style={{ height }}>
@@ -153,10 +197,12 @@ export default function MapComponent({
           zoom={currentCoords ? 14 : zoom}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={true}
+          zoomControl={false}
           maxBounds={CAMEROON_BOUNDS}
           maxBoundsViscosity={1.0}
           minZoom={CAMEROON_MIN_ZOOM}
         >
+        <ZoomControl position="bottomright" />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -192,7 +238,7 @@ export default function MapComponent({
         )}
 
         {currentCoords && (
-          <Marker position={currentCoords} icon={driverIcon}>
+          <Marker position={currentCoords} icon={driverMarker}>
             <Popup>
               <div style={{ fontFamily: 'Arial, sans-serif' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -203,6 +249,27 @@ export default function MapComponent({
             </Popup>
           </Marker>
         )}
+
+        {passengers.map((p) => (
+          p.latitude && p.longitude ? (
+            <Marker
+              key={p.id}
+              position={[p.latitude, p.longitude]}
+              icon={p.photo ? createPassengerIcon(p.photo.startsWith('http') ? p.photo : `/uploads/profils/${p.photo}`, 40) : createSvgIcon(`<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2"/><text x="12" y="16" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle" font-family="sans-serif">${p.prenom.charAt(0)}</text></svg>`, 36)}
+            >
+              <Popup>
+                <div style={{ fontFamily: 'Arial, sans-serif', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {p.photo && (
+                    <img src={p.photo.startsWith('http') ? p.photo : `/uploads/profils/${p.photo}`}
+                      style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                  )}
+                  <strong>{p.prenom} {p.nom}</strong>
+                </div>
+              </Popup>
+            </Marker>
+          ) : null
+        ))}
 
         {showRoute && routePoints.length >= 2 && (
           <Polyline

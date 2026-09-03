@@ -252,6 +252,7 @@ export default function PassagerMapPage() {
               driverPosition={driverPosition}
               userPosition={userPosition}
               driverName={trajet.conducteur ? `${trajet.conducteur.prenom} ${trajet.conducteur.nom}` : undefined}
+              driverPhoto={trajet.conducteur?.photo || null}
               darkMode={darkMode}
             />
           </div>

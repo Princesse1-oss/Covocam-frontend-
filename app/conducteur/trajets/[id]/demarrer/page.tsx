@@ -75,6 +75,7 @@ export default function DemarrerTrajetPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [passengers, setPassengers] = useState<Array<{ id: number; prenom: string; nom: string; latitude?: number; longitude?: number; photo?: string | null }>>([]);
   
   // ✅ C'est cette variable qui active/désactive le hook GPS
   const [isTrajetActive, setIsTrajetActive] = useState(false);
@@ -94,25 +95,40 @@ export default function DemarrerTrajetPage() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    fetch(`${API_URL}/trajets/${id}`, {
-      headers: { Authorization: `Bearer ${cleanToken}` },
-      signal: controller.signal,
-    })
-      .then(async (r) => {
+    Promise.all([
+      fetch(`${API_URL}/trajets/${id}`, {
+        headers: { Authorization: `Bearer ${cleanToken}` },
+        signal: controller.signal,
+      }),
+      fetch(`${API_URL}/conducteur/trajets/${id}/reservations`, {
+        headers: { Authorization: `Bearer ${cleanToken}` },
+        signal: controller.signal,
+      })
+    ])
+      .then(async ([resTrajet, resPassagers]) => {
         clearTimeout(timeoutId);
-        if (r.status === 401) {
+        if (resTrajet.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           router.push('/login');
           return;
         }
-        const text = await r.text();
-        if (!r.ok) throw new Error('Trajet non trouvé');
-        return JSON.parse(text);
-      })
-      .then(data => {
-        setTrajet(data);
-        if (data.statut === 'EN_COURS' || data.trajetActive) {
+        const trajetData = await resTrajet.json();
+        let passagersList: any[] = [];
+        if (resPassagers.ok) {
+          const pData = await resPassagers.json();
+          passagersList = Array.isArray(pData) ? pData : (pData.reservations || []);
+        }
+        setTrajet(trajetData);
+        setPassengers(passagersList.map((r: any) => ({
+          id: r.passager.id,
+          prenom: r.passager.prenom,
+          nom: r.passager.nom,
+          latitude: r.latitude,
+          longitude: r.longitude,
+          photo: r.passager.photo || null,
+        })));
+        if (trajetData.statut === 'EN_COURS' || trajetData.trajetActive) {
           setIsTrajetActive(true);
         }
         setLoading(false);
@@ -272,6 +288,8 @@ export default function DemarrerTrajetPage() {
             name: `${trajet.villeArrivee} (${trajet.quartierArrivee || 'Centre'})` 
           }}
           currentPosition={currentPosition ?? undefined}
+          driverPhoto={trajet.conducteur?.photo || null}
+          passengers={passengers}
           height="450px"
           zoom={12}
         />

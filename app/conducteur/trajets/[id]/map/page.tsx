@@ -69,6 +69,12 @@ interface Trajet {
   dateDepart: string;
   heureDepart: string;
   statut: string;
+  conducteur?: {
+    id: number;
+    nom: string;
+    prenom: string;
+    photo?: string | null;
+  };
 }
 
 interface Passager {
@@ -120,6 +126,7 @@ export default function ConducteurMapPage() {
           nom: r.passager.nom,
           prenom: r.passager.prenom,
           telephone: r.passager.telephone,
+          photo: r.passager.photo || null,
           quartierRamassage: r.quartierRamassage,
           latitude: r.latitude,
           longitude: r.longitude
@@ -226,6 +233,7 @@ export default function ConducteurMapPage() {
               arrivalName={trajet.villeArrivee}
               passagers={passagers}
               driverPosition={driverPosition}
+              driverPhoto={trajet.conducteur?.photo || null}
               darkMode={darkMode}
             />
           </div>

@@ -66,6 +66,25 @@ const conducteurIcon = new L.DivIcon({
   iconAnchor: [20, 20],
 });
 
+const createPhotoIcon = (photoUrl: string, size: number = 48, borderColor: string = E) => {
+  return new L.DivIcon({
+    className: 'custom-photo-marker',
+    html: `<div style="
+      width: ${size}px; height: ${size}px;
+      border-radius: 50%;
+      border: 3px solid ${borderColor};
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      overflow: hidden;
+      background: ${borderColor};
+    ">
+      <img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'"/>
+    </div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
+};
+
 const userIcon = new L.DivIcon({
   className: 'custom-marker',
   html: `<div style="background: #3B82F6; width: 40px; height: 40px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); display: flex; align-items: center; justify-content: center;">
@@ -86,6 +105,7 @@ interface CarteTrajetPassagerProps {
   driverPosition?: [number, number] | null;
   userPosition?: [number, number] | null;
   driverName?: string;
+  driverPhoto?: string | null;
   darkMode?: boolean;
 }
 
@@ -249,6 +269,7 @@ export default function CarteTrajetPassager({
   driverPosition,
   userPosition,
   driverName,
+  driverPhoto,
   darkMode = false,
 }: CarteTrajetPassagerProps) {
   const center: [number, number] = driverPosition || userPosition || departure || CAMEROON_CENTER;
@@ -301,7 +322,7 @@ export default function CarteTrajetPassager({
         <Polyline positions={[departure, arrival]} color={E} weight={4} opacity={0.8} />
 
         {driverPosition && (
-          <Marker position={driverPosition} icon={conducteurIcon}>
+          <Marker position={driverPosition} icon={driverPhoto ? createPhotoIcon(driverPhoto.startsWith('http') ? driverPhoto : `/uploads/profils/${driverPhoto}`, 48, E) : conducteurIcon}>
             <Popup>
               <div style={{ fontWeight: '600', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <SvgIcon name="car" size={16} color="#0D9E7E" /> {driverName || 'Conducteur'}
