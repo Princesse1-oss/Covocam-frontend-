@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTheme } from '@/app/lib/ThemeContext';
 
 // Couleurs du thÃ¨me
@@ -82,21 +82,10 @@ const Icons = {
   )
 };
 
-// Statistiques alÃ©atoires pour la dÃ©mo
-const getRandomTrips = () => Math.floor(Math.random() * 50 + 100);
-
 export default function HomePage() {
   const router = useRouter();
   const { t, lang, toggleLang, darkMode, toggleDarkMode } = useTheme();
-  const [scrolled, setScrolled] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const [currentTrips] = useState(getRandomTrips());
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const cities = ['YaoundÃ©', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'NgaoundÃ©rÃ©', 'Bertoua', 'Ebolowa', 'Kribi'];
 
@@ -187,15 +176,28 @@ export default function HomePage() {
           .nav-buttons button { padding:8px 14px !important;font-size:12px !important; }
           header { padding:0 16px !important; }
           .feature-card { padding:20px !important; }
-          .hero-stats { display:none !important; }
-          .hero-badge { top:16px !important; left:16px !important; padding:6px 14px !important; font-size:11px !important; }
+          header img { width:40px !important; height:40px !important; }
+        }
+        
+        @media (max-width: 520px) {
+          header { height:auto !important; min-height:60px !important; padding:8px 12px !important; flex-wrap:nowrap !important; }
+          header img { width:36px !important; height:36px !important; }
+          .nav-buttons { gap:6px !important; }
+          .nav-buttons button { padding:8px 12px !important; font-size:12px !important; white-space:nowrap !important; }
+          .nav-buttons .lang-label { display:none !important; }
+          .nav-buttons .btn-primary, .nav-buttons .btn-outline { padding:9px 14px !important; font-size:12px !important; }
+        }
+        
+        @media (max-width: 380px) {
+          .nav-buttons button { padding:7px 10px !important; font-size:11px !important; }
+          .nav-buttons .btn-primary, .nav-buttons .btn-outline { padding:8px 12px !important; font-size:11px !important; }
+          header img { width:32px !important; height:32px !important; }
         }
         
         @media (max-width: 480px) {
           .hero-image-container { height:45vh !important; min-height:300px !important; }
           .hero-content h1 { font-size:28px !important; }
           section { padding:48px 16px !important; }
-          footer { padding:24px 16px !important; }
           .hero-content { padding:32px 16px !important; }
         }
         
@@ -212,10 +214,10 @@ export default function HomePage() {
       {/* â”€â”€ TOPBAR â”€â”€ */}
       <header style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-        background: scrolled ? styles.topbarBg : 'transparent',
-        backdropFilter: scrolled ? 'blur(12px)' : 'none',
-        borderBottom: scrolled ? `1px solid ${styles.topbarBorder}` : 'none',
-        boxShadow: scrolled ? `0 2px 16px ${darkMode ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.06)'}` : 'none',
+        background: styles.topbarBg,
+        backdropFilter: 'blur(12px)',
+        borderBottom: `1px solid ${styles.topbarBorder}`,
+        boxShadow: `0 2px 16px ${darkMode ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.06)'}`,
         transition: 'all .3s ease',
         padding: '0 48px',
         height: '68px',
@@ -225,12 +227,6 @@ export default function HomePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="/covocam_logo.png" alt="CovoCam"
             style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block' }} />
-          <span style={{
-            fontSize: '9px', color: E, fontWeight: '600',
-            letterSpacing: '0.6px', textTransform: 'uppercase'
-          }}>
-            {t('tagline')}
-          </span>
         </div>
 
         {/* Nav buttons */}
@@ -241,11 +237,11 @@ export default function HomePage() {
               onClick={() => setIsLangOpen(!isLangOpen)}
               style={{
                 background: 'transparent',
-                border: `1.5px solid ${scrolled ? (darkMode ? '#4A4A4A' : '#E5E7EB') : 'rgba(255,255,255,0.3)'}`,
+                border: `1.5px solid ${darkMode ? '#4A4A4A' : '#E5E7EB'}`,
                 borderRadius: '50px',
                 padding: '8px 12px',
                 cursor: 'pointer',
-                color: scrolled ? styles.text : 'white',
+                color: styles.text,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -253,7 +249,7 @@ export default function HomePage() {
               }}
             >
               <Icons.Language />
-              <span style={{ fontSize: '13px', fontWeight: '600' }}>{lang.toUpperCase()}</span>
+              <span className="lang-label" style={{ fontSize: '13px', fontWeight: '600' }}>{lang.toUpperCase()}</span>
             </button> 
             {isLangOpen && (
               <div style={{
@@ -297,11 +293,11 @@ export default function HomePage() {
             onClick={toggleDarkMode}
             style={{
               background: 'transparent',
-              border: `1.5px solid ${scrolled ? (darkMode ? '#4A4A4A' : '#E5E7EB') : 'rgba(255,255,255,0.3)'}`,
+              border: `1.5px solid ${darkMode ? '#4A4A4A' : '#E5E7EB'}`,
               borderRadius: '50px',
               padding: '8px 12px',
               cursor: 'pointer',
-              color: scrolled ? styles.text : 'white',
+              color: styles.text,
               display: 'flex',
               alignItems: 'center',
               transition: 'all .2s'
@@ -314,8 +310,8 @@ export default function HomePage() {
             className="btn-outline"
             onClick={() => router.push('/login')}
             style={{
-              color: scrolled ? E : 'white',
-              borderColor: scrolled ? E : 'white',
+              color: E,
+              borderColor: E,
               padding: '10px 24px',
               fontSize: '14px',
               background: 'transparent'
@@ -334,7 +330,7 @@ export default function HomePage() {
       </header>
 
       {/* â”€â”€ HERO â”€â”€ */}
-      <section className="hero-section" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <section className="hero-section" style={{ display: 'flex', height: '100vh', overflow: 'hidden', paddingTop: '68px' }}>
         {/* Image gauche */}
         <div className="hero-image-container">
           <div 
@@ -344,21 +340,6 @@ export default function HomePage() {
             }}
           />
           <div className="hero-overlay-gradient" />
-          
-          {/* Badge */}
-          <div className="hero-badge" style={{
-            position: 'absolute', top: '32px', left: '32px',
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '50px', padding: '8px 18px',
-            display: 'flex', alignItems: 'center', gap: '8px',
-          }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ADE80' }} />
-            <span style={{ fontSize: '13px', color: 'white', fontWeight: '600' }}>
-              +{currentTrips} {t('availableTripsToday')}
-            </span>
-          </div>
         </div>
 
         {/* Contenu droite */}
@@ -639,30 +620,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€ FOOTER â”€â”€ */}
-      <footer style={{
-        background: darkMode ? '#0D0D0D' : '#0D0D0D',
-        padding: '32px 48px',
-        textAlign: 'center'
-      }}>
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            marginBottom: '12px'
-          }}>
-            <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '44px', height: '44px', borderRadius: '10px', objectFit: 'contain' }} />
-          </div>
-        <p style={{
-          fontSize: '13px',
-          color: '#6B7280',
-          margin: 0
-        }}>
-          {t('footer')}
-        </p>
-      </footer>
     </div>
   );
 }

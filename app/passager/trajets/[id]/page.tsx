@@ -13,6 +13,7 @@ interface Trajet {
   quartierArrivee: string | null;
   pointDepart: string | null;
   pointArrivee: string | null;
+  villesEtapes?: string[] | null;
   dateDepart: string;
   heureDepart: string;
   heureArriveeEstimee?: string;
@@ -342,6 +343,26 @@ export default function DetailTrajet() {
                     </div>
                     <span style={{ fontSize: '11px', color: '#9ca3af' }}>Direct</span>
                   </div>
+
+                  {trajet.villesEtapes && trajet.villesEtapes.length > 0 && (
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '700', color: '#4ade80', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Étapes
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px' }}>
+                        {trajet.villesEtapes.map((etape, idx) => (
+                          <span key={idx} style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            background: 'rgba(13,158,126,0.12)', color: '#4ade80',
+                            fontSize: '13px', fontWeight: '600', padding: '4px 12px', borderRadius: '20px'
+                          }}>
+                            <Icon name="mapPin" size={12} color="#4ade80" />
+                            {etape}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div style={{ textAlign: 'center', flex: 1, minWidth: isMobile ? '100%' : 'auto' }}>
                     <div style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: 'white' }}>{trajet.villeArrivee}</div>

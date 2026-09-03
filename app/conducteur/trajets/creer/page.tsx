@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ConducteurLayout from '../../../../components/conducteur/ConducteurLayout';
 import { useTheme } from '@/app/lib/ThemeContext';
@@ -140,7 +140,6 @@ export default function CreerTrajetPage() {
   const { t, darkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const saveAsDraftRef = useRef(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -444,7 +443,7 @@ export default function CreerTrajetPage() {
       gps: form.gps,
       description: form.description,
       bagageAutorise: form.bagageAutorise,
-      statut: saveAsDraftRef.current ? 'BROUILLON' : 'OUVERT',
+      statut: 'OUVERT',
     };
 
     try {
@@ -473,7 +472,7 @@ export default function CreerTrajetPage() {
       }
 
       const data = JSON.parse(responseText);
-      setSuccess(saveAsDraftRef.current ? (t('tripSavedDraft') || 'Trajet enregistré en brouillon') : t('tripPublished'));
+      setSuccess(t('tripPublished'));
       setTimeout(() => router.push('/conducteur/trajets'), 1500);
       
     } catch (err) {
@@ -481,7 +480,6 @@ export default function CreerTrajetPage() {
       setError(t('serverError'));
     } finally {
       setSubmitting(false);
-      saveAsDraftRef.current = false;
     }
   };
 
@@ -860,19 +858,7 @@ export default function CreerTrajetPage() {
           <button
             type="submit"
             disabled={submitting}
-            onClick={() => { saveAsDraftRef.current = true; (document.getElementById('create-trajet-form') as HTMLFormElement)?.requestSubmit(); }}
-            style={{
-              padding: '12px 24px', borderRadius: '10px',
-              border: `1px solid ${darkMode ? '#4B5563' : '#d1d5db'}`,
-              background: darkMode ? '#1F2937' : '#fff',
-              color: darkMode ? '#D1D5DB' : '#374151',
-              fontSize: '14px', fontWeight: '600', cursor: submitting ? 'not-allowed' : 'pointer',
-              transition: 'all .2s'
-            }}
-          >
-            {t('saveDraft') || 'Enregistrer brouillon'}
-          </button>
-          <button type="submit" disabled={submitting} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '10px', border: 'none', background: submitting ? '#d1d5db' : 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: submitting ? 'none' : '0 4px 15px rgba(13,158,126,0.4)', transition: 'all .2s' }} onMouseEnter={e => { if (!submitting) e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13,158,126,0.5)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.4)'; }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '10px', border: 'none', background: submitting ? '#d1d5db' : 'linear-gradient(135deg, #0A7B62, #0D9E7E)', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', boxShadow: submitting ? 'none' : '0 4px 15px rgba(13,158,126,0.4)', transition: 'all .2s' }} onMouseEnter={e => { if (!submitting) e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(13,158,126,0.5)'; }} onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(13,158,126,0.4)'; }}>
             {submitting ? t('publishing') : <><Icon name="rocket" size={14} color="white" /> {t('publishTrip')}</>}
           </button>
         </div>

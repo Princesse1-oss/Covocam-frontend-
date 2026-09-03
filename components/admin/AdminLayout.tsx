@@ -20,7 +20,6 @@ const navLinks = [
   { label: 'Évaluations', path: '/admin/evaluations', icon: 'evaluations', labelEn: 'Reviews' },
   { label: 'Positions', path: '/admin/positions', icon: 'positions', labelEn: 'GPS Tracking' },
   { label: 'Paiements', path: '/admin/paiements', icon: 'paiements', labelEn: 'Payments' },
-  { label: 'Lieux', path: '/admin/lieux', icon: 'lieux', labelEn: 'Locations' },
   { label: 'Profil', path: '/admin/profil', icon: 'profil', labelEn: 'Profile' },
 ];
 
