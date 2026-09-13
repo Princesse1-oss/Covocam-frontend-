@@ -38,10 +38,11 @@ const conducteurIcon = new L.DivIcon({
 
 const createPhotoIcon = (photoUrl: string | null | undefined, nom: string) => {
   const initials = nom ? nom.substring(0, 2).toUpperCase() : '??';
-  const bg = photoUrl
-    ? `<img src="${photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>`
+  const resolvedPhoto = photoUrl ? (photoUrl.startsWith('http') ? photoUrl : `/uploads/profils/${photoUrl}`) : null;
+  const bg = resolvedPhoto
+    ? `<img src="${resolvedPhoto}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>`
     : '';
-  const fallback = `<div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,${GREEN},#0A7B62);display:${photoUrl ? 'none' : 'flex'};align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;">${initials}</div>`;
+  const fallback = `<div style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,${GREEN},#0A7B62);display:${resolvedPhoto ? 'none' : 'flex'};align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;">${initials}</div>`;
   return new L.DivIcon({
     className: 'custom-photo-marker',
     html: `<div style="width:44px;height:44px;border-radius:50%;border:3px solid white;box-shadow:0 3px 12px rgba(13,158,126,0.4);overflow:hidden;position:relative;">${bg}${fallback}<div style="position:absolute;bottom:-1px;right:-1px;width:14px;height:14px;border-radius:50%;background:${GREEN};border:2px solid white;display:flex;align-items:center;justify-content:center;"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 11L6.5 6.5C6.8 5.6 7.6 5 8.6 5H15.4C16.4 5 17.2 5.6 17.5 6.5L19 11"/><rect x="2" y="11" width="20" height="7" rx="2"/></svg></div></div>`,

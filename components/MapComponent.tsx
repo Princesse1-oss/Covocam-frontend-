@@ -187,7 +187,7 @@ export default function MapComponent({
   if (currentCoords) routePoints.push(currentCoords);
   if (arrivalCoords) routePoints.push(arrivalCoords);
 
-  const driverMarker = driverPhoto ? createPhotoIcon(driverPhoto, 48) : driverIcon;
+  const driverMarker = driverPhoto ? createPhotoIcon(driverPhoto.startsWith('http') ? driverPhoto : `/uploads/profils/${driverPhoto}`, 48) : driverIcon;
 
   return (
     <div style={{ borderRadius: '16px', overflow: 'hidden', border: '2px solid #0D9E7E' }}>
