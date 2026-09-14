@@ -360,6 +360,23 @@ export default function PassagerTopbar() {
               </div>
             </Link>
 
+            {/* Messagerie */}
+            <Link href="/passager/chat" style={{ textDecoration: 'none', position: 'relative' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '10px',
+                background: pathname.startsWith('/passager/chat') ? EMERALD_LIGHT : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { if (!pathname.startsWith('/passager/chat')) e.currentTarget.style.background = styles.hoverBg; }}
+                onMouseLeave={e => { if (!pathname.startsWith('/passager/chat')) e.currentTarget.style.background = 'transparent'; }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15C21 15.55 20.55 16 20 16H7L3 20V4C3 3.45 3.45 3 4 3H20C20.55 3 21 3.45 21 4V15Z" stroke={pathname.startsWith('/passager/chat') ? EMERALD : styles.textSecondary} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill={pathname.startsWith('/passager/chat') ? EMERALD_LIGHT : 'none'}/>
+                </svg>
+              </div>
+            </Link>
+
             {/* Profil dropdown desktop */}
             {!isMobile && (
               <div style={{ position: 'relative', marginLeft: '8px' }}>

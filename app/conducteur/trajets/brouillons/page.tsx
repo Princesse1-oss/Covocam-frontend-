@@ -202,13 +202,13 @@ export default function TrajetsBrouillonsPage() {
 
   const handleSubmit = async () => {
     if (!selectedTrajet || !vehiculeId) {
-      setError('Veuillez sélectionner un véhicule'); setTimeout(() => setError(''), 4000);
+      setError(t('selectVehicleError')); setTimeout(() => setError(''), 4000);
       return;
     }
 
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('Session expirée. Veuillez vous reconnecter.'); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
+      setError(t('sessionExpired')); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
       return;
     }
 
@@ -234,12 +234,12 @@ export default function TrajetsBrouillonsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setSuccess('Trajet publié avec succès !'); setTimeout(() => { setSuccess(''); setShowModal(false); fetchBrouillons(token); }, 2000);
+        setSuccess(t('tripPublishedSuccess')); setTimeout(() => { setSuccess(''); setShowModal(false); fetchBrouillons(token); }, 2000);
       } else {
-        setError(data.error || 'Erreur lors de la publication'); setTimeout(() => setError(''), 4000);
+        setError(data.error || t('publishError')); setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      setError('Erreur de connexion'); setTimeout(() => setError(''), 4000);
+      setError(t('connectionLost')); setTimeout(() => setError(''), 4000);
     } finally {
       setSubmitting(false);
     }
@@ -251,7 +251,7 @@ export default function TrajetsBrouillonsPage() {
 
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('Session expirée. Veuillez vous reconnecter.'); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
+      setError(t('sessionExpired')); setTimeout(() => { setError(''); router.push('/login'); }, 2000);
       return;
     }
 
@@ -263,13 +263,13 @@ export default function TrajetsBrouillonsPage() {
 
       if (res.ok) {
         setBrouillons(prev => prev.filter(t => t.id !== id));
-        setSuccess('Brouillon supprimé'); setTimeout(() => setSuccess(''), 3000);
+        setSuccess(t('draftDeleted')); setTimeout(() => setSuccess(''), 3000);
       } else {
         const data = await res.json();
-        setError(data.error || 'Erreur lors de la suppression'); setTimeout(() => setError(''), 4000);
+        setError(data.error || t('deleteError')); setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
-      setError('Erreur de connexion'); setTimeout(() => setError(''), 4000);
+      setError(t('connectionLost')); setTimeout(() => setError(''), 4000);
     }
   };
 
@@ -293,7 +293,7 @@ export default function TrajetsBrouillonsPage() {
       <ConducteurLayout>
         <div style={{ padding: '80px', textAlign: 'center', color: textSecondary }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: `3px solid ${EL}`, borderTopColor: E, animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-          <p>Chargement des brouillons...</p>
+          <p>{t('loadingDrafts')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); }}`}</style>
         </div>
       </ConducteurLayout>
@@ -318,10 +318,10 @@ export default function TrajetsBrouillonsPage() {
         )}
         {confirmDeleteId !== null && (
           <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment supprimer ce brouillon ? Le passager sera notifié.</span>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('confirmDeleteDraft')}</span>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Annuler</button>
-              <button onClick={() => handleSupprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Supprimer</button>
+              <button onClick={() => setConfirmDeleteId(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('cancel')}</button>
+              <button onClick={() => handleSupprimer(confirmDeleteId)} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('delete')}</button>
             </div>
           </div>
         )}
@@ -329,10 +329,10 @@ export default function TrajetsBrouillonsPage() {
         {/* Header */}
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: '800', color: textColor, margin: '0 0 8px' }}>
-            Trajets en brouillon
+            {t('draftTripsTitle')}
           </h1>
           <p style={{ fontSize: '14px', color: textSecondary, margin: 0 }}>
-            Complétez ces trajets pour les publier. Vous avez 24h pour les finaliser.
+            {t('draftsSubtitle')}
           </p>
         </div>
 
@@ -346,10 +346,10 @@ export default function TrajetsBrouillonsPage() {
             <Icon name="alert" size={20} color={AM} />
             <div>
               <div style={{ fontSize: '14px', fontWeight: '700', color: '#92400E' }}>
-                Action requise
+                {t('actionRequired')}
               </div>
               <div style={{ fontSize: '13px', color: '#78350F' }}>
-                Vous avez {brouillons.length} trajet(s) en brouillon à compléter avant leur expiration.
+                {t('draftsAlert').replace('{n}', String(brouillons.length))}
               </div>
             </div>
           </div>
@@ -363,10 +363,10 @@ export default function TrajetsBrouillonsPage() {
           }}>
             <div style={{ fontSize: '14px', marginBottom: '16px', fontWeight: '700', color: textSecondary }}>[ ]</div>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: textColor, marginBottom: '8px' }}>
-              Aucun brouillon en attente
+              {t('noPendingDrafts')}
             </h3>
             <p style={{ fontSize: '14px', color: textSecondary, marginBottom: '24px' }}>
-              Les trajets créés suite à l'acceptation d'une demande apparaîtront ici.
+              {t('noPendingDraftsDesc')}
             </p>
             <Link href="/conducteur/demandes" style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -374,7 +374,7 @@ export default function TrajetsBrouillonsPage() {
               background: E, color: '#FFF', textDecoration: 'none',
               fontSize: '14px', fontWeight: '700'
             }}>
-              Voir les demandes disponibles
+              {t('viewAvailableRequests')}
             </Link>
           </div>
         ) : (
@@ -401,11 +401,11 @@ export default function TrajetsBrouillonsPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '16px' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isComplet ? E : '#F59E0B'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></span>
                       <span style={{ fontSize: '13px', fontWeight: '700', color: isComplet ? E : AM }}>
-                        {isComplet ? 'Prêt à publier' : 'Informations manquantes'}
+                        {t(isComplet ? 'readyToPublish' : 'missingInfo')}
                       </span>
                     </div>
                     <span style={{ fontSize: '11px', color: textSecondary }}>
-                      Créé le {formatDate(trajet.createdAt || '')}
+                      {t('createdOn')}{formatDate(trajet.createdAt || '')}
                     </span>
                   </div>
 
@@ -437,15 +437,15 @@ export default function TrajetsBrouillonsPage() {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: trajet.heureDepart ? E : RD }}>
                             <Icon name="clock" size={14} color={trajet.heureDepart ? E : RD} />
-                            {trajet.heureDepart || 'Heure non définie'}
+                            {trajet.heureDepart || t('timeNotSet')}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: textSecondary }}>
                             <Icon name="users" size={14} color={GR} />
-                            {trajet.placesDisponibles} {trajet.placesDisponibles > 1 ? 'places' : 'place'}
+                            {trajet.placesDisponibles} {trajet.placesDisponibles > 1 ? t('seatsPlural') : t('seatSingular')}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#16A34A', fontWeight: '600' }}>
                             <Icon name="file" size={14} color="#16A34A" />
-                            {trajet.prixParPlace.toLocaleString()} FCFA/place
+                            {trajet.prixParPlace.toLocaleString()} {t('fcfaPerSeat')}
                           </div>
                         </div>
 
@@ -455,20 +455,20 @@ export default function TrajetsBrouillonsPage() {
                           borderRadius: '10px', marginTop: '12px'
                         }}>
                           <div style={{ fontSize: '12px', fontWeight: '700', color: textColor, marginBottom: '8px', textTransform: 'uppercase' }}>
-                            Checklist de publication
+                            {t('publishChecklist')}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: trajet.vehicule ? '#16A34A' : RD }}>
                               {trajet.vehicule ? <Icon name="check" size={14} color="#16A34A" /> : <Icon name="x" size={14} color={RD} />}
-                              Véhicule sélectionné
+                              {t('vehicleSelected')}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: trajet.heureDepart ? '#16A34A' : RD }}>
                               {trajet.heureDepart ? <Icon name="check" size={14} color="#16A34A" /> : <Icon name="x" size={14} color={RD} />}
-                              Heure de départ précise
+                              {t('preciseDepartureTime')}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: pointDepart ? '#16A34A' : GR }}>
                               {pointDepart ? <Icon name="check" size={14} color="#16A34A" /> : <Icon name="x" size={14} color={GR} />}
-                              Point de rendez-vous
+                              {t('meetingPoint')}
                             </div>
                           </div>
                         </div>
@@ -492,7 +492,7 @@ export default function TrajetsBrouillonsPage() {
                         onMouseEnter={(e) => e.currentTarget.style.background = '#FECACA'}
                         onMouseLeave={(e) => e.currentTarget.style.background = RL}
                       >
-                        <Icon name="trash" size={14} color={RD} /> Supprimer
+                        <Icon name="trash" size={14} color={RD} /> {t('delete')}
                       </button>
                       <button
                         onClick={() => handleCompleter(trajet)}
@@ -510,7 +510,7 @@ export default function TrajetsBrouillonsPage() {
                         onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
                       >
                         <Icon name="edit" size={16} color="#FFF" />
-                        {isComplet ? 'Publier le trajet' : 'Compléter les infos'}
+                        {t(isComplet ? 'publishThisTrip' : 'completeInfo')}
                       </button>
                     </div>
                   </div>
@@ -541,7 +541,7 @@ export default function TrajetsBrouillonsPage() {
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
               <div style={{ fontSize: '14px', marginBottom: '12px', fontWeight: '700', color: textSecondary }}>&gt;_</div>
               <h3 style={{ fontSize: '20px', fontWeight: '800', color: textColor, marginBottom: '8px' }}>
-                Compléter le trajet
+                {t('completeTrip')}
               </h3>
               <p style={{ fontSize: '14px', color: textSecondary }}>
                 {selectedTrajet.villeDepart} → {selectedTrajet.villeArrivee}
@@ -551,7 +551,7 @@ export default function TrajetsBrouillonsPage() {
             {/* Véhicule */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>
-                <Icon name="car" size={14} color={E} /> Véhicule *
+                <Icon name="car" size={14} color={E} /> {t('vehicleAsterisk')}
               </label>
               <select
                 value={vehiculeId}
@@ -564,7 +564,7 @@ export default function TrajetsBrouillonsPage() {
                 onFocus={(e) => e.currentTarget.style.borderColor = E}
                 onBlur={(e) => e.currentTarget.style.borderColor = borderColor}
               >
-                <option value="">Sélectionnez un véhicule...</option>
+                <option value="">{t('selectVehicle')}...</option>
                 {vehicules.map(v => (
                   <option key={v.id} value={v.id}>
                     {v.marque} {v.modele} - {v.immatriculation}
@@ -573,7 +573,7 @@ export default function TrajetsBrouillonsPage() {
               </select>
               {vehicules.length === 0 && (
                 <div style={{ fontSize: '12px', color: RD, marginTop: '6px' }}>
-                  Vous n'avez pas de véhicule enregistré. <Link href="/conducteur/vehicule" style={{ color: E, fontWeight: '600' }}>Ajouter un véhicule</Link>
+                  {t('noVehicleRegistered')} <Link href="/conducteur/vehicule" style={{ color: E, fontWeight: '600' }}>{t('addVehicle')}</Link>
                 </div>
               )}
             </div>
@@ -581,7 +581,7 @@ export default function TrajetsBrouillonsPage() {
             {/* Heure */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>
-                <Icon name="clock" size={14} color={E} /> Heure de départ précise *
+                <Icon name="clock" size={14} color={E} /> {t('preciseDepartureTime')} *
               </label>
               <input
                 type="time"
@@ -601,13 +601,13 @@ export default function TrajetsBrouillonsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>
-                  Point de rendez-vous départ
+                  {t('meetingPointDeparture')}
                 </label>
                 <input
                   type="text"
                   value={pointDepart}
                   onChange={(e) => setPointDepart(e.target.value)}
-                  placeholder="Ex: Gare routière, Place..."
+                  placeholder={t('departurePointPlaceholder')}
                   style={{
                     width: '100%', padding: '12px 14px', borderRadius: '10px',
                     border: `1.5px solid ${borderColor}`, background: inputBg,
@@ -619,13 +619,13 @@ export default function TrajetsBrouillonsPage() {
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>
-                  Point de rendez-vous arrivée
+                  {t('meetingPointArrival')}
                 </label>
                 <input
                   type="text"
                   value={pointArrivee}
                   onChange={(e) => setPointArrivee(e.target.value)}
-                  placeholder="Ex: Marché central, Gare..."
+                  placeholder={t('arrivalPointPlaceholder')}
                   style={{
                     width: '100%', padding: '12px 14px', borderRadius: '10px',
                     border: `1.5px solid ${borderColor}`, background: inputBg,
@@ -640,12 +640,12 @@ export default function TrajetsBrouillonsPage() {
             {/* Description */}
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: textColor, marginBottom: '8px' }}>
-                Description (optionnel)
+                {t('descriptionOptional')}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Informations supplémentaires pour les passagers..."
+                placeholder={t('descriptionPlaceholder')}
                 rows={3}
                 maxLength={500}
                 style={{
@@ -669,7 +669,7 @@ export default function TrajetsBrouillonsPage() {
                   color: textColor, fontSize: '14px', fontWeight: '600', cursor: 'pointer'
                 }}
               >
-                Annuler
+                {t('cancel')}
               </button>
               <button
                 onClick={handleSubmit}
@@ -686,12 +686,12 @@ export default function TrajetsBrouillonsPage() {
                 {submitting ? (
                   <>
                     <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                    Publication...
+                    {t('publishing')}
                   </>
                 ) : (
                   <>
                     <Icon name="check" size={16} color="#FFF" />
-                    Publier le trajet
+                    {t('publishThisTrip')}
                   </>
                 )}
               </button>

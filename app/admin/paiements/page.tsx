@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 interface Paiement {
   id: number;
@@ -37,6 +38,7 @@ interface Paiement {
 }
 
 export default function AdminPaiements() {
+  const { t, lang } = useTheme();
   const [paiements, setPaiements] = useState<Paiement[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -136,10 +138,10 @@ export default function AdminPaiements() {
   };
 
   const statutLabel = (s: string) => {
-    if (s === 'REUSSI') return 'Réussi';
-    if (s === 'EN_ATTENTE') return 'En attente';
-    if (s === 'REMBOURSE') return 'Remboursé';
-    if (s === 'ECHEC') return 'Échoué';
+    if (s === 'REUSSI') return t('successful');
+    if (s === 'EN_ATTENTE') return t('pending');
+    if (s === 'REMBOURSE') return t('refunded');
+    if (s === 'ECHEC') return t('failedPayment');
     return s;
   };
 
@@ -147,7 +149,7 @@ export default function AdminPaiements() {
     return (
       <AdminLayout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
-          <p style={{ color: '#6b7280' }}>Chargement des paiements...</p>
+          <p style={{ color: '#6b7280' }}>{t('loadingPayments')}</p>
         </div>
       </AdminLayout>
     );
@@ -159,15 +161,15 @@ export default function AdminPaiements() {
 
         {/* Header */}
         <div style={{ background: '#fff', padding: isMobile ? '12px 16px' : '0 24px', height: isMobile ? 'auto' : '56px', display: 'flex', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexShrink: 0, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '10px' : '0' }}>
-          <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>Paiements</div>
+          <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>{t('payments')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-            <input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} style={{ padding: '7px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', width: isMobile ? '100%' : '200px', flex: isMobile ? 1 : 'none', boxSizing: 'border-box' }} />
+            <input type="text" placeholder={t('searchGeneric')} value={search} onChange={e => setSearch(e.target.value)} style={{ padding: '7px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', width: isMobile ? '100%' : '200px', flex: isMobile ? 1 : 'none', boxSizing: 'border-box' }} />
             <select value={filterStatut} onChange={e => setFilterStatut(e.target.value)} style={{ padding: '7px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', background: '#fff', color: '#374151' }}>
-              <option value="tous">Tous les statuts</option>
-              <option value="REUSSI">Réussi</option>
-              <option value="EN_ATTENTE">En attente</option>
-              <option value="ECHEC">Échoué</option>
-              <option value="REMBOURSE">Remboursé</option>
+              <option value="tous">{t('allStatus')}</option>
+              <option value="REUSSI">{t('successful')}</option>
+              <option value="EN_ATTENTE">{t('pending')}</option>
+              <option value="ECHEC">{t('failedPayment')}</option>
+              <option value="REMBOURSE">{t('refunded')}</option>
             </select>
           </div>
         </div>
@@ -184,24 +186,24 @@ export default function AdminPaiements() {
             </div>
             <div>
               <div style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>Campay</div>
-              <div style={{ fontSize: '11px', color: '#6b7280' }}>Tous les paiements sont traités via Campay (MTN Money / Orange Money)</div>
+              <div style={{ fontSize: '11px', color: '#6b7280' }}>{t('campayInfo')}</div>
             </div>
           </div>
 
           {/* Stat cards */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: '20px' }}>
             {[
-              { label: 'Transactions', value: filtered.length, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E', icon: (
+              { label: t('transactions'), value: filtered.length, border: '#0D9E7E', bg: '#E8F7F3', color: '#0D9E7E', icon: (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E7E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" />
                 </svg>
               )},
-              { label: 'Montant total', value: totalMontant, border: '#22c55e', bg: '#dcfce7', color: '#15803d', suffix: ' XAF', icon: (
+              { label: t('totalAmount'), value: totalMontant, border: '#22c55e', bg: '#dcfce7', color: '#15803d', suffix: ' XAF', icon: (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
               )},
-              { label: 'Commission Campay', value: totalCommission, border: '#f59e0b', bg: '#fef3c7', color: '#d97706', suffix: ' XAF', icon: (
+              { label: t('campayCommission'), value: totalCommission, border: '#f59e0b', bg: '#fef3c7', color: '#d97706', suffix: ' XAF', icon: (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                 </svg>
@@ -222,7 +224,7 @@ export default function AdminPaiements() {
           {/* Table */}
           <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #e5e7eb', overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Historique</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{t('historyLabel')}</span>
               <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', padding: '2px 8px', borderRadius: '20px', fontWeight: '600' }}>{filtered.length}</span>
             </div>
 
@@ -230,7 +232,7 @@ export default function AdminPaiements() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    {['#', 'Référence', 'Passager', 'Trajet', 'Montant', 'Commission', 'Date', 'Statut'].map(h => (
+                    {['#', t('referenceLabel'), t('passenger'), t('trip'), t('amountLabel'), t('commissionLabel'), t('date'), t('statusLabel')].map(h => (
                       <th key={h} style={{ fontSize: '11px', color: '#6b7280', textAlign: 'left', padding: '10px 14px', borderBottom: '1px solid #e5e7eb', textTransform: 'uppercase', letterSpacing: '.5px', fontWeight: '600', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -242,7 +244,7 @@ export default function AdminPaiements() {
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px' }}>
                           <rect x="1" y="4" width="22" height="16" rx="2" /><path d="M1 10h22" />
                         </svg>
-                        <div>Aucun paiement trouvé</div>
+                        <div>{t('noPaymentsFound')}</div>
                       </td>
                     </tr>
                   ) : filtered.map((p, i) => (
@@ -274,7 +276,7 @@ export default function AdminPaiements() {
                           <span style={{ fontSize: '12px', fontWeight: '600', color: '#111827' }}>{p.reservation?.trajet?.villeArrivee || '—'}</span>
                         </div>
                         <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '2px' }}>
-                          {p.reservation?.trajet?.dateDepart ? new Date(p.reservation.trajet.dateDepart).toLocaleDateString('fr-FR') : ''}
+                          {p.reservation?.trajet?.dateDepart ? new Date(p.reservation.trajet.dateDepart).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR') : ''}
                         </div>
                       </td>
                       <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
@@ -286,7 +288,7 @@ export default function AdminPaiements() {
                         <span style={{ fontSize: '10px', color: '#9ca3af' }}> XAF</span>
                       </td>
                       <td style={{ padding: '12px 14px', fontSize: '12px', color: '#374151', whiteSpace: 'nowrap' }}>
-                        {p.datePaiement && p.datePaiement !== 'En attente' ? new Date(p.datePaiement).toLocaleDateString('fr-FR') : '—'}
+                        {p.datePaiement && p.datePaiement !== 'En attente' ? new Date(p.datePaiement).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR') : '—'}
                       </td>
                       <td style={{ padding: '12px 14px' }}>
                         <span style={{ ...statutStyle(p.statut), padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', whiteSpace: 'nowrap' }}>
@@ -301,9 +303,9 @@ export default function AdminPaiements() {
 
             {filtered.length > 0 && (
               <div style={{ padding: '12px 20px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9fafb', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '12px', color: '#6b7280' }}>{filtered.length} transaction(s)</span>
+                <span style={{ fontSize: '12px', color: '#6b7280' }}>{filtered.length} {t('transactionCount')}</span>
                 <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                  Total : <strong style={{ color: '#15803d' }}>{totalMontant.toLocaleString()} XAF</strong>
+                  {t('totalColon')} <strong style={{ color: '#15803d' }}>{totalMontant.toLocaleString()} XAF</strong>
                 </span>
               </div>
             )}

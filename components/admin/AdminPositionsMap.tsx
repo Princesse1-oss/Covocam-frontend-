@@ -69,6 +69,11 @@ const arriveeMiniIcon = new L.DivIcon({
   iconAnchor: [9, 9],
 });
 
+const T: Record<'fr' | 'en', Record<string, string>> = {
+  fr: { haut: 'Haut', gauche: 'Gauche', droite: 'Droite', bas: 'Bas', recentrer: 'Recentrer', recentrerCmr: 'Recentrer sur le Cameroun', track: 'Trajet #', enCours: 'En cours', depart: 'Départ :', arrivee: 'Arrivée :' },
+  en: { haut: 'Up', gauche: 'Left', droite: 'Right', bas: 'Down', recentrer: 'Recenter', recentrerCmr: 'Recenter on Cameroon', track: 'Trip #', enCours: 'In progress', depart: 'Departure :', arrivee: 'Arrival :' },
+};
+
 export interface ConductorPosition {
   id: number;
   nom: string;
@@ -89,9 +94,10 @@ export interface ConductorPosition {
   heureDepart?: string | null;
 }
 
-function PanControls({ darkMode }: { darkMode?: boolean }) {
+function PanControls({ darkMode, lang = 'fr' }: { darkMode?: boolean; lang?: 'fr' | 'en' }) {
   const map = useMap();
   const STEP = 160;
+  const s = T[lang];
 
   const pan = (dx: number, dy: number) => {
     map.panBy([dx, dy], { animate: true });
@@ -128,11 +134,11 @@ function PanControls({ darkMode }: { darkMode?: boolean }) {
       }}
     >
       <div />
-      <button style={dirBtn} onClick={() => pan(0, -STEP)} aria-label="Haut" title="Haut">
+      <button style={dirBtn} onClick={() => pan(0, -STEP)} aria-label={s.haut} title={s.haut}>
         <SvgIcon name="chevronUp" size={18} />
       </button>
       <div />
-      <button style={dirBtn} onClick={() => pan(-STEP, 0)} aria-label="Gauche" title="Gauche">
+      <button style={dirBtn} onClick={() => pan(-STEP, 0)} aria-label={s.gauche} title={s.gauche}>
         <SvgIcon name="chevronLeft" size={18} />
       </button>
       <div
@@ -149,11 +155,11 @@ function PanControls({ darkMode }: { darkMode?: boolean }) {
       >
         OK
       </div>
-      <button style={dirBtn} onClick={() => pan(STEP, 0)} aria-label="Droite" title="Droite">
+      <button style={dirBtn} onClick={() => pan(STEP, 0)} aria-label={s.droite} title={s.droite}>
         <SvgIcon name="chevronRight" size={18} />
       </button>
       <div />
-      <button style={dirBtn} onClick={() => pan(0, STEP)} aria-label="Bas" title="Bas">
+      <button style={dirBtn} onClick={() => pan(0, STEP)} aria-label={s.bas} title={s.bas}>
         <SvgIcon name="chevronDown" size={18} />
       </button>
       <div />
@@ -161,8 +167,9 @@ function PanControls({ darkMode }: { darkMode?: boolean }) {
   );
 }
 
-function RecenterButton({ darkMode }: { darkMode?: boolean }) {
+function RecenterButton({ darkMode, lang = 'fr' }: { darkMode?: boolean; lang?: 'fr' | 'en' }) {
   const map = useMap();
+  const s = T[lang];
 
   const recenter = () => {
     map.flyTo(CAMEROON_CENTER, 7, { duration: 1 });
@@ -204,9 +211,9 @@ function RecenterButton({ darkMode }: { darkMode?: boolean }) {
       <ZoomOut />
       <button
         onClick={recenter}
-        aria-label="Recentrer sur le Cameroun"
+        aria-label={s.recentrerCmr}
         style={{ ...btnBase, top: '12px', right: '12px' }}
-        title="Recentrer"
+        title={s.recentrer}
       >
         <SvgIcon name="target" size={20} />
       </button>
@@ -241,12 +248,14 @@ function MapUpdater({ positions }: { positions: ConductorPosition[] }) {
 interface AdminPositionsMapProps {
   positions: ConductorPosition[];
   darkMode?: boolean;
+  lang?: 'fr' | 'en';
 }
 
-export default function AdminPositionsMap({ positions, darkMode = false }: AdminPositionsMapProps) {
+export default function AdminPositionsMap({ positions, darkMode = false, lang = 'fr' }: AdminPositionsMapProps) {
   const tileUrl = darkMode
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const s = T[lang];
 
   return (
     <div style={{ position: 'relative', height: 'calc(100vh - 140px)', width: '100%', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
@@ -264,8 +273,8 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
         minZoom={CAMEROON_MIN_ZOOM}
       >
         <ZoomControl position="bottomright" />
-        <RecenterButton darkMode={darkMode} />
-        <PanControls darkMode={darkMode} />
+        <RecenterButton darkMode={darkMode} lang={lang} />
+        <PanControls darkMode={darkMode} lang={lang} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url={tileUrl}
@@ -288,7 +297,7 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
                     <div style={{ fontWeight: '700', fontSize: '14px' }}>{p.prenom} {p.nom}</div>
                     <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <SvgIcon name="car" size={12} color={GREEN} /> Trajet #{p.trajetId}
+                        <SvgIcon name="car" size={12} color={GREEN} /> {s.track}{p.trajetId}
                       </span>
                     </div>
                   </div>
@@ -306,7 +315,7 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
                       background: p.statut === 'EN_COURS' ? '#10B981' : '#F59E0B',
                     }} />
                     <span style={{ fontWeight: '600', color: p.statut === 'EN_COURS' ? '#10B981' : '#F59E0B' }}>
-                      {p.statut === 'EN_COURS' ? 'En cours' : p.statut}
+                      {p.statut === 'EN_COURS' ? s.enCours : p.statut}
                     </span>
                   </div>
                 </div>
@@ -322,12 +331,12 @@ export default function AdminPositionsMap({ positions, darkMode = false }: Admin
           return [
             depLat && depLng ? (
               <Marker key={`dep-${p.trajetId}`} position={[depLat, depLng]} icon={departMiniIcon}>
-                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>Départ: {p.villeDepart}{p.quartierDepart ? ` (${p.quartierDepart})` : ''}</div></Popup>
+                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>{s.depart} {p.villeDepart}{p.quartierDepart ? ` (${p.quartierDepart})` : ''}</div></Popup>
               </Marker>
             ) : null,
             arrLat && arrLng ? (
               <Marker key={`arr-${p.trajetId}`} position={[arrLat, arrLng]} icon={arriveeMiniIcon}>
-                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#EF4444' }}>Arrivée: {p.villeArrivee}{p.quartierArrivee ? ` (${p.quartierArrivee})` : ''}</div></Popup>
+                <Popup><div style={{ fontSize: '12px', fontWeight: '600', color: '#EF4444' }}>{s.arrivee} {p.villeArrivee}{p.quartierArrivee ? ` (${p.quartierArrivee})` : ''}</div></Popup>
               </Marker>
             ) : null,
             depLat && depLng && arrLat && arrLng ? (

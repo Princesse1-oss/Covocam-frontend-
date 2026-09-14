@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 const API_URL = '/api';
 
@@ -93,6 +94,7 @@ interface StatsPaiements {
 }
 
 export default function AdminDashboard() {
+  const { t, lang } = useTheme();
   const [stats, setStats] = useState<Stats | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -189,7 +191,9 @@ export default function AdminDashboard() {
   const totalReservations = stats?.reservations?.total ?? 0;
   const totalPaiements = stats?.paiements?.total ?? 0;
 
-  const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const months = lang === 'en'
+    ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    : ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 
   const barData = reservationsParMois.length > 0
     ? reservationsParMois.map(r => r.count)
@@ -197,38 +201,38 @@ export default function AdminDashboard() {
   const maxBar = Math.max(...barData, 1);
 
   const statCards = [
-    { label: 'Passagers',     value: totalPassagers,    color: '#22c55e', bg: '#dcfce7', icon: <Icon name="users" color="#15803d" /> },
-    { label: 'Conducteurs',   value: totalConducteurs,  color: '#374151', bg: '#f3f4f6', icon: <Icon name="car" color="#374151" /> },
-    { label: 'Trajets',       value: totalTrajets,      color: '#10b981', bg: '#d1fae5', icon: <Icon name="route" color="#15803d" /> },
-    { label: 'Réservations',  value: totalReservations, color: '#84cc16', bg: '#ecfccb', icon: <Icon name="clipboard" color="#65a30d" /> },
-    { label: 'En attente',    value: statsPaiements?.en_attente ?? 0,  color: '#f59e0b', bg: '#fef3c7', icon: <Icon name="clock" color="#d97706" /> },
-    { label: 'Confirmés',     value: statsPaiements?.confirmes ?? 0,   color: '#22c55e', bg: '#dcfce7', icon: <Icon name="check" color="#15803d" /> },
-    { label: 'Remboursés',    value: statsPaiements?.rembourses ?? 0,  color: '#ef4444', bg: '#fee2e2', icon: <Icon name="refund" color="#dc2626" /> },
+    { label: t('passengersLabel'), value: totalPassagers,    color: '#22c55e', bg: '#dcfce7', icon: <Icon name="users" color="#15803d" /> },
+    { label: t('driversLabel'),    value: totalConducteurs,  color: '#374151', bg: '#f3f4f6', icon: <Icon name="car" color="#374151" /> },
+    { label: t('trajets'),         value: totalTrajets,      color: '#10b981', bg: '#d1fae5', icon: <Icon name="route" color="#15803d" /> },
+    { label: t('reservations'),    value: totalReservations, color: '#84cc16', bg: '#ecfccb', icon: <Icon name="clipboard" color="#65a30d" /> },
+    { label: t('pending'),         value: statsPaiements?.en_attente ?? 0,  color: '#f59e0b', bg: '#fef3c7', icon: <Icon name="clock" color="#d97706" /> },
+    { label: t('confirmedPlural'), value: statsPaiements?.confirmes ?? 0,   color: '#22c55e', bg: '#dcfce7', icon: <Icon name="check" color="#15803d" /> },
+    { label: t('refundedPlural'),  value: statsPaiements?.rembourses ?? 0,  color: '#ef4444', bg: '#fee2e2', icon: <Icon name="refund" color="#dc2626" /> },
   ];
 
   const hasData = totalUsers > 0 || totalTrajets > 0 || totalReservations > 0;
 
   const getTypeLabel = (type: string) => {
-    if (type === 'conducteur') return 'Conducteur';
-    if (type === 'passager') return 'Passager';
+    if (type === 'conducteur') return t('driver');
+    if (type === 'passager') return t('passenger');
     return type;
   };
 
-  const getStatutLabel = (estActif: boolean) => estActif ? 'Actif' : 'Suspendu';
+  const getStatutLabel = (estActif: boolean) => estActif ? t('statusActive') : t('statusSuspended');
 
   const getReservationStatutLabel = (statut: string) => {
     const labels: Record<string, string> = {
-      'pending':   'En attente',
-      'accepted':  'Confirmée',
-      'refused':   'Refusée',
-      'cancelled': 'Annulée',
+      'pending':   t('pending'),
+      'accepted':  t('confirmedFem'),
+      'refused':   t('refusedLabel'),
+      'cancelled': t('cancelledFem'),
     };
     return labels[statut] || statut;
   };
 
   const statutColor = (s: string) => {
-    if (s === 'Actif' || s === 'Confirmée')  return { bg: '#dcfce7', color: '#15803d' };
-    if (s === 'En attente')                   return { bg: '#fef3c7', color: '#d97706' };
+    if (s === t('statusActive') || s === t('confirmedFem'))  return { bg: '#dcfce7', color: '#15803d' };
+    if (s === t('pending'))                   return { bg: '#fef3c7', color: '#d97706' };
     return { bg: '#fee2e2', color: '#dc2626' };
   };
 
@@ -236,7 +240,7 @@ export default function AdminDashboard() {
     return (
       <AdminLayout>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'calc(100vh - 64px)' }}>
-          <p style={{ color:'#6b7280' }}>Chargement...</p>
+          <p style={{ color:'#6b7280' }}>{t('loading')}</p>
         </div>
       </AdminLayout>
     );
@@ -269,11 +273,11 @@ export default function AdminDashboard() {
       <div style={{ fontFamily:"'Segoe UI', Arial, sans-serif" }}>
 
         <div style={{ marginBottom:'18px' }}>
-          <h2 style={{ fontSize:'18px', fontWeight:'600', color:'#111827' }}>Tableau de bord</h2>
+          <h2 style={{ fontSize:'18px', fontWeight:'600', color:'#111827' }}>{t('dashboard')}</h2>
           <p style={{ fontSize:'12px', color:'#6b7280', marginTop:'2px' }}>
             {totalUsers === 0 && totalTrajets === 0
-              ? 'Aucun résultat'
-              : "Bienvenue sur votre espace d'administration CovoCam"}
+              ? t('noResults')
+              : t('adminWelcome')}
           </p>
         </div>
 
@@ -289,8 +293,8 @@ export default function AdminDashboard() {
               </div>
               <div className="stat-card-label" style={{ fontSize:'11px', color:'#6b7280', marginTop:'4px' }}>{card.label}</div>
               {card.value > 0
-                ? <div style={{ fontSize:'10px', color:'#22c55e', marginTop:'6px' }}>↑ ce mois</div>
-                : <div style={{ fontSize:'10px', color:'#9ca3af', marginTop:'6px' }}>Aucun résultat</div>
+                ? <div style={{ fontSize:'10px', color:'#22c55e', marginTop:'6px' }}>↑ {t('thisMonth')}</div>
+                : <div style={{ fontSize:'10px', color:'#9ca3af', marginTop:'6px' }}>{t('noResults')}</div>
               }
             </div>
           ))}
@@ -302,7 +306,7 @@ export default function AdminDashboard() {
             {/* Bar chart */}
             <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-                <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>Réservations par mois</div>
+                <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>{t('reservationsByMonth')}</div>
                 <button style={{ fontSize:'10px', padding:'3px 8px', borderRadius:'4px', border:'1px solid #e5e7eb', background:'#0a0a0a', color:'#22c55e', cursor:'pointer' }}>2026</button>
               </div>
               <div className="chart-container" style={{ display:'flex', gap:'4px', height:'160px', alignItems:'flex-end' }}>
@@ -323,13 +327,13 @@ export default function AdminDashboard() {
             {/* Donut chart */}
             <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb', display:'flex', flexDirection:'column' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-                <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>Transactions</div>
+                <div style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>{t('transactions')}</div>
                 <div style={{ display:'flex', gap:'4px' }}>
                   {[
-                    { label: '1 mois', days: 30 },
-                    { label: '3 mois', days: 90 },
-                    { label: '6 mois', days: 180 },
-                    { label: 'Tout', days: 0 },
+                    { label: t('period1m'), days: 30 },
+                    { label: t('period3m'), days: 90 },
+                    { label: t('period6m'), days: 180 },
+                    { label: t('periodAll'), days: 0 },
                   ].map(p => (
                     <button
                       key={p.days}
@@ -349,7 +353,7 @@ export default function AdminDashboard() {
               <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
                 {scatterData.length === 0 ? (
                   <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <p style={{ fontSize:'12px', color:'#9ca3af' }}>Aucune transaction sur cette période</p>
+                    <p style={{ fontSize:'12px', color:'#9ca3af' }}>{t('noTransactionsPeriod')}</p>
                   </div>
                 ) : (() => {
                   const parseDate = (d: string) => new Date(`${d}T00:00:00`).getTime();
@@ -367,10 +371,10 @@ export default function AdminDashboard() {
                     st === 'EN_ATTENTE' ? '#fbbf24' :
                     st === 'REMBOURSE'  ? '#f87171' : '#ef4444';
                   const statutLabel = (st: string) =>
-                    st === 'REUSSI'     ? 'Réussi' :
-                    st === 'EN_ATTENTE' ? 'En attente' :
-                    st === 'REMBOURSE'  ? 'Remboursé' :
-                    st === 'ECHEC'      ? 'Échec' : st;
+                    st === 'REUSSI'     ? t('successful') :
+                    st === 'EN_ATTENTE' ? t('pending') :
+                    st === 'REMBOURSE'  ? t('refunded') :
+                    st === 'ECHEC'      ? t('failed') : st;
                   const fmtK = (v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : `${Math.round(v)}`;
                   return (
                     <>
@@ -436,10 +440,10 @@ export default function AdminDashboard() {
                       </div>
                       <div style={{ display:'flex', flexWrap:'wrap', gap:'12px', justifyContent:'center', marginTop:'10px' }}>
                         {[
-                          { s:'REUSSI',     c:'#22c55e', l:'Réussi' },
-                          { s:'EN_ATTENTE', c:'#fbbf24', l:'En attente' },
-                          { s:'REMBOURSE',  c:'#f87171', l:'Remboursé' },
-                          { s:'ECHEC',      c:'#ef4444', l:'Échec' },
+                          { s:'REUSSI',     c:'#22c55e', l:t('successful') },
+                          { s:'EN_ATTENTE', c:'#fbbf24', l:t('pending') },
+                          { s:'REMBOURSE',  c:'#f87171', l:t('refunded') },
+                          { s:'ECHEC',      c:'#ef4444', l:t('failed') },
                         ].map(item => (
                           <div key={item.s} style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'10px', color:'#6b7280' }}>
                             <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:item.c, flexShrink:0 }}/>
@@ -456,8 +460,8 @@ export default function AdminDashboard() {
         ) : (
           <div style={{ background:'#fff', borderRadius:'10px', padding:'30px', textAlign:'center', border:'1px dashed #e5e7eb', marginBottom:'16px' }}>
             <div style={{ marginBottom:'12px', display:'flex', justifyContent:'center' }}><Icon name="route" size={48} color="#9CA3AF" /></div>
-            <h3 style={{ fontSize:'16px', fontWeight:'600', color:'#374151', marginBottom:'6px' }}>Aucune donnée disponible</h3>
-            <p style={{ fontSize:'13px', color:'#9ca3af' }}>Les graphiques s'afficheront automatiquement dès que la plateforme aura des activités</p>
+            <h3 style={{ fontSize:'16px', fontWeight:'600', color:'#374151', marginBottom:'6px' }}>{t('noData')}</h3>
+            <p style={{ fontSize:'13px', color:'#9ca3af' }}>{t('chartsWillShow')}</p>
           </div>
         )}
 
@@ -468,21 +472,21 @@ export default function AdminDashboard() {
             {/* Utilisateurs récents */}
             <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
-                <span style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>Utilisateurs</span>
-                <a href="/admin/utilisateurs" style={{ fontSize:'11px', color:'#22c55e', textDecoration:'none' }}>Voir tout →</a>
+                <span style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>{t('users')}</span>
+                <a href="/admin/utilisateurs" style={{ fontSize:'11px', color:'#22c55e', textDecoration:'none' }}>{t('viewAll')} →</a>
               </div>
               <div style={{ overflowX:'auto' }}>
                 <table style={{ width:'100%', borderCollapse:'collapse' }}>
                   <thead>
                     <tr>
-                      {['Nom','Type','Statut'].map(h => (
+                      {[t('adminTableName'), t('typeHeader'), t('statusLabel')].map(h => (
                         <th key={h} className="table-header" style={{ fontSize:'10px', color:'#9ca3af', textAlign:'left', padding:'6px 8px', borderBottom:'1px solid #f3f4f6', textTransform:'uppercase', letterSpacing:'.5px' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {recentUsers.length === 0 ? (
-                      <tr><td colSpan={3} style={{ textAlign:'center', padding:'20px', color:'#9ca3af', fontSize:'12px' }}>Aucun résultat</td></tr>
+                      <tr><td colSpan={3} style={{ textAlign:'center', padding:'20px', color:'#9ca3af', fontSize:'12px' }}>{t('noResults')}</td></tr>
                     ) : recentUsers.map(u => {
                       const statut = getStatutLabel(u.estActif);
                       const s = statutColor(statut);
@@ -516,21 +520,21 @@ export default function AdminDashboard() {
             {/* Réservations récentes */}
             <div style={{ background:'#fff', borderRadius:'10px', padding:'18px', border:'1px solid #e5e7eb' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
-                <span style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>Réservations</span>
-                <a href="/admin/reservations" style={{ fontSize:'11px', color:'#22c55e', textDecoration:'none' }}>Voir tout →</a>
+                <span style={{ fontSize:'13px', fontWeight:'600', color:'#111827' }}>{t('reservations')}</span>
+                <a href="/admin/reservations" style={{ fontSize:'11px', color:'#22c55e', textDecoration:'none' }}>{t('viewAll')} →</a>
               </div>
               <div style={{ overflowX:'auto' }}>
                 <table style={{ width:'100%', borderCollapse:'collapse' }}>
                   <thead>
                     <tr>
-                      {['Passager','Trajet','Date','Statut'].map(h => (
+                      {[t('passenger'), t('trip'), t('date'), t('statusLabel')].map(h => (
                         <th key={h} className="table-header" style={{ fontSize:'10px', color:'#9ca3af', textAlign:'left', padding:'6px 8px', borderBottom:'1px solid #f3f4f6', textTransform:'uppercase', letterSpacing:'.5px' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {recentReservations.length === 0 ? (
-                      <tr><td colSpan={4} style={{ textAlign:'center', padding:'20px', color:'#9ca3af', fontSize:'12px' }}>Aucun résultat</td></tr>
+                      <tr><td colSpan={4} style={{ textAlign:'center', padding:'20px', color:'#9ca3af', fontSize:'12px' }}>{t('noResults')}</td></tr>
                     ) : recentReservations.map(r => {
                       const statut = getReservationStatutLabel(r.statut);
                       const s = statutColor(statut);
@@ -554,11 +558,11 @@ export default function AdminDashboard() {
           <div className="tables-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
             <div style={{ background:'#fff', borderRadius:'10px', padding:'30px', textAlign:'center', border:'1px dashed #e5e7eb' }}>
               <div style={{ marginBottom:'8px', display:'flex', justifyContent:'center' }}><Icon name="users" size={32} color="#9CA3AF" /></div>
-              <p style={{ fontSize:'13px', color:'#9ca3af' }}>Aucun utilisateur récent</p>
+              <p style={{ fontSize:'13px', color:'#9ca3af' }}>{t('noRecentUsers')}</p>
             </div>
             <div style={{ background:'#fff', borderRadius:'10px', padding:'30px', textAlign:'center', border:'1px dashed #e5e7eb' }}>
               <div style={{ marginBottom:'8px', display:'flex', justifyContent:'center' }}><Icon name="clipboard" size={32} color="#9CA3AF" /></div>
-              <p style={{ fontSize:'13px', color:'#9ca3af' }}>Aucune réservation récente</p>
+              <p style={{ fontSize:'13px', color:'#9ca3af' }}>{t('noRecentReservations')}</p>
             </div>
           </div>
         )}

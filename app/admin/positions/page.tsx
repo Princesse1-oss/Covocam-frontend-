@@ -28,7 +28,7 @@ const POLL_INTERVAL = 15000;
 const GREEN = '#0D9E7E';
 
 export default function AdminPositionsPage() {
-  const { darkMode } = useTheme();
+  const { darkMode, t, lang } = useTheme();
   const [positions, setPositions] = useState<ConductorPosition[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatut, setFilterStatut] = useState<string>('ALL');
@@ -78,7 +78,7 @@ export default function AdminPositionsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <SvgIcon name="navigation" size={24} color={GREEN} />
             <h1 style={{ fontSize: '20px', fontWeight: '700', color: darkMode ? '#fff' : '#0D0D0D', margin: 0 }}>
-              Positions des conducteurs
+              {t('driversPositions')}
             </h1>
             <div style={{
               display: 'flex',
@@ -96,7 +96,7 @@ export default function AdminPositionsPage() {
                 background: '#10B981',
                 animation: 'pulse 2s infinite',
               }} />
-              <span style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>En direct</span>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>{t('liveBadge')}</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -110,7 +110,7 @@ export default function AdminPositionsPage() {
                 fontSize: '13px', fontWeight: '500',
               }}
             >
-              <SvgIcon name="clock" size={16} /> Actualiser
+              <SvgIcon name="clock" size={16} /> {t('refresh')}
             </button>
             <button
               onClick={() => setShowPanel(!showPanel)}
@@ -122,7 +122,7 @@ export default function AdminPositionsPage() {
                 fontSize: '13px', fontWeight: '500',
               }}
             >
-              <SvgIcon name="map" size={16} /> Panneau
+              <SvgIcon name="map" size={16} /> {t('panel')}
             </button>
           </div>
         </div>
@@ -139,10 +139,12 @@ export default function AdminPositionsPage() {
                 color: darkMode ? '#94a3b8' : '#64748b',
                 fontSize: '14px',
               }}>
-                Chargement de la carte...
+                <p style={{ fontSize: '13px', fontWeight: '700', color: darkMode ? '#9CA3AF' : '#64748b', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('loadingMap')}
+                </p>
               </div>
             ) : (
-              <AdminPositionsMap positions={filteredPositions} darkMode={darkMode} />
+              <AdminPositionsMap positions={filteredPositions} darkMode={darkMode} lang={lang} />
             )}
           </div>
 
@@ -163,7 +165,7 @@ export default function AdminPositionsPage() {
               {/* Filters */}
               <div>
                 <h3 style={{ fontSize: '13px', fontWeight: '600', color: darkMode ? '#94a3b8' : '#64748b', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Filtres
+                  {t('filters')}
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <select
@@ -176,9 +178,9 @@ export default function AdminPositionsPage() {
                       fontSize: '13px',
                     }}
                   >
-                    <option value="ALL">Tous les statuts</option>
+                    <option value="ALL">{t('allStatus')}</option>
                     {statuts.map(s => (
-                      <option key={s} value={s}>{s === 'EN_COURS' ? 'En cours' : s}</option>
+                      <option key={s} value={s}>{s === 'EN_COURS' ? t('inProgress') : s}</option>
                     ))}
                   </select>
                   <select
@@ -191,7 +193,7 @@ export default function AdminPositionsPage() {
                       fontSize: '13px',
                     }}
                   >
-                    <option value="ALL">Toutes les villes</option>
+                    <option value="ALL">{t('allCitiesFull')}</option>
                     {villes.map(v => (
                       <option key={v} value={v}>{v}</option>
                     ))}
@@ -209,7 +211,7 @@ export default function AdminPositionsPage() {
                   textAlign: 'center',
                 }}>
                   <div style={{ fontSize: '20px', fontWeight: '700', color: GREEN }}>{filteredPositions.length}</div>
-                  <div style={{ fontSize: '11px', color: darkMode ? '#64748b' : '#94a3b8' }}>Conducteurs</div>
+                  <div style={{ fontSize: '11px', color: darkMode ? '#64748b' : '#94a3b8' }}>{t('driversLabel')}</div>
                 </div>
                 <div style={{
                   padding: '12px', borderRadius: '10px',
@@ -219,14 +221,14 @@ export default function AdminPositionsPage() {
                   <div style={{ fontSize: '20px', fontWeight: '700', color: '#10B981' }}>
                     {filteredPositions.filter(p => p.statut === 'EN_COURS').length}
                   </div>
-                  <div style={{ fontSize: '11px', color: darkMode ? '#64748b' : '#94a3b8' }}>En trajet</div>
+                  <div style={{ fontSize: '11px', color: darkMode ? '#64748b' : '#94a3b8' }}>{t('onTrip')}</div>
                 </div>
               </div>
 
               {/* Driver list */}
               <div>
                 <h3 style={{ fontSize: '13px', fontWeight: '600', color: darkMode ? '#94a3b8' : '#64748b', margin: '0 0 8px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Conducteurs ({filteredPositions.length})
+                  {t('driversLabel')} ({filteredPositions.length})
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {filteredPositions.map(p => (
@@ -264,7 +266,7 @@ export default function AdminPositionsPage() {
                       textAlign: 'center', padding: '20px',
                       fontSize: '13px', color: darkMode ? '#475569' : '#94a3b8',
                     }}>
-                      Aucun conducteur trouvé
+                      {t('noDriversFound')}
                     </div>
                   )}
                 </div>

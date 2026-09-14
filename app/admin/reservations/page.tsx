@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 interface Reservation {
   id: number;
@@ -31,6 +32,7 @@ interface Reservation {
 }
 
 export default function AdminReservations() {
+  const { t, lang } = useTheme();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -116,10 +118,10 @@ export default function AdminReservations() {
 
   const statutLabel = (s: string) => {
     const upper = s?.toUpperCase() || '';
-    if (upper === 'CONFIRMEE' || upper === 'ACCEPTED') return 'Confirmée';
-    if (upper === 'EN_ATTENTE' || upper === 'PENDING') return 'En attente';
-    if (upper === 'ANNULEE' || upper === 'CANCELLED') return 'Annulée';
-    return s || 'Inconnu';
+    if (upper === 'CONFIRMEE' || upper === 'ACCEPTED') return t('confirmedFem');
+    if (upper === 'EN_ATTENTE' || upper === 'PENDING') return t('pending');
+    if (upper === 'ANNULEE' || upper === 'CANCELLED') return t('cancelledFem');
+    return s || t('unknownStatus');
   };
 
   const handleEnvoyerArgent = async (reservationId: number) => {
@@ -133,10 +135,10 @@ export default function AdminReservations() {
       if (res.ok) {
         setSentIds(prev => new Set(prev).add(reservationId));
       } else {
-        alert('Erreur lors de l\'envoi de l\'argent');
+        alert(t('sendMoneyError'));
       }
     } catch {
-      alert('Erreur réseau lors de l\'envoi de l\'argent');
+      alert(t('sendMoneyNetworkError'));
     } finally {
       setSendingIds(prev => { const next = new Set(prev); next.delete(reservationId); return next; });
     }
@@ -146,7 +148,7 @@ export default function AdminReservations() {
     return (
       <AdminLayout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)' }}>
-          <p style={{ color: '#6b7280' }}>Chargement...</p>
+          <p style={{ color: '#6b7280' }}>{t('loading')}</p>
         </div>
       </AdminLayout>
     );
@@ -157,11 +159,11 @@ export default function AdminReservations() {
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
         <header style={{ background: '#fff', padding: isMobile ? '12px 16px' : '0 24px', height: isMobile ? 'auto' : '56px', display: 'flex', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', flexShrink: 0, flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '10px' : '0' }}>
-          <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>Gestion des réservations</div>
+          <div style={{ fontSize: '15px', fontWeight: '600', color: '#111827' }}>{t('reservationsManage')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
             <input
               type="text"
-              placeholder="Rechercher une réservation..."
+              placeholder={t('searchReservationPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{ padding: '7px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', width: isMobile ? '100%' : '200px', flex: isMobile ? 1 : 'none', boxSizing: 'border-box' }}
@@ -171,10 +173,10 @@ export default function AdminReservations() {
               onChange={e => setFilterStatut(e.target.value)}
               style={{ padding: '7px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', outline: 'none', background: '#fff', color: '#374151', flex: isMobile ? 1 : 'none', minWidth: 0 }}
             >
-              <option value="tous">Tous les statuts</option>
-              <option value="EN_ATTENTE">En attente</option>
-              <option value="CONFIRMEE">Confirmée</option>
-              <option value="ANNULEE">Annulée</option>
+              <option value="tous">{t('allStatus')}</option>
+              <option value="EN_ATTENTE">{t('pending')}</option>
+              <option value="CONFIRMEE">{t('confirmedFem')}</option>
+              <option value="ANNULEE">{t('cancelledFem')}</option>
             </select>
           </div>
         </header>
@@ -183,25 +185,25 @@ export default function AdminReservations() {
           {/* Stat cards avec SVG */}
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '14px', marginBottom: '24px' }}>
             {[
-              { label: 'Total réservations', value: total, border: '#22c55e', bg: '#dcfce7', icon: (
+              { label: t('totalReservations'), value: total, border: '#22c55e', bg: '#dcfce7', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="3" />
                   <path d="M16 2V6M8 2V6M3 10H21" />
                   <path d="M8 14H16M8 17H13" />
                 </svg>
               )},
-              { label: 'En attente', value: enAttente, border: '#d97706', bg: '#fef3c7', icon: (
+              { label: t('pending'), value: enAttente, border: '#d97706', bg: '#fef3c7', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
                 </svg>
               )},
-              { label: 'Confirmées', value: confirmees, border: '#15803d', bg: '#dcfce7', icon: (
+              { label: t('confirmedFemPlural'), value: confirmees, border: '#15803d', bg: '#dcfce7', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6L9 17L4 12" />
                 </svg>
               )},
-              { label: 'Annulées', value: annulees, border: '#dc2626', bg: '#fee2e2', icon: (
+              { label: t('cancelledFemPlural'), value: annulees, border: '#dc2626', bg: '#fee2e2', icon: (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M15 9L9 15" />
@@ -229,7 +231,7 @@ export default function AdminReservations() {
                   <path d="M8 14H16M8 17H13" />
                 </svg>
               </span>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Liste des réservations</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{t('reservationList')}</span>
               <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', padding: '2px 8px', borderRadius: '20px', fontWeight: '600' }}>{filtered.length}</span>
             </div>
 
@@ -237,7 +239,7 @@ export default function AdminReservations() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    {['#', 'Passager', 'Trajet', 'Conducteur', 'Date départ', 'Places', 'Prix total', 'Date réservation', 'Statut', 'Actions'].map(h => (
+                    {['#', t('passenger'), t('trip'), t('driver'), t('adminTableDepartureDate'), t('adminTablePlaces'), t('priceTotal'), t('reservationDate'), t('statusLabel'), t('actions')].map(h => (
                       <th key={h} style={{ fontSize: '11px', color: '#c5c8cf', textAlign: 'left', padding: '10px 14px', borderBottom: '1px solid #e5e7eb', textTransform: 'uppercase', letterSpacing: '.5px', fontWeight: '600', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -253,7 +255,7 @@ export default function AdminReservations() {
                             <path d="M8 14H16M8 17H13" />
                           </svg>
                         </div>
-                        Aucune réservation trouvée
+                        {t('noReservationsFound')}
                       </td>
                     </tr>
                   ) : filtered.map((r, i) => {
@@ -270,7 +272,7 @@ export default function AdminReservations() {
                               {r.passager?.photo && (
                                 <img
                                   src={r.passager.photo.startsWith('http') ? r.passager.photo : `/uploads/profils/${r.passager.photo}`}
-                                  alt="Photo passager"
+                                  alt={t('passengerPhotoAlt')}
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{
                                     width: '100%', height: '100%', borderRadius: '50%',
@@ -317,7 +319,7 @@ export default function AdminReservations() {
                               {conducteurPhoto && (
                                 <img
                                   src={conducteurPhoto.startsWith('http') ? conducteurPhoto : `/uploads/profils/${conducteurPhoto}`}
-                                  alt="Photo"
+                                  alt={t('photoAlt')}
                                   onError={(e) => (e.currentTarget.style.display = 'none')}
                                   style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
                                 />
@@ -331,7 +333,7 @@ export default function AdminReservations() {
                         </td>
 
                         <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                          <div style={{ fontSize: '12px', color: '#374151' }}>{r.trajet?.dateDepart ? new Date(r.trajet.dateDepart).toLocaleDateString('fr-FR') : '—'}</div>
+                          <div style={{ fontSize: '12px', color: '#374151' }}>{r.trajet?.dateDepart ? new Date(r.trajet.dateDepart).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR') : '—'}</div>
                           <div style={{ fontSize: '11px', color: '#9ca3af' }}>{r.trajet?.heureDepart || '—'}</div>
                         </td>
 
@@ -344,7 +346,7 @@ export default function AdminReservations() {
                         </td>
 
                         <td style={{ padding: '12px 14px', fontSize: '11px', color: '#9ca3af', whiteSpace: 'nowrap' }}>
-                          {r.dateReservation ? new Date(r.dateReservation).toLocaleDateString('fr-FR') : '—'}
+                          {r.dateReservation ? new Date(r.dateReservation).toLocaleDateString(lang === 'en' ? 'en-US' : 'fr-FR') : '—'}
                         </td>
 
                         <td style={{ padding: '12px 14px' }}>
@@ -379,12 +381,12 @@ export default function AdminReservations() {
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite' }}>
                                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                                   </svg>
-                                  Envoi...
+                                  {t('sending')}
                                 </>
                               ) : sentIds.has(r.id) ? (
-                                'Envoyé ✓'
+                                t('sentOk')
                               ) : (
-                                'Envoyer argent'
+                                t('sendMoney')
                               )}
                             </button>
                           )}
@@ -398,9 +400,9 @@ export default function AdminReservations() {
 
             {filtered.length > 0 && (
               <div style={{ padding: '12px 20px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#6b7280' }}>{filtered.length} réservation(s) affichée(s)</span>
+                <span style={{ fontSize: '12px', color: '#6b7280' }}>{filtered.length} {t('reservationsShown')}</span>
                 <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                  Total encaissé : <strong style={{ color: '#15803d' }}>{filtered.filter(r => r.statut === 'CONFIRMEE').reduce((acc, r) => acc + (r.prixTotal || 0), 0).toLocaleString()} FCFA</strong>
+                  {t('totalCollected')} <strong style={{ color: '#15803d' }}>{filtered.filter(r => r.statut === 'CONFIRMEE').reduce((acc, r) => acc + (r.prixTotal || 0), 0).toLocaleString()} FCFA</strong>
                 </span>
               </div>
             )}

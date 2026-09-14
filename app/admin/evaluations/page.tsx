@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { useTheme } from '@/app/lib/ThemeContext';
 
 interface Evaluation {
   id: number;
@@ -13,11 +14,11 @@ interface Evaluation {
 
 type PeriodKey = '1m' | '3m' | '6m' | 'all';
 
-const PERIOD_OPTIONS: { key: PeriodKey; label: string; months: number | null }[] = [
-  { key: '1m', label: '1 mois', months: 1 },
-  { key: '3m', label: '3 mois', months: 3 },
-  { key: '6m', label: '6 mois', months: 6 },
-  { key: 'all', label: 'Tout', months: null },
+const PERIOD_OPTIONS: { key: PeriodKey; months: number | null }[] = [
+  { key: '1m', months: 1 },
+  { key: '3m', months: 3 },
+  { key: '6m', months: 6 },
+  { key: 'all', months: null },
 ];
 
 const GREEN = '#0D9E7E';
@@ -36,12 +37,12 @@ const BAR_COLORS: Record<number, string> = {
   1: '#ef4444',
 };
 
-function formatDate(value?: string) {
+function formatDate(value?: string, locale: string = 'fr-FR') {
   if (!value) return '—';
   const date = new Date(value);
   return isNaN(date.getTime())
     ? '—'
-    : date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    : date.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function StarIcon({ size = 14, filled = true }: { size?: number; filled?: boolean }) {
@@ -63,6 +64,7 @@ function Stars({ note, size = 14 }: { note: number; size?: number }) {
 }
 
 export default function AdminEvaluations() {
+  const { t, lang } = useTheme();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -138,7 +140,10 @@ export default function AdminEvaluations() {
     [evaluations, search, filterNote]
   );
 
-  const activePeriodLabel = PERIOD_OPTIONS.find(p => p.key === period)?.label ?? 'Tout';
+  const periodLabel = (k: PeriodKey) =>
+    k === '1m' ? t('period1m') : k === '3m' ? t('period3m') : k === '6m' ? t('period6m') : t('periodAll');
+
+  const activePeriodLabel = periodLabel(period);
 
   const confirmDelete = async (id: number) => {
     setPendingDeleteId(null);
@@ -151,7 +156,7 @@ export default function AdminEvaluations() {
       if (!res.ok) throw new Error('delete failed');
       setEvaluations(prev => prev.filter(e => e.id !== id));
     } catch {
-      setAdminError("Erreur lors de la suppression de l'évaluation");
+      setAdminError(t('deleteEvalError'));
       setTimeout(() => setAdminError(''), 4000);
     }
   };
@@ -160,7 +165,7 @@ export default function AdminEvaluations() {
     return (
       <AdminLayout>
         <div style={{ fontFamily: "'Segoe UI', Arial, sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 64px)', background: BG }}>
-          <p style={{ color: MUTED }}>Chargement...</p>
+          <p style={{ color: MUTED }}>{t('loading')}</p>
         </div>
       </AdminLayout>
     );
@@ -178,8 +183,8 @@ export default function AdminEvaluations() {
               <StarIcon size={18} />
             </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: '19px', fontWeight: 700, color: TEXT }}>Évaluations</h1>
-              <span style={{ fontSize: '11px', color: MUTED }}>{evaluations.length} au total sur la plateforme</span>
+              <h1 style={{ margin: 0, fontSize: '19px', fontWeight: 700, color: TEXT }}>{t('evaluations')}</h1>
+              <span style={{ fontSize: '11px', color: MUTED }}>{evaluations.length} {t('totalOnPlatform')}</span>
             </div>
           </div>
 
@@ -193,7 +198,7 @@ export default function AdminEvaluations() {
               </span>
               <input
                 type="text"
-                placeholder="Rechercher un auteur, un commentaire..."
+                placeholder={t('searchAuthorComment')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 style={{
@@ -211,9 +216,9 @@ export default function AdminEvaluations() {
                 fontSize: '13px', outline: 'none', background: '#fff', color: TEXT,
               }}
             >
-              <option value="toutes">Toutes les notes</option>
+              <option value="toutes">{t('allRatings')}</option>
               {[5, 4, 3, 2, 1].map(n => (
-                <option key={n} value={n}>{n} étoile{n > 1 ? 's' : ''}</option>
+                <option key={n} value={n}>{n} {n > 1 ? t('starsPlural') : t('starsLabel')}</option>
               ))}
             </select>
 
@@ -230,7 +235,7 @@ export default function AdminEvaluations() {
                     transition: 'background .15s, color .15s',
                   }}
                 >
-                  {p.label}
+                  {periodLabel(p.key)}
                 </button>
               ))}
             </div>
@@ -267,8 +272,8 @@ export default function AdminEvaluations() {
               </div>
               <div>
                 <div style={{ fontSize: '20px', fontWeight: 700, color: TEXT, lineHeight: 1.1 }}>{stats.total}</div>
-                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>Total évaluations</div>
-                <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '1px' }}>Période : {activePeriodLabel}</div>
+                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>{t('totalEvaluations')}</div>
+                <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '1px' }}>{t('periodColon')} {activePeriodLabel}</div>
               </div>
             </div>
 
@@ -282,7 +287,7 @@ export default function AdminEvaluations() {
                 <div style={{ fontSize: '20px', fontWeight: 700, color: TEXT, lineHeight: 1.1, display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                   {stats.avg.toFixed(1)}<span style={{ fontSize: '12px', fontWeight: 600, color: MUTED }}>/5</span>
                 </div>
-                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>Note moyenne</div>
+                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>{t('averageRating')}</div>
                 <div style={{ marginTop: '2px' }}><Stars note={stats.avg} size={11} /></div>
               </div>
             </div>
@@ -298,7 +303,7 @@ export default function AdminEvaluations() {
                 <div style={{ fontSize: '20px', fontWeight: 700, color: TEXT, lineHeight: 1.1, display: 'flex', alignItems: 'baseline', gap: '3px' }}>
                   {stats.total > 0 ? stats.best : '—'}<span style={{ fontSize: '12px', fontWeight: 600, color: MUTED }}>{stats.total > 0 ? '/5' : ''}</span>
                 </div>
-                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>Meilleure note</div>
+                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>{t('bestRating')}</div>
                 <div style={{ marginTop: '2px' }}>{stats.total > 0 && <Stars note={stats.best} size={11} />}</div>
               </div>
             </div>
@@ -312,9 +317,9 @@ export default function AdminEvaluations() {
               </div>
               <div>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: TEXT, lineHeight: 1.3 }}>
-                  {stats.latest ? formatDate(stats.latest.dateEvaluation) : '—'}
+                  {stats.latest ? formatDate(stats.latest.dateEvaluation, lang === 'en' ? 'en-US' : 'fr-FR') : '—'}
                 </div>
-                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>Dernière note</div>
+                <div style={{ fontSize: '11px', color: MUTED, marginTop: '3px' }}>{t('latestRating')}</div>
                 <div style={{ marginTop: '2px' }}>{stats.latest && <Stars note={stats.latest.note} size={11} />}</div>
               </div>
             </div>
@@ -328,21 +333,21 @@ export default function AdminEvaluations() {
                   <line x1="18" y1="20" x2="18" y2="4" />
                   <line x1="6" y1="20" x2="6" y2="16" />
                 </svg>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>Répartition des notes</span>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{t('ratingsDistribution')}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ background: 'rgba(13,158,126,0.1)', color: GREEN, fontSize: '11px', padding: '3px 10px', borderRadius: '20px', fontWeight: 700 }}>
                   {activePeriodLabel}
                 </span>
                 <span style={{ fontSize: '12px', color: MUTED }}>
-                  {stats.total} avis · moyenne {stats.avg.toFixed(1)}/5
+                  {stats.total} {t('reviewsCount')} · {t('averageShort')} {stats.avg.toFixed(1)}/5
                 </span>
               </div>
             </div>
 
             {stats.total === 0 ? (
               <div style={{ padding: '24px', textAlign: 'center', fontSize: '13px', color: '#9ca3af' }}>
-                Aucune évaluation sur cette période
+                {t('noEvalsPeriod')}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -355,7 +360,7 @@ export default function AdminEvaluations() {
                     <div style={{ flex: 1, height: '10px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
                       <div style={{ width: `${row.pct}%`, height: '100%', background: BAR_COLORS[row.note], borderRadius: '999px', transition: 'width .3s ease' }} />
                     </div>
-                    <span style={{ fontSize: '12px', color: MUTED, minWidth: '58px', textAlign: 'right' }}>{row.count} avis</span>
+                    <span style={{ fontSize: '12px', color: MUTED, minWidth: '58px', textAlign: 'right' }}>{row.count} {t('reviewsCount')}</span>
                     <span style={{ fontSize: '12px', fontWeight: 700, color: BAR_COLORS[row.note], minWidth: '40px', textAlign: 'right' }}>{row.pct}%</span>
                   </div>
                 ))}
@@ -373,7 +378,7 @@ export default function AdminEvaluations() {
                 <line x1="3" y1="12" x2="3.01" y2="12" />
                 <line x1="3" y1="18" x2="3.01" y2="18" />
               </svg>
-              <span style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>Liste des évaluations</span>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: TEXT }}>{t('evalList')}</span>
               <span style={{ background: 'rgba(13,158,126,0.1)', color: GREEN, fontSize: '11px', padding: '2px 8px', borderRadius: '20px', fontWeight: 700 }}>
                 {filtered.length}
               </span>
@@ -383,7 +388,7 @@ export default function AdminEvaluations() {
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '760px' }}>
                 <thead>
                   <tr style={{ background: '#f9fafb' }}>
-                    {['#', 'Auteur', 'Note', 'Commentaire', 'Date', 'Action'].map(h => (
+                    {['#', t('authorLabel'), t('ratingLabel'), t('commentLabel'), t('date'), t('actionLabel')].map(h => (
                       <th key={h} style={{
                         fontSize: '11px', color: MUTED, textAlign: 'left', padding: '10px 14px',
                         borderBottom: `1px solid ${BORDER}`, textTransform: 'uppercase', letterSpacing: '.5px',
@@ -399,7 +404,7 @@ export default function AdminEvaluations() {
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                           <StarIcon size={40} filled={false} />
                         </div>
-                        Aucune évaluation trouvée
+                        {t('noEvaluationsFound')}
                       </td>
                     </tr>
                   ) : (
@@ -448,7 +453,7 @@ export default function AdminEvaluations() {
                               {e.commentaire}
                             </div>
                           ) : (
-                            <span style={{ fontSize: '12px', color: '#d1d5db', fontStyle: 'italic' }}>Aucun commentaire</span>
+                            <span style={{ fontSize: '12px', color: '#d1d5db', fontStyle: 'italic' }}>{t('noComment')}</span>
                           )}
                         </td>
 
@@ -459,10 +464,10 @@ export default function AdminEvaluations() {
                         <td style={{ padding: '12px 14px' }}>
                           {pendingDeleteId === e.id ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 700, color: TEXT, whiteSpace: 'nowrap' }}>Supprimer ?</span>
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: TEXT, whiteSpace: 'nowrap' }}>{t('deleteQuestion')}</span>
                               <button
                                 onClick={() => confirmDelete(e.id)}
-                                title="Confirmer la suppression"
+                                title={t('confirmDeleteTitle')}
                                 style={{
                                   width: '26px', height: '26px', borderRadius: '6px', border: 'none', background: '#DC2626',
                                   color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -474,7 +479,7 @@ export default function AdminEvaluations() {
                               </button>
                               <button
                                 onClick={() => setPendingDeleteId(null)}
-                                title="Annuler"
+                                title={t('cancel')}
                                 style={{
                                   width: '26px', height: '26px', borderRadius: '6px', border: `1px solid ${BORDER}`, background: '#fff',
                                   color: '#374151', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -489,7 +494,7 @@ export default function AdminEvaluations() {
                           ) : (
                             <button
                               onClick={() => setPendingDeleteId(e.id)}
-                              title="Supprimer cette évaluation"
+                              title={t('deleteEvalTitle')}
                               style={{
                                 background: '#FEF2F2', border: 'none', color: '#DC2626', padding: '6px 12px', borderRadius: '8px',
                                 fontSize: '11px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px',
@@ -503,7 +508,7 @@ export default function AdminEvaluations() {
                                 <line x1="10" y1="11" x2="10" y2="17" />
                                 <line x1="14" y1="11" x2="14" y2="17" />
                               </svg>
-                              Supprimer
+                              {t('deleteLabel')}
                             </button>
                           )}
                         </td>
@@ -516,9 +521,9 @@ export default function AdminEvaluations() {
 
             {filtered.length > 0 && (
               <div style={{ padding: '12px 20px', borderTop: `1px solid ${BORDER}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '12px', color: MUTED }}>{filtered.length} évaluation(s) affichée(s)</span>
+                <span style={{ fontSize: '12px', color: MUTED }}>{filtered.length} {t('evalsShown')}</span>
                 <span style={{ fontSize: '12px', color: MUTED }}>
-                  Moyenne affichée : <strong style={{ color: STAR_FILLED }}>
+                  {t('avgShownColon')} <strong style={{ color: STAR_FILLED }}>
                     {(filtered.reduce((acc, e) => acc + e.note, 0) / filtered.length).toFixed(1)}/5
                   </strong>
                 </span>

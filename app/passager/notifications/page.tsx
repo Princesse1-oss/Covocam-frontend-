@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/app/lib/ThemeContext';
+import { traduireNotification } from '@/app/lib/translations';
 
 // ✅ Utilisation du proxy Next.js pour éviter tout problème CORS
 const API_URL = '/api';
@@ -81,7 +82,7 @@ const formatDate = (dateValue: any) => {
 
 export default function PassagerNotifications() {
   const router = useRouter();
-  const { darkMode, t } = useTheme();
+  const { darkMode, t, lang } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -317,9 +318,12 @@ export default function PassagerNotifications() {
           {notifications.map((notif) => {
             const isTrajetNotif = notif.type === 'nouvelle_reservation' || notif.type === 'reservation_annulee';
             const isTermine = notif.type === 'trajet_termine' || (notif.message && notif.message.toLowerCase().includes('termin'));
+            const traduit = traduireNotification(notif, lang);
+            const titreAffiche = traduit?.titre ?? notif.titre;
+            const messageAffiche = traduit?.message ?? notif.message;
             const initials = notif.passager
               ? `${notif.passager.prenom?.charAt(0) || ''}${notif.passager.nom?.charAt(0) || ''}`
-              : (notif.titre?.charAt(0) || '');
+              : (titreAffiche?.charAt(0) || '');
             const showAvatar = isTrajetNotif || notif.passager;
 
             return (
@@ -388,7 +392,7 @@ export default function PassagerNotifications() {
                       color: darkMode ? '#FFFFFF' : BLACK,
                       wordBreak: 'break-word'
                     }}>
-                      {notif.titre}
+                      {titreAffiche}
                     </span>
                   </div>
                   
@@ -400,7 +404,7 @@ export default function PassagerNotifications() {
                     lineHeight: '1.5',
                     wordBreak: 'break-word'
                   }}>
-                    {notif.message}
+                    {messageAffiche}
                   </p>
                   
                   <div style={{ 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/app/lib/ThemeContext';
+import { traduireNotification } from '@/app/lib/translations';
 import ConducteurLayout from '../../../components/conducteur/ConducteurLayout';
 
 const E = '#0D9E7E';
@@ -623,7 +624,11 @@ export default function ConducteurNotifications() {
             )}
           </div>
           <div>
-            {notifications.map((n, i) => (
+            {notifications.map((n, i) => {
+              const traduit = traduireNotification(n, lang);
+              const titreAffiche = traduit?.titre ?? n.titre;
+              const messageAffiche = traduit?.message ?? n.message;
+              return (
               <div key={n.id} style={{
                 display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 20px',
                 borderBottom: i < notifications.length - 1 ? '1px solid #f3f4f6' : 'none',
@@ -635,8 +640,8 @@ export default function ConducteurNotifications() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
                 }}><Icon name="bell" size={16} /></div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: n.estLu ? '500' : '700', color: '#111827' }}>{n.titre}</div>
-                  <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '3px', lineHeight: '1.5' }}>{n.message}</div>
+                  <div style={{ fontSize: '13px', fontWeight: n.estLu ? '500' : '700', color: '#111827' }}>{titreAffiche}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '3px', lineHeight: '1.5' }}>{messageAffiche}</div>
                   <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>{formatDateTime(n.dateEnvoi)}</div>
                 </div>
                 {!n.estLu && (
@@ -662,7 +667,8 @@ export default function ConducteurNotifications() {
                   <Icon name="trash" size={12} color="#dc2626" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

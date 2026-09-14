@@ -274,11 +274,11 @@ export default function MesReservations() {
       if (res.ok) {
         setReservations(prev => prev.filter(r => r.id !== id));
       } else {
-        setError('Impossible d\'annuler cette réservation.');
+        setError(t('cancelReservationError') || 'Impossible d\'annuler cette réservation.');
         setTimeout(() => setError(''), 4000);
       }
     } catch {
-      setError('Erreur réseau.');
+      setError(t('networkError') || 'Erreur réseau.');
       setTimeout(() => setError(''), 4000);
     } finally {
       setProcessingId(null);
@@ -288,7 +288,7 @@ export default function MesReservations() {
   // ✅ FONCTION POUR SOUMETTRE L'ÉVALUATION
   const handleSubmitEvaluation = async () => {
     if (note === 0) {
-      setError('Veuillez sélectionner une note (1 à 5 étoiles)');
+      setError(t('selectRatingAlert') || 'Veuillez sélectionner une note (1 à 5 étoiles)');
       setTimeout(() => setError(''), 4000);
       return;
     }
@@ -332,12 +332,12 @@ export default function MesReservations() {
           }
         }, 2500);
       } else {
-        setError(data.error || 'Erreur lors de l\'envoi');
+        setError(data.error || t('submitError') || 'Erreur lors de l\'envoi');
         setTimeout(() => setError(''), 4000);
       }
     } catch (err) {
       console.error('Erreur réseau:', err);
-      setError('Erreur de connexion au serveur');
+      setError(t('serverConnectionError') || 'Erreur de connexion au serveur');
       setTimeout(() => setError(''), 4000);
     } finally {
       setSubmittingEvaluation(false);
@@ -357,24 +357,24 @@ export default function MesReservations() {
     if (s === 'A_PAYER') return t('pendingPayment') || 'En attente de paiement';
     if (s === 'EN_ATTENTE') return t('pending') || 'En attente du conducteur';
     if (s === 'ANNULEE') return t('cancelled') || 'Annulée';
-    if (s === 'REFUSEE') return 'Refusée';
+    if (s === 'REFUSEE') return t('refusedLabel') || 'Refusée';
     return s;
   };
 
   const getStatutTrajetBadge = (statutTrajet: string) => {
     switch (statutTrajet) {
       case 'OUVERT':
-        return { label: 'À venir', bg: '#F3F4F6', color: '#6B7280', icon: <Icon name="calendar" size={14} color="#6B7280" /> };
+        return { label: t('upcoming') || 'À venir', bg: '#F3F4F6', color: '#6B7280', icon: <Icon name="calendar" size={14} color="#6B7280" /> };
       case 'EN_ATTENTE_DEPART':
-        return { label: 'Départ bientôt', bg: AL, color: AM, icon: <Icon name="clock" size={14} color={AM} /> };
+        return { label: t('departingSoon') || 'Départ bientôt', bg: AL, color: AM, icon: <Icon name="clock" size={14} color={AM} /> };
       case 'EN_COURS':
-        return { label: 'En cours', bg: BLL, color: BL, icon: <Icon name="car" size={14} color={BL} /> };
+        return { label: t('inProgress') || 'En cours', bg: BLL, color: BL, icon: <Icon name="car" size={14} color={BL} /> };
       case 'EN_ATTENTE_VALIDATION':
-        return { label: 'Arrivée imminente', bg: '#FEF3C7', color: '#B45309', icon: <Icon name="check" size={14} color="#B45309" /> };
+        return { label: t('arrivingSoon') || 'Arrivée imminente', bg: '#FEF3C7', color: '#B45309', icon: <Icon name="check" size={14} color="#B45309" /> };
       case 'TERMINE':
-        return { label: 'Terminé', bg: EL, color: '#15803d', icon: <Icon name="check" size={14} color="#15803d" /> };
+        return { label: t('completed') || 'Terminé', bg: EL, color: '#15803d', icon: <Icon name="check" size={14} color="#15803d" /> };
       case 'ANNULE':
-        return { label: 'Annulé', bg: RL, color: RD, icon: <Icon name="x" size={14} color={RD} /> };
+        return { label: t('cancelled') || 'Annulé', bg: RL, color: RD, icon: <Icon name="x" size={14} color={RD} /> };
       default:
         return { label: statutTrajet, bg: LG, color: GR, icon: <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: GR, display: 'inline-block' }} /> };
     }
@@ -406,7 +406,7 @@ export default function MesReservations() {
               boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'
             }}
           >
-            <Icon name="mapPin" size={16} color="#FFF" /> Suivre le conducteur
+            <Icon name="mapPin" size={16} color="#FFF" /> {t('followDriver') || 'Suivre le conducteur'}
           </Link>
         );
       } else {
@@ -417,7 +417,7 @@ export default function MesReservations() {
             color: '#9CA3AF', fontSize: '13px', fontWeight: '600',
             textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
           }}>
-            <Icon name="mapPin" size={16} color="#9CA3AF" /> Carte disponible 5 min avant
+            <Icon name="mapPin" size={16} color="#9CA3AF" /> {t('mapAvailableBefore') || 'Carte disponible 5 min avant'}
           </div>
         );
       }
@@ -436,7 +436,7 @@ export default function MesReservations() {
             animation: 'pulse 2s infinite'
           }}
         >
-          <Icon name="car" size={16} color="#FFF" /> Trajet en cours - Voir la carte
+          <Icon name="car" size={16} color="#FFF" /> {t('tripInProgressSeeMap') || 'Trajet en cours - Voir la carte'}
         </Link>
       );
     }
@@ -449,7 +449,7 @@ export default function MesReservations() {
           color: '#B45309', fontSize: '13px', fontWeight: '600',
           textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
         }}>
-          Le conducteur finalise le trajet
+          {t('finalizingTrip') || 'Le conducteur finalise le trajet'}
         </div>
       );
     }
@@ -471,7 +471,7 @@ export default function MesReservations() {
             boxShadow: '0 4px 12px rgba(13, 158, 126, 0.3)'
           }}
         >
-          <Icon name="star" size={16} color="#FFF" /> Évaluer le conducteur
+          <Icon name="star" size={16} color="#FFF" /> {t('rateDriver') || 'Évaluer le conducteur'}
         </button>
       );
     }
@@ -481,17 +481,30 @@ export default function MesReservations() {
 
   const safeReservations = Array.isArray(reservations) ? reservations : [];
 
-  const filtered = safeReservations.filter(r => {
+  // ✅ Les réservations disparaissent 1 jour après la date du trajet
+  const estExpiree = (r: Reservation) => {
+    const d = r.trajet?.dateDepart;
+    if (!d) return false;
+    const jourTrajet = new Date(d);
+    jourTrajet.setHours(23, 59, 59, 999);
+    const limite = new Date(jourTrajet);
+    limite.setDate(limite.getDate() + 1);
+    return new Date() > limite;
+  };
+
+  const visibles = safeReservations.filter(r => !estExpiree(r));
+
+  const filtered = visibles.filter(r => {
     if (filterStatut === 'tous') return true;
     if (filterStatut === 'EN_ATTENTE') return r.statut === 'EN_ATTENTE' || r.statut === 'A_PAYER';
     if (filterStatut === 'ANNULEE') return r.statut === 'ANNULEE' || r.statut === 'REFUSEE';
     return r.statut === filterStatut;
   });
 
-  const totalConfirmees = safeReservations.filter(r => r.statut === 'CONFIRMEE' || r.statut === 'TERMINEE').length;
-  const totalEnAttente = safeReservations.filter(r => r.statut === 'EN_ATTENTE' || r.statut === 'A_PAYER').length;
-  const totalAnnulees = safeReservations.filter(r => r.statut === 'ANNULEE' || r.statut === 'REFUSEE').length;
-  const totalDepense = safeReservations
+  const totalConfirmees = visibles.filter(r => r.statut === 'CONFIRMEE' || r.statut === 'TERMINEE').length;
+  const totalEnAttente = visibles.filter(r => r.statut === 'EN_ATTENTE' || r.statut === 'A_PAYER').length;
+  const totalAnnulees = visibles.filter(r => r.statut === 'ANNULEE' || r.statut === 'REFUSEE').length;
+  const totalDepense = visibles
     .filter(r => ['CONFIRMEE', 'TERMINEE'].includes(r.statut))
     .reduce((acc, r) => acc + (r.prixTotal || 0), 0);
 
@@ -566,10 +579,10 @@ export default function MesReservations() {
 
         {confirmAnnul !== null && (
           <div style={{ marginBottom: '16px', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>Voulez-vous vraiment annuler cette réservation ?</span>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>{t('cancelReservationConfirm') || 'Voulez-vous vraiment annuler cette réservation ?'}</span>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setConfirmAnnul(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Non</button>
-              <button onClick={() => { const id = confirmAnnul; setConfirmAnnul(null); handleAnnuler(id!); }} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Oui, annuler</button>
+              <button onClick={() => setConfirmAnnul(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFF', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('noBtn') || 'Non'}</button>
+              <button onClick={() => { const id = confirmAnnul; setConfirmAnnul(null); handleAnnuler(id!); }} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#DC2626', color: '#FFF', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{t('yesCancel') || 'Oui, annuler'}</button>
             </div>
           </div>
         )}
@@ -628,7 +641,7 @@ export default function MesReservations() {
                       </span>
                     </div>
                     <span style={{ fontSize: '11px', color: badgeTrajet.color, fontWeight: '600' }}>
-                      {r.statut === 'CONFIRMEE' ? 'Payée' : statutLabel(r.statut)}
+                      {r.statut === 'CONFIRMEE' ? (t('paid') || 'Payée') : statutLabel(r.statut)}
                     </span>
                   </div>
 
@@ -729,8 +742,8 @@ export default function MesReservations() {
                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: EL, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
                   <Icon name="check" size={40} color={E} />
                 </div>
-                <h3 style={{ fontSize: '20px', fontWeight: '800', color: BK, marginBottom: '8px' }}>Merci pour votre avis !</h3>
-                <p style={{ fontSize: '14px', color: GR }}>Votre évaluation a été enregistrée avec succès.</p>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: BK, marginBottom: '8px' }}>{t('thanksReview') || 'Merci pour votre avis !'}</h3>
+                <p style={{ fontSize: '14px', color: GR }}>{t('reviewSubmitted') || 'Votre évaluation a été enregistrée avec succès.'}</p>
               </div>
             ) : (
               <>
@@ -739,10 +752,10 @@ export default function MesReservations() {
                     <Icon name="star" size={28} color="#F59E0B" />
                   </div>
                   <h3 style={{ fontSize: '20px', fontWeight: '800', color: BK, marginBottom: '8px' }}>
-                    Évaluer {evaluationModal.conducteurNom}
+                    {t('rateDriverName').replace('{name}', evaluationModal.conducteurNom) || `Évaluer ${evaluationModal.conducteurNom}`}
                   </h3>
                   <p style={{ fontSize: '14px', color: GR }}>
-                    Comment s'est passée votre expérience ?
+                    {t('howWasExperience') || 'Comment s\'est passée votre expérience ?'}
                   </p>
                 </div>
 
@@ -750,12 +763,12 @@ export default function MesReservations() {
 
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: BK, marginBottom: '8px' }}>
-                    Commentaire (optionnel)
+                    {t('commentOptional') || 'Commentaire (optionnel)'}
                   </label>
                   <textarea
                     value={commentaire}
                     onChange={(e) => setCommentaire(e.target.value)}
-                    placeholder="Partagez votre expérience..."
+                    placeholder={t('shareExperiencePlaceholder') || 'Partagez votre expérience...'}
                     style={{
                       width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #EBEBEB',
                       minHeight: '100px', resize: 'vertical', fontSize: '14px', fontFamily: 'inherit'
@@ -779,7 +792,7 @@ export default function MesReservations() {
                       background: 'white', color: GR, fontSize: '14px', fontWeight: '600', cursor: 'pointer'
                     }}
                   >
-                    Annuler
+                    {t('cancel') || 'Annuler'}
                   </button>
                   <button
                     onClick={handleSubmitEvaluation}
@@ -794,12 +807,12 @@ export default function MesReservations() {
                     {submittingEvaluation ? (
                       <>
                         <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        Envoi...
+                        {t('sending') || 'Envoi...'}
                       </>
                     ) : (
                       <>
                         <Icon name="check" size={16} color="#FFF" />
-                        Envoyer mon avis
+                        {t('submitReview') || 'Envoyer mon avis'}
                       </>
                     )}
                   </button>
