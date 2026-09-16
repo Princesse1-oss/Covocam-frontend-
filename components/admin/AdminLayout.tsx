@@ -95,12 +95,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [darkMode, setDarkMode] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPhone, setIsPhone] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    const checkPhone = () => setIsPhone(window.innerWidth < 640);
     checkMobile();
+    checkPhone();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkPhone);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('resize', checkPhone);
+    };
   }, []);
 
   useEffect(() => {
@@ -248,7 +255,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           marginLeft: isMobile ? 0 : '200px',
           flex: 1,
           minWidth: 0,
-          padding: isMobile ? '16px' : '24px',
+          padding: isPhone ? '12px' : (isMobile ? '16px' : '24px'),
           minHeight: 'calc(100vh - 64px)',
           color: darkMode ? '#fff' : '#0D0D0D',
           transition: 'color 0.3s',

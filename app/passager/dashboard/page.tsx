@@ -285,7 +285,7 @@ export default function PassagerDashboard() {
 
         {/* ===== STATS ===== */}
         {!searched && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '28px' }}>
             {[
               { label: t('availableTrips'), value: totalAvailable, icon: <Icon name="car" size={22} />, color: E, bg: EL, sub: `${totalAvailable} ${t('seats')}` },
               { label: t('activeDrivers'), value: activeDrivers, icon: <Icon name="users" size={22} color="#16A34A" />, color: '#16A34A', bg: '#F0FDF4', sub: t('onPlatformSub') },

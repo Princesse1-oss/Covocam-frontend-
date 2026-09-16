@@ -128,9 +128,9 @@ export default function AdminPositionsPage() {
         </div>
 
         {/* Content */}
-        <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0, flexWrap: 'wrap' }}>
           {/* Map */}
-          <div style={{ flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, minWidth: '280px', minHeight: 0 }}>
             {loading ? (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',

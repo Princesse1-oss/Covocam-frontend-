@@ -192,7 +192,7 @@ export default function AdminLieuxPage() {
               <div style={{ background: '#fff', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '520px', maxHeight: '85vh', overflowY: 'auto' }}>
                 <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', margin: '0 0 20px' }}>{editingLieu ? t('editPlace') : t('addPlace')}</h2>
                 <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
                     <div style={{ gridColumn: '1 / -1' }}>
                       <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px' }}>{t('nameRequired')}</label>
                       <input required value={form.nom} onChange={e => setForm(p => ({ ...p, nom: e.target.value }))} style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box' }} />

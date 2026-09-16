@@ -128,3 +128,31 @@ body {
 .dark .text-gray-500 { color: #6B7280 !important; }
 .dark .border-gray-100 { border-color: #2A2A2A !important; }
 .dark .border-gray-200 { border-color: #2A2A2A !important; }
+
+/* ---------------------------------------------------------
+   MOBILE (< 640px) - Redesign téléphone
+   Les grilles basées sur des classes cèdent à 1 colonne,
+   les tableaux restent scrollables, les inputs passent à 16px
+   (évite le zoom auto iOS), les images ne débordent plus.
+   --------------------------------------------------------- */
+@media (max-width: 640px) {
+  html, body { overflow-x: hidden; }
+
+  img { max-width: 100%; }
+
+  input, select, textarea { font-size: 16px !important; }
+
+  .form-grid,
+  .admin-form-grid,
+  .det-grid,
+  .pmt-grid,
+  .profile-grid,
+  .admin-profile-grid,
+  .features-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .charts-grid { grid-template-columns: 1fr !important; }
+  .tables-grid { grid-template-columns: 1fr !important; }
+}
