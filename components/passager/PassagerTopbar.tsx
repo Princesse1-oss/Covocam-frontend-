@@ -116,6 +116,7 @@ export default function PassagerTopbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPhone, setIsPhone] = useState(false);
   const notifPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchNotifCount = () => {
@@ -134,8 +135,11 @@ export default function PassagerTopbar() {
     if (typeof window === 'undefined') return;
 
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    const checkPhone = () => setIsPhone(window.innerWidth < 640);
     checkMobile();
+    checkPhone();
     window.addEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkPhone);
 
     const updateUser = () => {
       const raw = localStorage.getItem('user');
@@ -164,6 +168,7 @@ export default function PassagerTopbar() {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('user-updated', updateUser);
       window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('resize', checkPhone);
       window.removeEventListener('notifications-updated', fetchNotifCount);
     };
   }, []);
@@ -239,14 +244,14 @@ export default function PassagerTopbar() {
         color: styles.text,
       }}>
         <div style={{
-          maxWidth: '1440px', margin: '0 auto', padding: '0 16px', // Padding réduit sur mobile
-          display: 'flex', alignItems: 'center', height: '64px', gap: '16px',
+          maxWidth: '1440px', margin: '0 auto', padding: isPhone ? '0 10px' : '0 16px', // Padding réduit sur mobile
+          display: 'flex', alignItems: 'center', height: '64px', gap: isPhone ? '6px' : '16px',
         }}>
 
           {/* LOGO */}
           <Link href="/passager/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 12px rgba(13,158,126,0.3)' }} />
+              style={{ width: isPhone ? '36px' : '48px', height: isPhone ? '36px' : '48px', borderRadius: '14px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 12px rgba(13,158,126,0.3)' }} />
             {!isMobile && (
               <span style={{ fontSize: '9px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
                 {t('activePassenger')}
@@ -289,13 +294,13 @@ export default function PassagerTopbar() {
           )}
 
           {/* ACTIONS DROITE */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: isMobile ? 'auto' : '0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isPhone ? '2px' : '4px', marginLeft: isMobile ? 'auto' : '0', flexShrink: 0 }}>
 
             {/* Mode sombre/clair */}
             <div
               onClick={toggleDarkMode}
               style={{
-                width: '40px', height: '40px', borderRadius: '10px',
+                width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                 background: 'transparent',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
@@ -322,7 +327,7 @@ export default function PassagerTopbar() {
             <div
               onClick={toggleLang}
               style={{
-                width: '40px', height: '40px', borderRadius: '10px',
+                width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
               }}
@@ -336,7 +341,7 @@ export default function PassagerTopbar() {
             {/* Notifs */}
             <Link href="/passager/notifications" style={{ textDecoration: 'none', position: 'relative' }}>
               <div style={{
-                width: '40px', height: '40px', borderRadius: '10px',
+                width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                 background: pathname.startsWith('/passager/notifications') ? EMERALD_LIGHT : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
@@ -363,7 +368,7 @@ export default function PassagerTopbar() {
             {/* Messagerie */}
             <Link href="/passager/chat" style={{ textDecoration: 'none', position: 'relative' }}>
               <div style={{
-                width: '40px', height: '40px', borderRadius: '10px',
+                width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                 background: pathname.startsWith('/passager/chat') ? EMERALD_LIGHT : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
@@ -462,12 +467,12 @@ export default function PassagerTopbar() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 style={{
-                  width: '40px', height: '40px', borderRadius: '10px',
+                  width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                   background: mobileOpen ? EMERALD_LIGHT : 'transparent',
                   border: `1.5px solid ${mobileOpen ? EMERALD : styles.border}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   cursor: 'pointer', transition: 'all 0.2s',
-                  marginLeft: '4px'
+                  marginLeft: isPhone ? '2px' : '4px'
                 }}
               >
                 {mobileOpen ? (

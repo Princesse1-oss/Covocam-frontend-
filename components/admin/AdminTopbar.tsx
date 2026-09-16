@@ -127,14 +127,18 @@ export default function AdminTopbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPhone, setIsPhone] = useState(false);
   const { darkMode, toggleDarkMode: ctxToggleDarkMode, lang, toggleLang: ctxToggleLang, t } = useTheme();
   const navLinks = getNavLinks((k) => t(k as Parameters<typeof t>[0]));
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    const checkPhone = () => setIsPhone(window.innerWidth < 640);
     checkMobile();
+    checkPhone();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkPhone);
+    return () => { window.removeEventListener('resize', checkMobile); window.removeEventListener('resize', checkPhone); };
   }, []);
 
   useEffect(() => {
@@ -176,33 +180,35 @@ export default function AdminTopbar() {
         height: '64px',
       }}>
         <div style={{
-          maxWidth: '100%', margin: '0 auto', padding: '0 24px',
-          display: 'flex', alignItems: 'center', height: '100%', gap: '24px',
+          maxWidth: '100%', margin: '0 auto', padding: isPhone ? '0 12px' : '0 24px',
+          display: 'flex', alignItems: 'center', height: '100%', gap: isPhone ? '8px' : '24px',
         }}>
 
           {/* LOGO */}
-          <Link href="/admin/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <Link href="/admin/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: isPhone ? '6px' : '12px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '48px', height: '48px', borderRadius: '14px', objectFit: 'contain', display: 'block' }} />
-            <span style={{ fontSize: '9px', color: GREEN, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              Admin
-            </span>
+              style={{ width: isPhone ? '34px' : '48px', height: isPhone ? '34px' : '48px', borderRadius: '14px', objectFit: 'contain', display: 'block' }} />
+            {!isPhone && (
+              <span style={{ fontSize: '9px', color: GREEN, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                Admin
+              </span>
+            )}
           </Link>
 
           {/* Spacer pour sidebar */}
           <div style={{ flex: 1 }} />
 
           {/* ACTIONS DROITE */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isPhone ? '2px' : '8px', flexShrink: 0 }}>
 
             {/* Séparateur */}
-            <div style={{ width: '1px', height: '24px', background: BORDER, margin: '0 4px' }}/>
+            {!isPhone && <div style={{ width: '1px', height: '24px', background: BORDER, margin: '0 4px' }}/>}
 
             {/* Mode sombre/clair */}
             <div
               onClick={ctxToggleDarkMode}
               style={{
-                width: '36px', height: '36px', borderRadius: '10px',
+                width: isPhone ? '34px' : '36px', height: isPhone ? '34px' : '36px', borderRadius: '10px',
                 background: 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
@@ -227,7 +233,7 @@ export default function AdminTopbar() {
             <div
               onClick={ctxToggleLang}
               style={{
-                width: '36px', height: '36px', borderRadius: '10px',
+                width: isPhone ? '34px' : '36px', height: isPhone ? '34px' : '36px', borderRadius: '10px',
                 background: 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'all 0.2s',
@@ -244,14 +250,14 @@ export default function AdminTopbar() {
             </div>
 
             {/* Séparateur */}
-            <div style={{ width: '1px', height: '24px', background: BORDER, margin: '0 4px' }}/>
+            {!isPhone && <div style={{ width: '1px', height: '24px', background: BORDER, margin: '0 4px' }}/>}
 
             {/* Profil dropdown */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
                 style={{
-                  width: '40px', height: '40px', borderRadius: '50%',
+                  width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '50%',
                   background: profileOpen ? GREEN_LIGHT : 'transparent',
                   border: profileOpen ? `2px solid ${GREEN}` : '2px solid transparent',
                   cursor: 'pointer', transition: 'all 0.2s',
@@ -259,7 +265,7 @@ export default function AdminTopbar() {
                   boxShadow: profileOpen ? `0 0 0 4px rgba(34, 197, 94, 0.15)` : 'none',
                 }}
               >
-                <Avatar user={user} size={36}/>
+                <Avatar user={user} size={isPhone ? 30 : 36}/>
               </button>
 
               {profileOpen && (
@@ -321,7 +327,7 @@ export default function AdminTopbar() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 style={{
-                  width: '40px', height: '40px', borderRadius: '10px',
+                  width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '10px',
                   background: mobileOpen ? GREEN_LIGHT : 'transparent',
                   border: mobileOpen ? `1.5px solid ${GREEN}` : '1.5px solid #334155',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',

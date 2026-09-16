@@ -147,6 +147,7 @@ export default function ConducteurTopbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isPhone, setIsPhone] = useState(false);
   const notifPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchNotifCount = () => {
@@ -163,9 +164,12 @@ export default function ConducteurTopbar() {
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    const checkPhone = () => setIsPhone(window.innerWidth < 640);
     checkMobile();
+    checkPhone();
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', checkPhone);
+    return () => { window.removeEventListener('resize', checkMobile); window.removeEventListener('resize', checkPhone); };
   }, []);
 
   useEffect(() => {
@@ -244,11 +248,11 @@ export default function ConducteurTopbar() {
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         color: styles.text,
       }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', height: '68px', gap: '24px' }}>
-          <Link href="/conducteur/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', padding: isPhone ? '0 10px' : '0 24px', display: 'flex', alignItems: 'center', height: '68px', gap: isPhone ? '8px' : '24px' }}>
+          <Link href="/conducteur/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: isPhone ? '6px' : '12px', flexShrink: 0 }}>
             <img src="/covocam_logo.png" alt="CovoCam"
-              style={{ width: '52px', height: '52px', borderRadius: '16px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 16px rgba(13,158,126,0.35)' }} />
-            <span style={{ fontSize: '10px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{t('activeDriver')}</span>
+              style={{ width: isPhone ? '36px' : '52px', height: isPhone ? '36px' : '52px', borderRadius: '16px', objectFit: 'contain', display: 'block', boxShadow: '0 4px 16px rgba(13,158,126,0.35)' }} />
+            {!isPhone && <span style={{ fontSize: '10px', color: AMBER, fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{t('activeDriver')}</span>}
           </Link>
 
           {!isMobile && (
@@ -272,14 +276,14 @@ export default function ConducteurTopbar() {
             </nav>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: isMobile ? 'auto' : '0', flexShrink: 0 }}>
-            <div onClick={toggleDarkMode} style={{ width: '40px', height: '40px', borderRadius: '12px', background: styles.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 10 }} onMouseEnter={e => e.currentTarget.style.background = styles.hoverBg} onMouseLeave={e => e.currentTarget.style.background = styles.bg} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isPhone ? '4px' : '6px', marginLeft: isMobile ? 'auto' : '0', flexShrink: 0 }}>
+            <div onClick={toggleDarkMode} style={{ width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '12px', background: styles.bg, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 10 }} onMouseEnter={e => e.currentTarget.style.background = styles.hoverBg} onMouseLeave={e => e.currentTarget.style.background = styles.bg} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={theme === 'dark' ? '#FCD34D' : styles.textSecondary} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 {theme === 'dark' ? (<><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></>) : (<><path d="M21 15C21 15.55 20.55 16 20 16H7L3 20V4C3 3.45 3.45 3 4 3H20C20.55 3 21 3.45 21 4V15Z" stroke={styles.textSecondary} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill={styles.bg}/><path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998Z"/></>)}
               </svg>
             </div>
 
-            <div onClick={toggleLang} style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = styles.hoverBg} onMouseLeave={e => e.currentTarget.style.background = 'transparent'} title={lang === 'fr' ? 'English' : 'Français'}>
+            <div onClick={toggleLang} style={{ width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '12px', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = styles.hoverBg} onMouseLeave={e => e.currentTarget.style.background = 'transparent'} title={lang === 'fr' ? 'English' : 'Français'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={styles.textSecondary} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
               </svg>
@@ -289,7 +293,7 @@ export default function ConducteurTopbar() {
             {!isMobile && <div style={{ width: '1px', height: '28px', background: styles.border, margin: '0 4px' }}/>}
 
             <Link href="/conducteur/notifications" style={{ textDecoration: 'none', position: 'relative' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: pathname.startsWith('/conducteur/notifications') ? EMERALD_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+              <div style={{ width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '12px', background: pathname.startsWith('/conducteur/notifications') ? EMERALD_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                 onMouseEnter={e => { if (!pathname.startsWith('/conducteur/notifications')) e.currentTarget.style.background = styles.hoverBg; }}
                 onMouseLeave={e => { if (!pathname.startsWith('/conducteur/notifications')) e.currentTarget.style.background = 'transparent'; }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -301,7 +305,7 @@ export default function ConducteurTopbar() {
             </Link>
 
             <Link href="/conducteur/chat" style={{ textDecoration: 'none', position: 'relative' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: pathname.startsWith('/conducteur/chat') ? EMERALD_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+              <div style={{ width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '12px', background: pathname.startsWith('/conducteur/chat') ? EMERALD_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
                 onMouseEnter={e => { if (!pathname.startsWith('/conducteur/chat')) e.currentTarget.style.background = styles.hoverBg; }}
                 onMouseLeave={e => { if (!pathname.startsWith('/conducteur/chat')) e.currentTarget.style.background = 'transparent'; }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -368,7 +372,7 @@ export default function ConducteurTopbar() {
             )}
 
             {isMobile && (
-              <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: '40px', height: '40px', borderRadius: '12px', background: mobileOpen ? EMERALD_LIGHT : 'transparent', border: `1.5px solid ${mobileOpen ? EMERALD : styles.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: isPhone ? '36px' : '40px', height: isPhone ? '36px' : '40px', borderRadius: '12px', background: mobileOpen ? EMERALD_LIGHT : 'transparent', border: `1.5px solid ${mobileOpen ? EMERALD : styles.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}>
                 {mobileOpen ? (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6L18 18" stroke={EMERALD} strokeWidth="2" strokeLinecap="round"/></svg>) : (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12H21M3 6H21M3 18H21" stroke={styles.textSecondary} strokeWidth="2" strokeLinecap="round"/></svg>)}
               </button>
             )}
